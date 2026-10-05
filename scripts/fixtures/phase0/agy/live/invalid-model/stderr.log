@@ -1,0 +1,1 @@
+error: invalid model selection (--model "aiflow-invalid-model-000000" --effort "low"): --effort is not supported for model "aiflow-invalid-model-000000"

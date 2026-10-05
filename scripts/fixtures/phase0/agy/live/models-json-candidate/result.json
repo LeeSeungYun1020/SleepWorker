@@ -1,0 +1,27 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "models",
+    "--output-format",
+    "json"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/agy/live",
+  "version": "1.2.16",
+  "startedAt": "2026-10-05T01:53:22.801649+00:00",
+  "stdinClosed": true,
+  "exitCode": 1,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.055516,
+      "afterExit": false
+    }
+  ],
+  "pid": 69277,
+  "finishedAt": "2026-10-05T01:53:22.859239+00:00",
+  "durationSec": 0.057613
+}

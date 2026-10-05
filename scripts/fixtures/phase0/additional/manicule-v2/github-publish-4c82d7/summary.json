@@ -1,0 +1,13 @@
+{
+  "status": "VERIFIED",
+  "head": "0a422b5164a36bcc88344a572b34347108c20c17",
+  "base": "d3913e5a74ebc041c72f598bd7a5f0fe533b3ef9",
+  "branch": "ai/aiflow-phase0-703e619e",
+  "pr": {
+    "headRefOid": "0a422b5164a36bcc88344a572b34347108c20c17",
+    "isDraft": true,
+    "number": 113,
+    "url": "https://github.com/LeeSeungYun1020/Manicule/pull/113"
+  },
+  "cleanup": "pending; close test PR after attaching evidence"
+}

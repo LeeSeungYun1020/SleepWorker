@@ -44,8 +44,8 @@ data class ProviderReport(val outcome: ProviderOutcome, val sessionId: String?,
 
 ### 2. `CodexAdapter`
 아래 provider별 argv/이벤트 매핑은 01 결과로 확정할 후보이며, 지원 버전·기능 계약과 함께 구현한다.
-2026-10-05 실측 자료는 `scripts/samples/codex/bundled-live/`(0.160.0) 참조.
-`scripts/samples/codex/live/`(0.146.0)는 기본 모델의 CLI 버전 불일치 실패 자료다.
+2026-10-05 실측 자료는 `scripts/fixtures/phase0/codex/bundled-live/`(0.160.0) 참조.
+`scripts/fixtures/phase0/codex/live/`(0.146.0)는 기본 모델의 CLI 버전 불일치 실패 자료다.
 `scripts/phase0-result.md`의 미검증 항목을 어댑터 지원 기능으로 가정하지 않는다.
 - [ ] new: `[bin, "exec", "--json", "-C", cwd, "-m", model, "-c", "model_reasoning_effort=<effort>", "-c", "sandbox_mode=danger-full-access", "-c", "approval_policy=never", "-"]`, `stdin = script`
 - [ ] resume: `[bin, "exec", "--json", "-C", cwd, "-c", ...(동일 3개), "resume", sessionId, "-"]`, `stdin = script` — `-m` 포함 여부는 01 결과에 따름
@@ -54,8 +54,8 @@ data class ProviderReport(val outcome: ProviderOutcome, val sessionId: String?,
 - [ ] `listModels`: `null` (설정의 수동 리스트 사용)
 
 ### 3. `AntigravityAdapter`
-2026-10-05 실측 자료: `scripts/samples/agy/live/`, 버전 1.2.16.
-추가 자료: `scripts/samples/additional/manicule-v2/`. 다른 cwd의 명시 ID resume에서도
+2026-10-05 실측 자료: `scripts/fixtures/phase0/agy/live/`, 버전 1.2.16.
+추가 자료: `scripts/fixtures/phase0/additional/manicule-v2/`. 다른 cwd의 명시 ID resume에서도
 실제 실행은 원래 워크트리에 유지됨. 강제 중단은 exit 1 + JSON status ERROR /
 `context canceled`를 반환했으므로 종료코드만으로 취소 여부를 추론하지 않는다.
 - [ ] new: `[bin, "-p", script, "--output-format", "json", "--model", model, "--effort", effort, "--dangerously-skip-permissions"]`, `cwd = 워크스페이스`
@@ -94,7 +94,7 @@ data class ProviderReport(val outcome: ProviderOutcome, val sessionId: String?,
 - [ ] 종료 후 최종 파싱에서만 ID/결과가 나오는 fixture → finalEvents와 report에 반영, 중복 방출 없음
 - [ ] 일반 stderr 경고·미지의 로그와 최종 실패 구별. shell 빈 출력 정상. 두 시도/두 파서 간 누적 출력 격리
 - [ ] 미지원 옵션은 명확한 CONFIG 오류. 실측 fixture와 synthetic fixture의 출처 표시
-- [ ] `codex/bundled-live`, `agy/live`, `additional/manicule-v2`에서 new/resume·미인증 Codex 401·잘못된 모델·agy context canceled/exit 1·TSV 모델 목록을 가져와 오프라인 회귀 테스트. 불완전한 `agy-interrupt/`에는 관측되지 않은 exitCode를 추가하지 않음
+- [ ] `codex/bundled-live`, `agy/live`, `additional/manicule-v2`에서 new/resume·미인증 Codex 401·잘못된 모델·agy context canceled/exit 1·TSV 모델 목록을 가져와 오프라인 회귀 테스트. 보존된 fixture의 관측되지 않은 exitCode를 추정하지 않음(최초 불완전 수집 로그는 정리됨)
 - [ ] agy 미로그인 fixture는 확보 전까지 NOT_VERIFIED로 별도 표시. 모델 조회의 네트워크 오류/잘린 응답은 Unknown이며 LoggedOut으로 오분류하지 않음을 테스트
 - [ ] 모델 비용 없이 원문 재생으로 파서 검증. 새 모델 계약 실측이 필요할 때만 00의 저비용 우선 원칙과 01 도우미를 적용
 

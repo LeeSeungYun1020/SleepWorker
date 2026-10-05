@@ -1,0 +1,85 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+    "-c",
+    "model_reasoning_effort=low",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "resume",
+    "01a109c5-0c63-7b93-bd78-773da75e8369",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-05T01:54:51.291292+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.068855,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.111953,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.119885,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.459493,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 118,
+      "elapsedSec": 4.539904,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 194,
+      "elapsedSec": 5.501972,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 191,
+      "elapsedSec": 5.502616,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 122,
+      "elapsedSec": 10.182352,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 163,
+      "elapsedSec": 10.222169,
+      "afterExit": false
+    }
+  ],
+  "pid": 71302,
+  "finishedAt": "2026-10-05T01:55:02.532767+00:00",
+  "durationSec": 11.241912
+}

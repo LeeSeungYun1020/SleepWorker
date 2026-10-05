@@ -1,0 +1,33 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "--output-format",
+    "json",
+    "--effort",
+    "low",
+    "--dangerously-skip-permissions",
+    "--model",
+    "gemini-3.8-flash-low",
+    "-p",
+    "This is a read-only CLI protocol test, not project development. Do not change files, make commits, delegate or use network. Run pwd and git rev-parse --show-toplevel. Remember EXTRA_f8f22cab53be436ea73a63717fce792b in conversation only, then reply READY."
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "version": "1.2.16",
+  "startedAt": "2026-10-05T05:19:58.253804+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 257,
+      "elapsedSec": 8.825739,
+      "afterExit": false
+    }
+  ],
+  "pid": 81706,
+  "finishedAt": "2026-10-05T05:20:08.389123+00:00",
+  "durationSec": 10.135328
+}

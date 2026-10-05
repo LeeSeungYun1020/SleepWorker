@@ -1,0 +1,30 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "resume",
+    "--sandbox",
+    "read-only",
+    "invalid",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-05T01:54:30.728289+00:00",
+  "stdinClosed": true,
+  "exitCode": 2,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 199,
+      "elapsedSec": 0.015637,
+      "afterExit": false
+    }
+  ],
+  "pid": 70079,
+  "finishedAt": "2026-10-05T01:54:30.744717+00:00",
+  "durationSec": 0.016441
+}

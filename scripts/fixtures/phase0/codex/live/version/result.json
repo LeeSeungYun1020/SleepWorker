@@ -1,0 +1,25 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.nvm/versions/node/v24.11.1/bin/codex",
+    "--version"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/codex/live",
+  "version": null,
+  "startedAt": "2026-10-05T01:53:16.082682+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 18,
+      "elapsedSec": 0.074009,
+      "afterExit": false
+    }
+  ],
+  "pid": 67710,
+  "finishedAt": "2026-10-05T01:53:16.159957+00:00",
+  "durationSec": 0.077299
+}

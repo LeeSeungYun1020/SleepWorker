@@ -1,0 +1,29 @@
+{
+  "source": "measured",
+  "argv": [
+    "gh",
+    "pr",
+    "view",
+    "https://github.com/LeeSeungYun1020/Manicule/pull/113",
+    "--json",
+    "url,title,state,isDraft,headRefOid,headRefName,baseRefName"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "version": null,
+  "startedAt": "2026-10-05T05:27:01.870421+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 276,
+      "elapsedSec": 0.630216,
+      "afterExit": false
+    }
+  ],
+  "pid": 84030,
+  "finishedAt": "2026-10-05T05:27:02.507468+00:00",
+  "durationSec": 0.637097
+}

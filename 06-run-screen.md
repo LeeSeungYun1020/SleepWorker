@@ -2,6 +2,9 @@
 
 선행: `05-engine.md` | 다음: `07-workflow-editor.md`
 
+01에서 이월된 agy 미로그인 오류 실측은 이 단계의 인증 처리 마무리 전에 확인한다.
+그 전까지 확인되지 않은 실패는 Unknown으로 차단·진단하며, Phase 1 진입을 막는 조건으로 되돌리지 않는다.
+
 ## 목표
 
 실제 Codex/Antigravity/셸을 엔진에 연결하고, 프리플라이트를 구현하며, 실행 화면(Compose, `commonMain/ui/run`)에서 계획서 §4 예시 워크플로를 end-to-end로 자동 실행한다.

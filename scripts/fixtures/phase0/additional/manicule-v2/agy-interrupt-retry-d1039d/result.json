@@ -1,0 +1,39 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "--output-format",
+    "json",
+    "--effort",
+    "low",
+    "--dangerously-skip-permissions",
+    "--model",
+    "gemini-3.8-flash-low",
+    "-p",
+    "Do not modify files or use tools. Explain addition briefly."
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "version": "1.2.16",
+  "startedAt": "2026-10-05T05:22:33.507722+00:00",
+  "stdinClosed": true,
+  "exitCode": 1,
+  "termination": "timeout",
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 24,
+      "elapsedSec": 3.004346,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 220,
+      "elapsedSec": 3.004767,
+      "afterExit": false
+    }
+  ],
+  "pid": 81830,
+  "finishedAt": "2026-10-05T05:22:37.328336+00:00",
+  "durationSec": 3.820773
+}

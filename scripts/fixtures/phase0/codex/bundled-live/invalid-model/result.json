@@ -1,0 +1,109 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+    "-c",
+    "model_reasoning_effort=low",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "-m",
+    "aiflow-invalid-model-000000",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-05T01:55:02.534700+00:00",
+  "stdinClosed": true,
+  "exitCode": 1,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 158,
+      "elapsedSec": 0.057683,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.06632,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 158,
+      "elapsedSec": 0.145141,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.14853,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 158,
+      "elapsedSec": 0.149447,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 216,
+      "elapsedSec": 0.152869,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.181905,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.436283,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 158,
+      "elapsedSec": 0.860623,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 293,
+      "elapsedSec": 1.01793,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 158,
+      "elapsedSec": 1.461688,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 226,
+      "elapsedSec": 1.946313,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 242,
+      "elapsedSec": 1.95619,
+      "afterExit": false
+    }
+  ],
+  "pid": 71879,
+  "finishedAt": "2026-10-05T01:55:04.623940+00:00",
+  "durationSec": 2.089355
+}

@@ -1,0 +1,8 @@
+{
+  "status": "VERIFIED",
+  "scope": "local review and push dry run only",
+  "head": "0a422b5164a36bcc88344a572b34347108c20c17",
+  "base": "d3913e5a74ebc041c72f598bd7a5f0fe533b3ef9",
+  "branch": "ai/aiflow-phase0-703e619e",
+  "diff": "diff --git a/.aiflow-phase0-smoke.md b/.aiflow-phase0-smoke.md\nnew file mode 100644\nindex 0000000..70cc991\n--- /dev/null\n+++ b/.aiflow-phase0-smoke.md\n@@ -0,0 +1,5 @@\n+# aiflow Phase 0 GitHub transport test\n+\n+Temporary test fixture for a dedicated draft PR. Do not merge.\n+Validates exact reviewed SHA publication and open-PR reuse.\n+No Manicule application behavior is changed."
+}

@@ -1,0 +1,67 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+    "-c",
+    "model_reasoning_effort=low",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "-m",
+    "gpt-6-astra",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-05T05:22:52.865167+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.112069,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.198199,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.233613,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.551433,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 99,
+      "elapsedSec": 4.961104,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 160,
+      "elapsedSec": 5.380873,
+      "afterExit": false
+    }
+  ],
+  "pid": 82477,
+  "finishedAt": "2026-10-05T05:22:58.933743+00:00",
+  "durationSec": 6.068599
+}

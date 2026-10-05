@@ -1,0 +1,39 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "--output-format",
+    "json",
+    "--effort",
+    "low",
+    "--dangerously-skip-permissions",
+    "--model",
+    "aiflow-invalid-model-000000",
+    "-p",
+    "Reply OK only."
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/agy/live/worktree",
+  "version": "1.2.16",
+  "startedAt": "2026-10-05T01:53:49.038332+00:00",
+  "stdinClosed": true,
+  "exitCode": 1,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 153,
+      "elapsedSec": 3.08564,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 355,
+      "elapsedSec": 3.085793,
+      "afterExit": false
+    }
+  ],
+  "pid": 69947,
+  "finishedAt": "2026-10-05T01:53:52.807141+00:00",
+  "durationSec": 3.769006
+}

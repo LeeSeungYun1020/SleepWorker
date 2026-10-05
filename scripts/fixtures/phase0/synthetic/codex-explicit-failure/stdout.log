@@ -1,0 +1,2 @@
+{"type":"thread.started","thread_id":"synthetic"}
+{"type":"turn.failed","error":{"message":"synthetic failure"}}

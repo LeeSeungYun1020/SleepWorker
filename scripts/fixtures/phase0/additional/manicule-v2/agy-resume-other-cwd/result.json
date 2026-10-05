@@ -1,0 +1,35 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "--output-format",
+    "json",
+    "--effort",
+    "low",
+    "--dangerously-skip-permissions",
+    "--model",
+    "gemini-3.8-flash-low",
+    "--conversation",
+    "7da463ba-b47e-4860-bb6c-4dcdd40c3e44",
+    "-p",
+    "Read-only protocol test: run pwd and git rev-parse --show-toplevel. Reply with those two actual paths and the remembered EXTRA token. Do not modify files or use network."
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/repo",
+  "version": "1.2.16",
+  "startedAt": "2026-10-05T05:20:08.390773+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 528,
+      "elapsedSec": 9.300076,
+      "afterExit": false
+    }
+  ],
+  "pid": 81721,
+  "finishedAt": "2026-10-05T05:20:19.197230+00:00",
+  "durationSec": 10.806487
+}

@@ -1,0 +1,95 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+    "-c",
+    "model_reasoning_effort=low",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-05T01:54:31.062007+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.379856,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.474153,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.494905,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.538704,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 185,
+      "elapsedSec": 6.037855,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 263,
+      "elapsedSec": 7.522058,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 337,
+      "elapsedSec": 7.522457,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 514,
+      "elapsedSec": 17.44184,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 529,
+      "elapsedSec": 17.442505,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 87,
+      "elapsedSec": 19.281999,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 163,
+      "elapsedSec": 19.331545,
+      "afterExit": false
+    }
+  ],
+  "pid": 70223,
+  "finishedAt": "2026-10-05T01:54:51.289998+00:00",
+  "durationSec": 20.228729
+}

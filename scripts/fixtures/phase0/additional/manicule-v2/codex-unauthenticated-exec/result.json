@@ -1,0 +1,242 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "--json",
+    "--ignore-user-config",
+    "-c",
+    "cli_auth_credentials_store=\"file\"",
+    "-m",
+    "gpt-6-astra",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-05T05:22:37.331650+00:00",
+  "stdinClosed": true,
+  "exitCode": 1,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.127229,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.159119,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 271,
+      "elapsedSec": 0.371345,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 177,
+      "elapsedSec": 0.39907,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 267,
+      "elapsedSec": 0.399955,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 177,
+      "elapsedSec": 0.565156,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 368,
+      "elapsedSec": 0.565763,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 177,
+      "elapsedSec": 0.905633,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 368,
+      "elapsedSec": 0.905658,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 206,
+      "elapsedSec": 0.905755,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 177,
+      "elapsedSec": 1.491614,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 368,
+      "elapsedSec": 1.491675,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 206,
+      "elapsedSec": 1.491735,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 177,
+      "elapsedSec": 2.516507,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 369,
+      "elapsedSec": 2.516589,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 206,
+      "elapsedSec": 2.516658,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 306,
+      "elapsedSec": 4.267483,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 306,
+      "elapsedSec": 4.269247,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 177,
+      "elapsedSec": 4.281935,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 369,
+      "elapsedSec": 4.282002,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 206,
+      "elapsedSec": 4.28208,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 177,
+      "elapsedSec": 7.5174,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 75,
+      "elapsedSec": 7.517423,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 280,
+      "elapsedSec": 7.519114,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 420,
+      "elapsedSec": 7.917839,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 258,
+      "elapsedSec": 7.918009,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 420,
+      "elapsedSec": 8.372926,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 258,
+      "elapsedSec": 8.373139,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 420,
+      "elapsedSec": 8.982967,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 258,
+      "elapsedSec": 8.983118,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 421,
+      "elapsedSec": 10.130492,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 258,
+      "elapsedSec": 10.130705,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 421,
+      "elapsedSec": 11.933023,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 258,
+      "elapsedSec": 11.93323,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 236,
+      "elapsedSec": 15.508548,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 252,
+      "elapsedSec": 15.519279,
+      "afterExit": false
+    }
+  ],
+  "pid": 81836,
+  "finishedAt": "2026-10-05T05:22:52.863331+00:00",
+  "durationSec": 15.531684
+}

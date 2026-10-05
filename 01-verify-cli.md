@@ -5,7 +5,8 @@
 > 2026-10-05 진행 결과: `scripts/phase0-result.md` 참조. 두 provider의
 > 워크트리 new/ID/resume은 실측 완료. agy 모델 목록 JSON 옵션은 미지원이며
 > 실제 오류 포맷을 계획서와 04에 반영했다. Manicule에서 원격 push·draft PR 재사용·CI 및
-> 정리까지 추가 검증했다. agy 미로그인 오류 실측이 남아 전체 완료는 아님.
+> 정리까지 추가 검증했다. 핵심 계약 확보로 Phase 1 진입 가능. agy 미로그인 오류 실측은
+> 사용자 합의에 따라 06 인증 처리 마무리 전까지 이월하며 해당 계약은 NOT_VERIFIED로 유지한다.
 
 ## 목표
 
@@ -30,7 +31,7 @@ Codex CLI와 Antigravity CLI(`agy`)가 **헤드리스 모드에서 새 세션 �
 - [ ] `codex --version`, `agy --version` 기록
 - [ ] `codex login status` 종료코드·출력 확인 (로그인/미로그인 두 상태 모두)
 - [x] `agy models`의 TSV `<slug>\t<label>` 구조 기록. 1.2.16에서 `models --output-format json`은 UNSUPPORTED
-- [ ] 미로그인 상태에서 `agy models` 실행 시 종료코드·stderr 포맷 기록
+- [ ] 미로그인 상태에서 `agy models` 실행 시 종료코드·stderr 포맷 기록 — 06 인증 처리 마무리 전까지 이월, Phase 1 진입을 막지 않음
 - [ ] GUI 앱이 PATH를 상속하지 않는 문제 확인: `/bin/zsh -lc 'command -v codex; command -v agy'` 결과 기록
 
 ### 2. Codex 검증 스크립트 `scripts/verify-codex.sh`
@@ -78,7 +79,7 @@ Codex CLI와 Antigravity CLI(`agy`)가 **헤드리스 모드에서 새 세션 �
 - [ ] 각 단계의 세션 ID·종료코드·소요 시간을 `scripts/phase0-result.md`에 기록
 
 ### 6. 회귀 테스트용 출력 자료
-- [ ] `scripts/samples/<provider>/<case>/`에 stdout.log, stderr.log, result.json(실제 종료코드·버전·명령·시점) 보존. 04의 `commonTest/resources/samples/`로 가져가 파서 테스트에 사용
+- [ ] 새 실행은 `scripts/samples/`에 수집하고, 필요한 stdout.log·stderr.log·result.json만 `scripts/fixtures/phase0/`에 원문/해시와 함께 선별 보존. 04의 `commonTest/resources/samples/`로 가져가 파서 테스트에 사용
 - [ ] 실측: new/resume 성공, 미로그인, 잘못된 모델, 중간 종료, 늦게 도착하는 최종 출력. 재현 불가한 케이스는 NOT_VERIFIED로 표시
 - [ ] 실측 원문과 별도로 synthetic 케이스를 명시해 종료코드 0 + 명시적 실패, 잘린 JSON, 세션 ID 누락, 알려지지 않은 일반 로그, 정상적인 빈 shell 출력을 시험. 가공한 자료를 CLI 실측으로 표시하지 않음
 
@@ -86,13 +87,13 @@ Codex CLI와 Antigravity CLI(`agy`)가 **헤드리스 모드에서 새 세션 �
 
 - `scripts/verify-codex.sh`, `scripts/verify-agy.sh`
 - `scripts/phase0-result.md`: 버전, 실제 플래그, 출력 샘플(JSONL/JSON 원문 1건씩), 에러 포맷, 계획서와 다른 점 목록
-- `scripts/samples/` 및 provider별 VERIFIED/UNSUPPORTED/NOT_VERIFIED 계약표
+- `scripts/fixtures/phase0/` 및 provider별 VERIFIED/UNSUPPORTED/NOT_VERIFIED 계약표 (`scripts/samples/`는 정리 가능한 임시 실행 출력)
 
 ## 완료 기준
 
 - [ ] 두 CLI 모두 new → ID 추출 → resume 이 스크립트로 재현됨
 - [ ] 워크트리 cwd에서 동작 확인
-- [ ] 미로그인·잘못된 모델 두 실패 케이스의 종료코드와 stderr 포맷이 문서화됨
+- [ ] 미로그인·잘못된 모델 두 실패 케이스의 종료코드와 stderr 포맷이 문서화됨 — Codex 및 잘못된 모델 완료, agy 미로그인은 06까지 이월
 - [ ] 계획서 §5 표와 다른 점이 `phase0-result.md`에 정리됨 (없으면 "차이 없음" 명시)
 - [ ] 필수 new/resume 계약은 실측 VERIFIED이고, 원문 fixture와 CLI 자체 종료코드가 확보됨. 실제 파서 회귀 테스트 통과는 04에서 확인
 

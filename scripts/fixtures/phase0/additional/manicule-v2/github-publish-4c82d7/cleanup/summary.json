@@ -1,0 +1,16 @@
+{
+  "status": "VERIFIED",
+  "prState": "CLOSED",
+  "remoteBranchDeleted": true,
+  "prUrl": "https://github.com/LeeSeungYun1020/Manicule/pull/113",
+  "workflowRuns": [
+    {
+      "databaseId": 37267727596,
+      "event": "pull_request",
+      "headSha": "0a422b5164a36bcc88344a572b34347108c20c17",
+      "status": "completed",
+      "url": "https://github.com/LeeSeungYun1020/Manicule/actions/runs/37267727596",
+      "workflowName": "Gradle Check"
+    }
+  ]
+}

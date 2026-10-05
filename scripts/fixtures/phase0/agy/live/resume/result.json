@@ -1,0 +1,35 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "--output-format",
+    "json",
+    "--effort",
+    "low",
+    "--dangerously-skip-permissions",
+    "--model",
+    "gemini-3.8-flash-low",
+    "--conversation",
+    "a6a5569c-894c-413a-8b64-e852b7ec68fb",
+    "-p",
+    "Append exactly RESUMED to FILES.md. Reply with the remembered token from the previous turn."
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/agy/live/worktree",
+  "version": "1.2.16",
+  "startedAt": "2026-10-05T01:53:39.802603+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 291,
+      "elapsedSec": 7.782091,
+      "afterExit": false
+    }
+  ],
+  "pid": 69923,
+  "finishedAt": "2026-10-05T01:53:49.036252+00:00",
+  "durationSec": 9.234024
+}

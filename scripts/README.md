@@ -65,12 +65,11 @@ GitHub 추가 검증은 Manicule 및 게시 계정 `LeeSeungYun1020`을 대상�
 정리는 이 도구가 만든 draft PR의 SHA/branch/title을 확인한 뒤 수행한다.
 권한 오류 등으로 프로세스 정리를 확인할 수 없으면 collectorError로 기록하며 성공으로 판정하지 않는다.
 
-로그에는 로컬 경로와 세션 ID가 포함된다. `repo/`, `worktree/`, 격리 인증 홈은 로컬에
-보존하고 Git 추적에서 제외한다. 원문을 공유하기 전에 직접 확인한다.
-synthetic 자료는 `samples/synthetic/` 아래에서만 관리하며 실측과 혼동하지 않는다.
-`samples/` 전체는 로컬 검증 자료로 Git에서 제외한다. 이 문서와 결과 보고서의 samples 경로는
-기존 실행 환경의 증거 위치이며 새 clone에 포함되지 않는다. Phase 04에서는 필요한 자료만
-검토해 테스트 리소스로 별도 추가하고, 로컬 원문은 변경하지 않는다.
+새 실행의 `samples/`는 Git에서 제외되는 임시 디렉터리다. 기존 실행 자료는 정리했고,
+필요한 CLI 원문·결과 요약만 `fixtures/phase0/`에 보존했다. manifest의 SHA-256으로 원문
+보존을 확인할 수 있다. synthetic 사례는 `fixtures/phase0/synthetic/`에서 실측과 구분한다.
+Phase 04는 이 보존 자료를 테스트 리소스로 사용한다. 과거 cwd/argv 절대 경로는 삭제된
+테스트 저장소를 가리킬 수 있으므로 그대로 실행하지 않는다.
 
 공식 Codex 호출 참고: https://learn.chatgpt.com/docs/developer-commands#codex-exec
 실제 지원 플래그의 기준은 각 실행에 보존한 설치 바이너리의 도움말이다.

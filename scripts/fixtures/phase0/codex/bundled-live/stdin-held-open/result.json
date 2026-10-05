@@ -1,0 +1,28 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+    "-c",
+    "model_reasoning_effort=low",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/codex/bundled-live/worktree",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-05T01:55:04.625767+00:00",
+  "stdinClosed": false,
+  "exitCode": -15,
+  "termination": "timeout",
+  "outputComplete": true,
+  "chunks": [],
+  "pid": 72501,
+  "finishedAt": "2026-10-05T01:55:09.635892+00:00",
+  "durationSec": 5.01042
+}

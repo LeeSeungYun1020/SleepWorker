@@ -1,0 +1,19 @@
+{
+  "provider": "codex",
+  "binary": "/Users/leeseungyun/.nvm/versions/node/v24.11.1/bin/codex",
+  "version": "codex-cli 0.146.0",
+  "status": "NOT_VERIFIED",
+  "reason": "inspect raw evidence; one or more required checks failed",
+  "new": {
+    "sessionId": "01a109c3-ed1d-7eb3-9d24-221aecb71bdb",
+    "response": "",
+    "success": false
+  },
+  "resume": null,
+  "invalidModel": {
+    "sessionId": "01a109c3-f976-7470-a818-f5789cd90a94",
+    "response": "",
+    "success": false
+  },
+  "scope": "new/resume in worktree only; not the full Phase 0 completion gate"
+}

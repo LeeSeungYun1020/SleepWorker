@@ -1,0 +1,7 @@
+{
+  "source": "synthetic",
+  "provider": "shell",
+  "exitCode": 0,
+  "expectedSuccess": true,
+  "note": "Handcrafted parser fixture; never observed from a CLI."
+}

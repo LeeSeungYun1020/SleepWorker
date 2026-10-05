@@ -1,0 +1,38 @@
+{
+  "source": "measured",
+  "argv": [
+    "git",
+    "-c",
+    "credential.helper=",
+    "-c",
+    "credential.helper=!gh auth git-credential",
+    "push",
+    "origin",
+    "HEAD:refs/heads/ai/aiflow-phase0-703e619e"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "version": null,
+  "startedAt": "2026-10-05T05:25:23.299200+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 211,
+      "elapsedSec": 1.625964,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 106,
+      "elapsedSec": 1.631217,
+      "afterExit": false
+    }
+  ],
+  "pid": 83888,
+  "processExitedAt": "2026-10-05T05:25:24.938412+00:00",
+  "finishedAt": "2026-10-05T05:25:24.938643+00:00",
+  "durationSec": 1.639449
+}

@@ -2,6 +2,9 @@
 
 선행: `01-verify-cli.md` | 다음: `03-data-model.md`, `04-provider-adapters.md`
 
+진입 가능: 01의 핵심 실행 계약과 보존 fixture 확보 완료. agy 미로그인 오류 실측은
+00의 합의대로 06까지 이월하며 프로젝트 생성·플랫폼·모델 구현의 선행 조건으로 요구하지 않는다.
+
 ## 목표
 
 계획서 §7 구조대로 Kotlin Multiplatform + Compose Multiplatform 프로젝트를 생성하고, `shared`(commonMain/jvmMain) + `desktopApp` 구성으로 빈 창이 뜨는 앱을 빌드한다. 플랫폼 의존 인터페이스(`ProcessExecutor` 등)의 뼈대를 먼저 잡는다.

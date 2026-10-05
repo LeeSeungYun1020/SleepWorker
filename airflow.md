@@ -47,7 +47,7 @@
 
 ## 2. CLI 매핑 (Phase 0 검증 후보)
 
-2026-10-05 부분 실측: `scripts/phase0-result.md` 및 `scripts/samples/` 참조.
+2026-10-05 부분 실측: `scripts/phase0-result.md` 및 `scripts/fixtures/phase0/` 참조.
 Codex 앱 번들 0.160.0과 agy 1.2.16의 워크트리 new/resume은 VERIFIED다.
 PATH의 Codex 0.146.0은 기본 gpt-6-astra와 호환되지 않았다. 나머지 기능까지 검증된 것은 아니다.
 추가로 Manicule 독립 복제본에서 GitHub push·draft PR 생성/재사용·CI·정리,

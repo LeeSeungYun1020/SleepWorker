@@ -1,0 +1,37 @@
+[
+  {
+    "stage": "plan",
+    "provider": "codex",
+    "sessionId": "01a109c7-dc2a-7702-b689-10d8aaf21ea9",
+    "exitCode": 0,
+    "durationSec": 19.32633
+  },
+  {
+    "stage": "implement",
+    "provider": "codex",
+    "sessionId": "01a109c7-dc2a-7702-b689-10d8aaf21ea9",
+    "exitCode": 0,
+    "durationSec": 20.518928
+  },
+  {
+    "stage": "verify",
+    "provider": "codex",
+    "sessionId": "01a109c7-dc2a-7702-b689-10d8aaf21ea9",
+    "exitCode": 0,
+    "durationSec": 24.93265
+  },
+  {
+    "stage": "review",
+    "provider": "agy",
+    "sessionId": "8585a3af-8188-463d-86fd-15c9b6b24dec",
+    "exitCode": 0,
+    "durationSec": 43.040575
+  },
+  {
+    "stage": "fix",
+    "provider": "codex",
+    "sessionId": "01a109c7-dc2a-7702-b689-10d8aaf21ea9",
+    "exitCode": 0,
+    "durationSec": 32.918411
+  }
+]

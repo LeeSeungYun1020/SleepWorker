@@ -1,0 +1,7 @@
+{
+  "source": "synthetic",
+  "provider": "agy",
+  "exitCode": 0,
+  "expectedSuccess": false,
+  "note": "Handcrafted parser fixture; never observed from a CLI."
+}

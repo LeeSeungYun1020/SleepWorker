@@ -1,0 +1,10 @@
+2026-10-05T01:55:02.592268Z  WARN codex_models_manager::model_info: Unknown model aiflow-invalid-model-000000 is used. This will use fallback model metadata.
+2026-10-05T01:55:02.600964Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-10-05T01:55:02.600974Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+2026-10-05T01:55:02.679762Z  WARN codex_models_manager::model_info: Unknown model aiflow-invalid-model-000000 is used. This will use fallback model metadata.
+2026-10-05T01:55:02.684089Z  WARN codex_models_manager::model_info: Unknown model aiflow-invalid-model-000000 is used. This will use fallback model metadata.
+2026-10-05T01:55:02.970897Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-10-05T01:55:02.970911Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+2026-10-05T01:55:03.395228Z  WARN codex_core::client: model_verbosity is set but ignored as the model does not support verbosity: aiflow-invalid-model-000000
+2026-10-05T01:55:03.552322Z  WARN codex_core::session::startup_prewarm: startup websocket prewarm setup failed: {"type":"error","status":400,"error":{"type":"invalid_request_error","message":"The 'aiflow-invalid-model-000000' model is not supported when using Codex with a ChatGPT account."}}
+2026-10-05T01:55:03.996275Z  WARN codex_core::client: model_verbosity is set but ignored as the model does not support verbosity: aiflow-invalid-model-000000

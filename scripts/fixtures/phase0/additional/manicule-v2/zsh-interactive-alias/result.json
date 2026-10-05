@@ -1,0 +1,26 @@
+{
+  "source": "measured",
+  "argv": [
+    "/bin/zsh",
+    "-ic",
+    "alias aiflow_phase0_alias"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2",
+  "version": null,
+  "startedAt": "2026-10-05T05:22:58.935719+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 43,
+      "elapsedSec": 0.020821,
+      "afterExit": false
+    }
+  ],
+  "pid": 83103,
+  "finishedAt": "2026-10-05T05:22:58.956968+00:00",
+  "durationSec": 0.021264
+}

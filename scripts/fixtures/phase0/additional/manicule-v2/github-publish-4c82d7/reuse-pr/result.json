@@ -1,0 +1,36 @@
+{
+  "source": "measured",
+  "argv": [
+    "gh",
+    "pr",
+    "list",
+    "--repo",
+    "LeeSeungYun1020/Manicule",
+    "--head",
+    "ai/aiflow-phase0-703e619e",
+    "--base",
+    "main",
+    "--state",
+    "open",
+    "--json",
+    "number,url,headRefOid,isDraft"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "version": null,
+  "startedAt": "2026-10-05T05:25:28.281222+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stdout",
+      "bytes": 149,
+      "elapsedSec": 0.489577,
+      "afterExit": false
+    }
+  ],
+  "pid": 83918,
+  "finishedAt": "2026-10-05T05:25:28.776588+00:00",
+  "durationSec": 0.495406
+}

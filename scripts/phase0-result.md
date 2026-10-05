@@ -6,10 +6,13 @@
 저비용 모델 우선/명시 선택 원칙을 적용하지만, 아래 과거 실측 모델·fixture는 그대로 유지한다.
 Luna의 설치 CLI 지원은 아직 별도 실측 전이며 기존 Astra 성공으로 대체하지 않는다.
 
-**전체 Phase 0: NOT_VERIFIED — 핵심 new → ID → resume 계약은 두 provider 모두
-통과했으며 Manicule GitHub 게시·PR 재사용·CI 검증까지 추가 완료했다. agy 미로그인
-실패 계약을 포함한 아래 미검증 항목이 남아 있다. Phase 1 진행 게이트는
-아직 완료로 표시하지 않는다.**
+**Phase 1 진입 가능 — 핵심 new → ID → resume과 GitHub 통합 계약 확보.**
+agy 미로그인 오류 실측은 사용자 합의에 따라 06의 인증 처리 마무리 전까지 이월한다.
+현재 로그인은 정상이며 해당 미인증 판별 계약은 NOT_VERIFIED로 유지한다.
+
+정리 후 증거 위치는 `fixtures/phase0/`다. 임시 clone/worktree·격리 인증 홈·중복 로그를
+삭제하고 파서 원문과 주요 요약만 보존했다. 정확한 보존 목록/해시는 `fixtures/phase0/manifest.json`을
+따른다. 아래 실행 당시의 절대 경로와 삭제된 보조 로그 언급은 역사적 기록이다.
 
 ## 실행 환경 / 범위
 
@@ -56,7 +59,7 @@ stdin.txt가 기준이다. 성공한 문서 내용의 품질 전체가 아니라
 | agy resume | 동일 | 0 | 9.234 |
 | agy invalid-model + effort low | 빈 ID | 1 | 3.769 |
 
-Codex JSONL 원문 발췌 (`samples/codex/bundled-live/new/stdout.log`):
+Codex JSONL 원문 발췌 (`fixtures/phase0/codex/bundled-live/new/stdout.log`):
 
 ```jsonl
 {"type":"thread.started","thread_id":"01a109c5-0c63-7b93-bd78-773da75e8369"}
@@ -64,7 +67,7 @@ Codex JSONL 원문 발췌 (`samples/codex/bundled-live/new/stdout.log`):
 {"type":"turn.completed","usage":{"input_tokens":55265,"cached_input_tokens":44288,"cache_write_input_tokens":0,"output_tokens":244,"reasoning_output_tokens":20}}
 ```
 
-agy JSON 원문 (`samples/agy/live/new/stdout.log`):
+agy JSON 원문 (`fixtures/phase0/agy/live/new/stdout.log`):
 
 ```json
 {"conversation_id":"a6a5569c-894c-413a-8b64-e852b7ec68fb","status":"SUCCESS","response":"READY\n","duration_seconds":8.999806,"num_turns":1,"usage":{"input_tokens":42580,"output_tokens":178,"thinking_tokens":0,"cache_read_tokens":0,"total_tokens":42758}}
@@ -102,7 +105,7 @@ effort를 생략한 모델 검증 순서/오류까지 동일하다고 가정하�
 plan → implement(의도적 버그를 드러내는 테스트 커밋) → verify(실패 기록) →
 prepare-review(이전 결과 무효화, HEAD SHA 고정) → review(NEEDS_FIX + SHA 검사) →
 fix(수정 커밋) → 실제 unittest 재실행을 수행한다.
-단계별 세션 ID·종료코드·소요 시간은 `samples/pipeline/local-smoke/stages.json`에 보존한다.
+단계별 세션 ID·종료코드·소요 시간은 `fixtures/phase0/pipeline/local-smoke/stages.json`에 보존한다.
 전체 결과는 그 디렉터리의 `summary.json`을 따른다.
 
 **로컬 smoke 결과: VERIFIED.** 모든 agent 프로세스 exit 0, 수정 후 unittest 2개 통과,
@@ -128,7 +131,7 @@ verify 단계는 **테스트 실패를 정확히 기록하는 작업**이므로 
 
 ## 2026-10-05 추가 검증: Manicule / GitHub
 
-원문: `samples/additional/manicule-v2/`. 실행 도구: `verify-additional.py`,
+원문: `fixtures/phase0/additional/manicule-v2/`. 실행 도구: `verify-additional.py`,
 `verify-github.py`, `cleanup-github-test.py`.
 
 - 원본 `/Users/leeseungyun/project/Manicule`의 상태는 전후 clean, HEAD는
@@ -142,7 +145,7 @@ verify 단계는 **테스트 실패를 정확히 기록하는 작업**이므로 
   수집기의 termination=timeout과 오류 JSON을 함께 기록한다.
 - 첫 중단 실험의 프로세스 그룹 정리에서 PermissionError가 발생해 결과 저장이 누락됐다.
   수집기 수정 후 재실행 원문은 `agy-interrupt-retry-d1039d/`에 보존했다.
-  최초 `agy-interrupt/`는 불완전한 수집 자료이며 종료코드를 추정하지 않는다.
+  최초 `agy-interrupt/`는 불완전한 수집 자료여서 정리 시 삭제했으며 종료코드는 추정하지 않았다.
 - `manicule/` 첫 시도는 로그 폴더/worktree 경로 충돌로 setup 실패. 수정 후 v2에서 성공.
 
 ### GitHub 게시 / 정리 결과
@@ -169,7 +172,7 @@ CI: [Gradle Check 실행](https://github.com/LeeSeungYun1020/Manicule/actions/ru
 
 ### 사용자에게 필요한 작업
 
-1. **필수 완료 게이트: agy 미로그인 fixture 확보.** 현재 로그인 상태는 정상이다.
+1. **06 인증 처리 마무리 전까지 이월: agy 미로그인 fixture 확보.** Phase 1을 시작하기 위한 사용자 작업은 없다. 현재 로그인 상태는 정상이다.
    기존 인증을 건드리지 않으려면 별도 macOS 사용자/VM 등 로그인하지 않은 agy 환경이
    필요하다. 그 환경에 scripts 폴더를 복사한 후 아래 명령을 실행해 출력 디렉터리를 전달하면 된다.
 
@@ -192,7 +195,7 @@ CI: [Gradle Check 실행](https://github.com/LeeSeungYun1020/Manicule/actions/ru
   timeout/시그널/출력 완료 분리, 새 evidence 경로만 허용.
 - `test_phase0.py` + `test_github_guard.py`: 11개 오프라인 테스트 통과.
   정리 권한 오류에도 증거 저장, 정확한 APPROVED 문자열·SHA·clean 상태 검사 포함. CLI 실측과 구분.
-- `samples/synthetic/`: 명시적 실패+exit 0, 잘린 JSON, ID 누락, 일반 로그,
+- `fixtures/phase0/synthetic/`: 명시적 실패+exit 0, 잘린 JSON, ID 누락, 일반 로그,
   정상 빈 shell 출력 6개. source=synthetic. Phase 04 파서 테스트는 아직 미구현.
 - 계획서 §2·§5와 `04-provider-adapters.md`의 agy 모델 목록·실패·성공 판정 계약 수정.
 - 참고: [공식 Codex exec 문서](https://learn.chatgpt.com/docs/developer-commands#codex-exec).

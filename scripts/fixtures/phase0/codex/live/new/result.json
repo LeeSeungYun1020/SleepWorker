@@ -1,0 +1,161 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.nvm/versions/node/v24.11.1/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/codex/live/worktree",
+    "-c",
+    "model_reasoning_effort=low",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/codex/live/worktree",
+  "version": "codex-cli 0.146.0",
+  "startedAt": "2026-10-05T01:53:16.983683+00:00",
+  "stdinClosed": true,
+  "exitCode": 1,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 147,
+      "elapsedSec": 0.354791,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 142,
+      "elapsedSec": 0.613148,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.624346,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.627222,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 292,
+      "elapsedSec": 0.665397,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.667989,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.668418,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.685818,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.687267,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 292,
+      "elapsedSec": 0.740331,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.741572,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 151,
+      "elapsedSec": 0.741723,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 142,
+      "elapsedSec": 0.858157,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.873645,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 142,
+      "elapsedSec": 0.877281,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 200,
+      "elapsedSec": 0.884839,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.923155,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 142,
+      "elapsedSec": 1.651701,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 308,
+      "elapsedSec": 2.24984,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 142,
+      "elapsedSec": 2.73694,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 242,
+      "elapsedSec": 3.492823,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 258,
+      "elapsedSec": 3.500807,
+      "afterExit": false
+    }
+  ],
+  "pid": 67930,
+  "finishedAt": "2026-10-05T01:53:20.650517+00:00",
+  "durationSec": 3.666987
+}

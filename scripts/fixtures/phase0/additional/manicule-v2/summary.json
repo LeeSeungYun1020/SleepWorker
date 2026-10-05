@@ -1,0 +1,25 @@
+{
+  "source": "/Users/leeseungyun/project/Manicule",
+  "repo": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/repo",
+  "worktree": "/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree",
+  "githubRepo": "LeeSeungYun1020/Manicule",
+  "branch": "ai/aiflow-phase0-703e619e",
+  "versions": {
+    "codex": "codex-cli 0.160.0",
+    "agy": "1.2.16"
+  },
+  "crossCwd": {
+    "new": {
+      "sessionId": "7da463ba-b47e-4860-bb6c-4dcdd40c3e44",
+      "response": "READY\n",
+      "success": true
+    },
+    "resume": {
+      "sessionId": "7da463ba-b47e-4860-bb6c-4dcdd40c3e44",
+      "response": "- `pwd`: `/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree`\n- `git rev-parse --show-toplevel`: `/Users/leeseungyun/project/Airflow/scripts/samples/additional/manicule-v2/worktree`\n- EXTRA Token: `EXTRA_f8f22cab53be436ea73a63717fce792b`\n",
+      "success": true
+    },
+    "contextRetained": true
+  },
+  "github": "read-only verified; publishing not yet performed"
+}
