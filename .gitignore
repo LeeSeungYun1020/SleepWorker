@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+# CLI evidence, disposable clones/worktrees and isolated authentication data.
+# Keep local; curate parser fixtures separately before tracking them.
+/scripts/samples/
+.DS_Store
