@@ -1,5 +1,8 @@
 # 02 — KMP 프로젝트 생성 (Phase 1a)
 
+> 2026-10-05 구현 및 테스트 결과: [`scripts/phase1-result.md`](scripts/phase1-result.md).
+> 아래 체크리스트는 계획 원문이며 실제 검증 완료/보류 항목은 결과 문서를 따른다.
+
 선행: `01-verify-cli.md` | 다음: `03-data-model.md`, `04-provider-adapters.md`
 
 진입 가능: 01의 핵심 실행 계약과 보존 fixture 확보 완료. agy 미로그인 오류 실측은

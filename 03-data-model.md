@@ -1,5 +1,8 @@
 # 03 — 데이터 모델 + YAML + 검증 (Phase 1b)
 
+> 2026-10-05 구현 및 테스트 결과: [`scripts/phase1-result.md`](scripts/phase1-result.md).
+> 아래 체크리스트는 계획 원문이며 실제 검증 완료/보류 항목은 결과 문서를 따른다.
+
 선행: `02-create-project.md` | 다음: `05-engine.md` (04와 병행 가능)
 
 ## 목표

@@ -4,3 +4,9 @@ __pycache__/
 # Keep local; curate parser fixtures separately before tracking them.
 /scripts/samples/
 .DS_Store
+
+.gradle/
+.kotlin/
+**/build/
+.idea/
+*.iml

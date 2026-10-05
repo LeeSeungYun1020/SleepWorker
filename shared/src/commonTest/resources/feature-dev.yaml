@@ -1,0 +1,175 @@
+name: feature-dev
+repoPath: /Users/me/src/myrepo
+baseBranch: main
+worktreeRoot: ../myrepo.worktrees
+start: sync
+maxSteps: 30
+
+worktrees:
+  - { name: impl-wt, branch: ai/feature-x }
+
+sessions:
+  plan: { provider: codex,       workspace: local }
+  impl: { provider: antigravity, workspace: worktree:impl-wt }
+
+steps:
+  - id: sync                      # shell 단계: "!"로 자동 해석
+    title: 기준 브랜치 동기화
+    workspace: local
+    script: |
+      !set -eu
+      git fetch origin
+      git switch main
+      git pull --ff-only
+      git log --oneline -10 > GITLOG.md
+    transitions:
+      - { when: success, next: plan }
+      - { when: failure, next: ask }
+
+  - id: plan
+    session: { ref: plan, mode: new }
+    model: gpt-6-luna
+    effort: low
+    script: |
+      GitHub 이슈 #123을 gh CLI로 읽고, 최근 변경(GITLOG.md)을 참고해
+      구현 계획을 PLAN.md에 작성하라.
+    completion: { fileExists: PLAN.md }
+    transitions:
+      - { when: success, next: implement }
+      - { when: failure, next: ask }
+
+  - id: implement
+    session: { ref: impl, mode: new }
+    model: gemini-3.8-flash-low
+    effort: low
+    script: |
+      ../../myrepo/PLAN.md 를 읽고 계획대로 구현하라.
+      테스트를 작성하고 ./gradlew test 가 통과할 때까지 수정하라.
+      변경한 작업 파일을 커밋하여 ai/feature-x에 반영하라.
+      보고서 파일은 커밋하지 말고, 작업 파일의 미커밋 변경을 남기지 마라.
+    transitions:
+      - { when: success, next: verify }
+      - { when: failure, next: ask }
+
+  - id: verify
+    session: { ref: impl, mode: resume }
+    model: gemini-3.8-flash-low
+    effort: low
+    script: |
+      ./gradlew test 전체를 실행해 통과 여부를 확인하고 VERIFY.md에 결과를 요약하라.
+      코드나 커밋은 변경하지 마라.
+    checkTimeoutSec: 1800
+    completion: { command: "./gradlew test" }
+    transitions:
+      - { when: success, next: prepare-review }
+      - { when: failure, next: fix, maxVisits: 2 }
+
+  - id: prepare-review             # shell: 커밋 고정 + 이전 리뷰 무효화
+    kind: shell
+    workspace: local
+    timeoutSec: 30
+    script: |
+      !set -eu
+      wt=../myrepo.worktrees/impl-wt
+      dirty=$(git -C "$wt" status --porcelain)
+      test -z "$dirty"
+      head=$(git rev-parse ai/feature-x)
+      base=$(git rev-parse main)
+      test "$(git -C "$wt" rev-parse HEAD)" = "$head"
+      printf '%s\n%s\n' "$head" "$base" > REVIEW_TARGET.txt
+      : > REVIEW.md
+    transitions:
+      - { when: success, next: review }
+      - { when: failure, next: ask }
+
+  - id: review
+    session: { ref: plan, mode: resume }
+    model: gpt-6-luna
+    effort: low
+    checkTimeoutSec: 30
+    script: |
+      REVIEW_TARGET.txt의 첫 줄은 검토할 head SHA, 둘째 줄은 base SHA다.
+      git diff <base SHA>..<head SHA> 를 PLAN.md 기준으로 리뷰하라.
+      REVIEW.md를 이번 결과로 덮어써라. 첫 줄은 정확히 APPROVED 또는
+      CHANGES_REQUESTED, 둘째 줄은 검토한 head SHA, 셋째 줄은 base SHA를 쓰고
+      넷째 줄부터 근거와 수정 지시를 적어라. 코드나 커밋은 변경하지 마라.
+    completion:
+      command: |
+        test -f REVIEW.md && test -f REVIEW_TARGET.txt || exit 1
+        state=$(sed -n '1p' REVIEW.md) || exit 2
+        case "$state" in APPROVED|CHANGES_REQUESTED) ;; *) exit 1 ;; esac
+        head=$(sed -n '1p' REVIEW_TARGET.txt) || exit 2
+        base=$(sed -n '2p' REVIEW_TARGET.txt) || exit 2
+        test -n "$head" && test -n "$base" || exit 1
+        test "$(sed -n '2p' REVIEW.md)" = "$head" || exit 1
+        test "$(sed -n '3p' REVIEW.md)" = "$base" || exit 1
+        current_head=$(git rev-parse ai/feature-x) || exit 2
+        current_base=$(git rev-parse main) || exit 2
+        test "$current_head" = "$head" && test "$current_base" = "$base" || exit 1
+        wt=../myrepo.worktrees/impl-wt
+        worktree_head=$(git -C "$wt" rev-parse HEAD) || exit 2
+        dirty=$(git -C "$wt" status --porcelain) || exit 2
+        test "$worktree_head" = "$head" && test -z "$dirty"
+    transitions:
+      - { when: failure, next: ask }
+      - when:
+          command: |
+            state=$(sed -n '1p' REVIEW.md) || exit 2
+            test "$state" = APPROVED
+        next: publish
+      - when:
+          command: |
+            state=$(sed -n '1p' REVIEW.md) || exit 2
+            test "$state" = CHANGES_REQUESTED
+        next: fix
+        maxVisits: 3
+      - { when: otherwise, next: ask }
+
+  - id: fix
+    session: { ref: impl, mode: resume }
+    model: gemini-3.8-flash-low
+    effort: low
+    script: |
+      VERIFY.md의 테스트 실패 또는 ../../myrepo/REVIEW.md의 수정 지시를 반영하라.
+      REVIEW.md가 없거나 비어 있으면 검증 실패를 우선 확인하라.
+      변경한 작업 파일을 커밋하고 미커밋 변경을 남기지 마라. 보고서는 커밋하지 마라.
+    transitions:
+      - { when: success, next: test }
+      - { when: failure, next: ask }
+
+  - id: test                      # shell 단계: agent 없이 테스트만 돌리고 분기
+    kind: shell
+    workspace: worktree:impl-wt
+    timeoutSec: 1800
+    script: |
+      !./gradlew test
+    transitions:
+      - { when: success, next: prepare-review }
+      - { when: failure, next: fix, maxVisits: 3 }
+
+  - id: publish
+    session: { ref: impl, mode: resume }
+    model: gemini-3.8-flash-low
+    effort: low
+    script: |
+      ../../myrepo/REVIEW.md 첫 줄이 정확히 APPROVED인지 확인하라.
+      둘째/셋째 줄의 검토 SHA가 ../../myrepo/REVIEW_TARGET.txt의 head/base 및 현재 HEAD/main과
+      모두 같은지 확인하고, git status --porcelain 결과가 비어 있는지도 확인하라.
+      불일치하면 작업을 진행하지 말고 실패로 종료하라.
+      gh api user로 사전 지정된 게시 계정인지 확인하고, git ls-remote로 현재 원격 main SHA가
+      검토한 base SHA와 같은지도 확인하라. 불일치하면 실패로 종료하라.
+      공유 gh 활성 계정을 자동 전환하거나 토큰을 파일·로그에 기록하지 마라.
+      코드 수정이나 새 커밋 없이 승인된 HEAD만 origin의 ai/feature-x로 푸시하라.
+      같은 head/base 브랜치의 열린 PR이 있으면 재사용하고, 없을 때만
+      gh pr create --base main --head ai/feature-x --fill 로 PR을 생성하라.
+    transitions:
+      - { when: success, next: log }
+      - { when: failure, next: ask }
+
+  - id: log                       # shell 단계: 결과 확인
+    workspace: worktree:impl-wt
+    script: |
+      !git log --oneline main..HEAD && gh pr view
+    transitions:
+      - { when: success, next: end }
+      - { when: failure, next: ask }
