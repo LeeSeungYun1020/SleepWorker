@@ -68,7 +68,7 @@ Manicule 테스트 PR #113은 CI 성공 후 병합 없이 닫았고 임시 원�
 ## 공통 규칙
 
 - 각 파일의 **완료 기준**을 만족해야 다음 단계로 진행. 예외는 위에서 합의한 01의 agy 미로그인 실측 이월이며 06의 인증 처리 완료 전에 확인한다.
-- 각 단계 종료 시 커밋 메시지 접두: `phase-NN:` (예: `phase-03: add workflow data model`).
+- 커밋 메시지는 `<type>: <description>` 형식을 사용한다. type은 `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore` 중 변경 목적에 맞게 선택한다. Phase가 필요하면 설명에 실제 개발 단계로 적으며 문서 번호를 접두로 사용하지 않는다(예: `feat: implement Phase 1 workflow data model`).
 - 테스트는 `shared/commonTest`에 작성. 플랫폼 의존 코드(`jvmMain`)는 `jvmTest`.
 - 앱 불개입 원칙 유지: 엔진은 프롬프트 내용을 가공하거나 단계 간 출력을 주입하지 않는다.
 - 실행 흐름은 필수 `start`와 명시적 화살표(`transitions`)만 결정한다. 단계 배열 순서·보조 목록 정렬·노드 좌표·자동 배치는 실행 의미가 없다.
