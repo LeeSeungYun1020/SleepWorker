@@ -6,6 +6,7 @@ import com.charleskorn.kaml.*
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
+import kotlinx.serialization.json.*
 
 object WorkspaceSerializer : KSerializer<Workspace> {
     override val descriptor = PrimitiveSerialDescriptor("Workspace", PrimitiveKind.STRING)
@@ -25,7 +26,15 @@ object TargetSerializer : KSerializer<Target> {
 @Serializable private data class ContainsValue(val path: String, val text: String)
 @Serializable private data class CheckValue(val fileExists: String? = null, val command: String? = null, val fileContains: ContainsValue? = null)
 private fun checkValue(decoder: Decoder): Pair<String?, CheckValue?> {
-    val input = decoder as? YamlInput ?: throw SerializationException("Checks require YAML")
+    if (decoder is JsonDecoder) {
+        val element = decoder.decodeJsonElement()
+        if (element is JsonPrimitive && element.isString) return element.content to null
+        val value = decoder.json.decodeFromJsonElement(CheckValue.serializer(), element)
+        if (listOf(value.fileExists, value.command, value.fileContains).count { it != null } != 1)
+            throw SerializationException("Expected exactly one check")
+        return null to value
+    }
+    val input = decoder as? YamlInput ?: throw SerializationException("Checks require YAML or JSON")
     return if (input.node is YamlScalar) (input.node as YamlScalar).content to null
     else null to input.yaml.decodeFromYamlNode(CheckValue.serializer(), input.node).also {
         if (listOf(it.fileExists, it.command, it.fileContains).count { v -> v != null } != 1) throw SerializationException("Expected exactly one check")

@@ -162,15 +162,15 @@ def parse_output(provider, folder):
     return dict(sessionId=sid, response=reply, success=success)
 
 
-def command(provider, binary, cwd, model=None, session=None):
+def command(provider, binary, cwd, model=None, session=None, effort="low"):
     if provider == "codex":
         argv = [binary, "exec", "--json", "-C", str(cwd),
-                "-c", "model_reasoning_effort=low",
+                "-c", f"model_reasoning_effort={effort}",
                 "-c", "sandbox_mode=danger-full-access", "-c", "approval_policy=never"]
         if model:
             argv += ["-m", model]
         return argv + (["resume", session, "-"] if session else ["-"])
-    argv = [binary, "--output-format", "json", "--effort", "low",
+    argv = [binary, "--output-format", "json", "--effort", effort,
             "--dangerously-skip-permissions"]
     if model:
         argv += ["--model", model]

@@ -1,0 +1,108 @@
+{
+    "visitNo": 2,
+    "stepId": "verify",
+    "status": "SUCCEEDED",
+    "startedAt": "2026-10-06T10:49:27.013878Z",
+    "endedAt": "2026-10-06T10:49:27.299788Z",
+    "effectiveMode": null,
+    "manualRetryOf": null,
+    "boundSessionId": null,
+    "attempts": [
+        {
+            "attemptNo": 1,
+            "status": "SUCCEEDED",
+            "startedAt": "2026-10-06T10:49:27.015989Z",
+            "endedAt": "2026-10-06T10:49:27.297265Z",
+            "sessionId": null,
+            "metadata": {
+                "binaryPath": "/bin/zsh",
+                "binaryVersion": null,
+                "contractId": null,
+                "requestedModel": null,
+                "requestedEffort": null
+            },
+            "result": {
+                "success": true,
+                "exitCode": 0,
+                "termination": "NORMAL",
+                "providerReport": {
+                    "outcome": "NOT_APPLICABLE",
+                    "sessionId": null,
+                    "finalOutput": null,
+                    "failure": null,
+                    "finalEvents": [],
+                    "usage": null
+                },
+                "completionResult": {
+                    "result": {
+                        "type": "aiflow.engine.CheckResult.Met"
+                    },
+                    "command": {
+                        "exitCode": 0,
+                        "termination": "NORMAL",
+                        "stdout": [],
+                        "stderr": [],
+                        "elapsedMs": 136,
+                        "error": null,
+                        "cleanupError": null,
+                        "bodyStarted": true
+                    }
+                },
+                "failure": null,
+                "sessionId": null,
+                "bodyStarted": true,
+                "finalOutput": null,
+                "cleanupError": null
+            },
+            "retrySkippedReason": null,
+            "failureDetail": null
+        }
+    ],
+    "result": {
+        "success": true,
+        "exitCode": 0,
+        "termination": "NORMAL",
+        "providerReport": {
+            "outcome": "NOT_APPLICABLE",
+            "sessionId": null,
+            "finalOutput": null,
+            "failure": null,
+            "finalEvents": [],
+            "usage": null
+        },
+        "completionResult": {
+            "result": {
+                "type": "aiflow.engine.CheckResult.Met"
+            },
+            "command": {
+                "exitCode": 0,
+                "termination": "NORMAL",
+                "stdout": [],
+                "stderr": [],
+                "elapsedMs": 136,
+                "error": null,
+                "cleanupError": null,
+                "bodyStarted": true
+            }
+        },
+        "failure": null,
+        "sessionId": null,
+        "bodyStarted": true,
+        "finalOutput": null,
+        "cleanupError": null
+    },
+    "transitionTaken": {
+        "stepId": "verify",
+        "index": 0,
+        "condition": "success",
+        "target": "log"
+    },
+    "conditionEvaluations": {},
+    "decision": {
+        "type": "aiflow.engine.Decision.NextStep",
+        "id": "log",
+        "resetSession": false,
+        "transitionIndex": 0
+    },
+    "controls": []
+}

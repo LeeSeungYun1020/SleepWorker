@@ -1,0 +1,3 @@
+{"visitNo":1,"attemptNo":1,"phase":"visits/1-sync/attempts/1","stream":"STDOUT","text":"sync ready","timestamp":"2026-10-06T10:49:26.994779Z"}
+{"visitNo":2,"attemptNo":1,"phase":"visits/2-verify/attempts/1","stream":"STDOUT","text":"local verification","timestamp":"2026-10-06T10:49:27.152676Z"}
+{"visitNo":3,"attemptNo":1,"phase":"visits/3-log/attempts/1","stream":"STDOUT","text":"complete","timestamp":"2026-10-06T10:49:27.444691Z"}

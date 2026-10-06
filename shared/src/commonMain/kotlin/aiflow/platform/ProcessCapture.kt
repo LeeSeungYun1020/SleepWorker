@@ -20,7 +20,7 @@ suspend fun captureProcess(executor: ProcessExecutor, spec: ProcessSpec, timeout
             }
         }
     } catch (t: Throwable) {
-        try { process.killTreeAndWait() } catch (cleanup: Throwable) { t.addSuppressed(cleanup) }
+        try { withContext(NonCancellable) { withTimeout(5_000) { process.killTreeAndWait() } } } catch (cleanup: Throwable) { t.addSuppressed(cleanup) }
         throw t
     }
 }

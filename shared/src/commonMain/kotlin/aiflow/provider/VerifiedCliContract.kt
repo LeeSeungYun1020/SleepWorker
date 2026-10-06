@@ -40,5 +40,24 @@ data class VerifiedCliContract(
             "unauthenticated" to ContractEvidence(Verification.NOT_VERIFIED, "scripts/phase0-result.md", "Deferred until Phase 3 authentication handling"),
             "effortHelp" to measured("agy", "Help lists low/medium/high/xhigh/max; this does not verify execution"),
         ), mapOf(ModelEffort("gemini-3.8-flash-low", Effort.LOW) to measured("agy/live/new", "Explicit model + low succeeded")))
+
+        private fun phase3(path: String, detail: String) = ContractEvidence(Verification.VERIFIED, "scripts/fixtures/phase3/cli/$path", detail)
+        val codex1601 = VerifiedCliContract("codex-0.160.1-phase3", Provider.CODEX, "0.160.1", mapOf(
+            "new" to phase3("luna-new", "exec JSONL with stdin and explicit cwd"),
+            "resume" to phase3("luna-resume", "Same thread ID resumed successfully"),
+            "jsonl" to phase3("luna-new", "thread.started, agent_message, turn.completed"),
+        ), mapOf(
+            ModelEffort("gpt-6-luna", Effort.MEDIUM) to phase3("luna-new", "CLI execution plus separate user desktop session evidence"),
+            ModelEffort("gpt-6-astra", Effort.MEDIUM) to phase3("astra-new", "Explicit requested Astra medium succeeded"),
+            ModelEffort("gpt-6-sol", Effort.MEDIUM) to phase3("sol-new", "Explicit requested Sol medium succeeded"),
+        ))
+        val antigravity130 = VerifiedCliContract("agy-1.3.0-phase3", Provider.ANTIGRAVITY, "1.3.0", mapOf(
+            "new" to phase3("agy-logged-out-bounded", "Actual SUCCESS despite reported desktop logout; this is authenticated execution evidence"),
+            "resume" to phase3("agy-high-resume", "Same conversation ID resumed with Flash high"),
+            "modelsTsv" to phase3("agy-logged-out-models", "TSV catalog; listing alone does not establish authentication"),
+            "unauthenticated" to ContractEvidence(Verification.NOT_VERIFIED, "scripts/phase3-acceptance-plan.md", "Reported logout did not log out CLI: actual request succeeded; no failure signature inferred"),
+        ), mapOf(ModelEffort("gemini-3.8-flash-high", Effort.HIGH) to phase3("agy-logged-out-bounded", "Explicit Flash high model + high effort SUCCESS")))
+        fun forVersion(provider: Provider, version: String): VerifiedCliContract? =
+            listOf(codex, codex1601, antigravity, antigravity130).firstOrNull { it.provider == provider && it.version == version }
     }
 }

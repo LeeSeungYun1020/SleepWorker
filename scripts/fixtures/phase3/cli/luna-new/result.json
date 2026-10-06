@@ -1,0 +1,67 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/phase3-acceptance/probe-repo",
+    "-c",
+    "model_reasoning_effort=medium",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "-m",
+    "gpt-6-luna",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/phase3-acceptance/probe-repo",
+  "version": "0.160.1",
+  "startedAt": "2026-10-06T11:32:36.426166+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.150277,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.25211,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.288054,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.516744,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 93,
+      "elapsedSec": 3.14951,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 160,
+      "elapsedSec": 3.338549,
+      "afterExit": false
+    }
+  ],
+  "pid": 32640,
+  "finishedAt": "2026-10-06T11:32:40.416821+00:00",
+  "durationSec": 3.990869
+}

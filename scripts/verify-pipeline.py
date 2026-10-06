@@ -13,7 +13,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--codex", default="codex")
     parser.add_argument("--agy", default="agy")
+    parser.add_argument("--codex-model", required=True)
     parser.add_argument("--agy-model", required=True)
+    parser.add_argument("--codex-effort", choices=["low", "medium", "high", "xhigh", "max"], required=True)
+    parser.add_argument("--agy-effort", choices=["low", "medium", "high", "xhigh", "max"], required=True)
+    parser.add_argument("--model-reason", required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     root = args.output.resolve()
@@ -50,7 +54,8 @@ def main():
         prompt = ("Work only in this disposable repository. Do not use network, push, publish, "
                   "or delegate. " + prompt)
         argv = command(provider, bins[provider], worktree,
-                       args.agy_model if provider == "agy" else None, sessions.get(provider))
+                       args.agy_model if provider == "agy" else args.codex_model, sessions.get(provider),
+                       args.agy_effort if provider == "agy" else args.codex_effort)
         stdin = prompt
         if provider == "agy":
             argv += ["-p", prompt]
@@ -59,7 +64,11 @@ def main():
                          version=versions[provider], timeout=180)
         parsed = parse_output(provider, root / name)
         stages.append(dict(stage=name, provider=provider, sessionId=parsed["sessionId"],
-                           exitCode=result["exitCode"], durationSec=result["durationSec"]))
+                           exitCode=result["exitCode"], durationSec=result["durationSec"],
+                           requestedModel=args.agy_model if provider == "agy" else args.codex_model,
+                           requestedEffort=args.agy_effort if provider == "agy" else args.codex_effort,
+                           selectionReason=args.model_reason, callNo=len(stages) + 1, source="live",
+                           usage="See raw provider output; unavailable values must not be estimated"))
         save(root / "stages.json", stages)
         if not parsed["success"]:
             raise RuntimeError(name + " provider failed; inspect evidence")

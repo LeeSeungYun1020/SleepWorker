@@ -1,0 +1,27 @@
+workflowId: "1a505950-8c5d-440e-bfd4-297ee10e8062"
+workflow:
+  name: "Phase 3 local smoke"
+  repoPath: "/private/var/folders/hg/gm3wrckd1g5dj53dbqpxctwr0000gn/T/aiflow-phase3-7868976206836857855"
+  baseBranch: "main"
+  start: "sync"
+  steps:
+  - id: "sync"
+    script: "!printf 'sync ready\\n'"
+    workspace: "local"
+    transitions:
+    - when: "success"
+      next: "verify"
+  - id: "verify"
+    script: "!printf 'local verification\\n'"
+    workspace: "local"
+    completion:
+      command: "test -d .git"
+    transitions:
+    - when: "success"
+      next: "log"
+  - id: "log"
+    script: "!printf 'complete\\n'"
+    workspace: "local"
+    transitions:
+    - when: "success"
+      next: "end"

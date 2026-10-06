@@ -2,12 +2,27 @@
 
 기준 문서: `airflow.md` (확정 계획서)
 
+## Phase 3 구현 상태 (2026-10-06)
+
+프리플라이트·실행 화면·데스크톱 배선 구현 및 로컬 Git/셸 앱 완주 확인.
+Kotlin 테스트 89개와 Python 테스트 11개 통과. 실제 2-provider 모델 실행,
+agy 미로그인 실측, GitHub 게시 통합은 미완료이며 Phase 3 전체 완료로 간주하지 않는다.
+상세 범위와 보존 기록: [`scripts/phase3-result.md`](scripts/phase3-result.md).
+
+## Phase 2 구현 상태 (2026-10-05)
+
+05 실행 엔진·워크트리 준비·런 기록·중단 복구 구현 완료. `./gradlew build` 성공,
+전체 80개 테스트 통과(기존 33개 + Phase 2 47개). 실제 모델 호출 없이 fake 프로세스와
+임시 저장소의 로컬 Git/셸로 검증했다. 상세 결과는
+[`scripts/phase2-result.md`](scripts/phase2-result.md)에 기록했다.
+다음 구현 범위는 06 실행 화면과 실제 CLI 프리플라이트 연결이다.
+
 ## Phase 1 구현 상태 (2026-10-05)
 
 02~04 구현, 전체 빌드, 33개 오프라인/로컬 프로세스 테스트, DMG 생성과
 패키징 앱의 네비게이션 전환 확인 완료. 상세 결과와 유지한 실측 제한은
 [`scripts/phase1-result.md`](scripts/phase1-result.md)에 기록했다.
-다음 구현 범위는 05 실행 엔진이다.
+당시 다음 범위였던 05 실행 엔진은 위 Phase 2 결과를 따른다.
 
 ## Phase 0 실측 반영 (2026-10-05)
 

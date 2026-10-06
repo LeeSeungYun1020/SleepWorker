@@ -4,8 +4,8 @@ import aiflow.model.*
 import aiflow.platform.RepositoryLease
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import okio.FileSystem
 import okio.Path
 import kotlin.uuid.Uuid
@@ -69,6 +69,13 @@ class WorkflowStore(
             val versionId = id(file.name.removeSuffix(".yaml"))
             codec.decodeVersion(read(file)).also { require(it.workflowId == workflowId && it.versionId == versionId) }
         }.sortedWith(compareBy({ it.createdAt }, { it.versionId }))
+    }
+    suspend fun listWorkflows(): List<String> = mutex.withLock {
+        lease.requireHeld()
+        require(fs.metadataOrNull(root)?.symlinkTarget == null) { "Symlink workflow storage" }
+        if (!fs.exists(root)) emptyList() else fs.list(root).filter {
+            fs.metadataOrNull(it)?.isDirectory == true && Regex("[0-9a-f-]{36}").matches(it.name)
+        }.map { id(it.name) }
     }
     suspend fun listVersions(workflowId: String): List<WorkflowVersion> = mutex.withLock { versions(workflowId) }
     suspend fun loadVersion(workflowId: String, versionId: String): WorkflowVersion = mutex.withLock { version(workflowId, versionId) }

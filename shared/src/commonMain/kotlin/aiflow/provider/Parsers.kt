@@ -6,6 +6,7 @@ internal fun JsonObject.string(key: String): String? = (get(key) as? JsonPrimiti
 internal abstract class AgentParser(private val req: ExecRequest) : ProviderParser {
     protected var sessionId = req.resumeSessionId
     protected var output: String? = null
+    protected var usage: JsonElement? = null
     protected var complete = false
     protected var malformed = false
     protected var conflict = false
@@ -61,7 +62,7 @@ internal abstract class AgentParser(private val req: ExecRequest) : ProviderPars
             code != 0 -> { outcome = ProviderOutcome.FAILED; info = FailureInfo(FailureKind.EXIT_CODE, FailurePhase.FINALIZING, "Exit $code") }
             else -> { outcome = ProviderOutcome.SUCCEEDED; info = null }
         }
-        return ProviderReport(outcome, sessionId, output, info, events)
+        return ProviderReport(outcome, sessionId, output, info, events, usage)
     }
 }
 internal class CodexParser(req: ExecRequest) : AgentParser(req) {
@@ -87,7 +88,7 @@ internal class CodexParser(req: ExecRequest) : AgentParser(req) {
                     else -> listOf(AgentEvent.Raw(line, stream))
                 }
             }
-            "turn.completed" -> { complete = true; listOf(AgentEvent.Completed) }
+            "turn.completed" -> { usage = obj["usage"]; complete = true; listOf(AgentEvent.Completed) }
             "error" -> if (obj.string("message")?.startsWith("Reconnecting...") == true) listOf(AgentEvent.Diagnostic(line))
                 else listOf(fail(obj["error"]?.toString() ?: obj.string("message") ?: line))
             "turn.failed" -> listOf(fail(obj["error"]?.toString() ?: obj.string("message") ?: line))
@@ -112,6 +113,7 @@ internal class AntigravityParser(req: ExecRequest) : AgentParser(req) {
         val obj = try { Json.parseToJsonElement(buffer.toString()) as? JsonObject } catch (_: Exception) { null }
         if (obj == null) malformed = true
         else {
+            usage = obj["usage"]
             obj.string("conversation_id")?.takeIf { it.isNotBlank() }?.let { events.addAll(session(it)) }
             obj.string("response")?.let { output = it; events.add(AgentEvent.Message(it)) }
             when {
