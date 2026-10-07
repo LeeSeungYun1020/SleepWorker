@@ -45,8 +45,13 @@ fun RunScreen(vm: RunViewModel) {
     var summary by remember { mutableStateOf(false) }
     var follow by remember { mutableStateOf(true) }
     var now by remember { mutableStateOf(Clock.System.now()) }
-    LaunchedEffect(state?.runId) { while (true) { now = Clock.System.now(); delay(1000) } }
     val active = state?.status?.let { !it.terminal } == true
+    LaunchedEffect(state?.runId, active) {
+        if (active) {
+            now = Clock.System.now()
+            while (true) { delay(1000); now = Clock.System.now() }
+        }
+    }
     val visit = state?.visits?.firstOrNull { it.visitNo == selectedVisit } ?: state?.visits?.lastOrNull()
     val step = state?.workflow?.steps?.firstOrNull { it.id == visit?.stepId }
     val attempt = visit?.attempts?.firstOrNull { it.attemptNo == selectedAttempt } ?: visit?.attempts?.lastOrNull()
@@ -89,11 +94,10 @@ fun RunScreen(vm: RunViewModel) {
             } }
         }
         state?.let { run ->
-            val start = run.visits.firstOrNull()?.startedAt
-            val end = if (run.status.terminal) run.lastUpdatedAt else now
+            val elapsed = runElapsedTime(run.status, run.visits.firstOrNull()?.startedAt, run.lastUpdatedAt, now)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 RunStatusBadge(run.status)
-                Text("${start?.let { ((end - it).inWholeSeconds).coerceAtLeast(0) } ?: 0}초 · ${run.runId}", style = MaterialTheme.typography.labelLarge)
+                Text("${elapsed.displayText()} · ${run.runId}", style = MaterialTheme.typography.labelLarge)
             }
             when (run.status) {
                 RunStatus.PAUSE_REQUESTED -> Text("현재 단계 완료 후 정지합니다")
@@ -110,7 +114,7 @@ fun RunScreen(vm: RunViewModel) {
                     Card(onClick = { selectedVisit = v.visitNo; selectedAttempt = null }, colors = CardDefaults.cardColors(containerColor = if (v.visitNo == visit?.visitNo) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {
                             Text("#${v.visitNo} ${if (definition.effectiveKind == StepKind.SHELL) "!" else "Agent"} ${v.stepId} · ${definition.title.orEmpty()}")
-                            Text("${v.status} · ${((v.endedAt ?: now) - v.startedAt).inWholeSeconds.coerceAtLeast(0)}초 · 시도 ${v.attempts.size}/${v.attempts.size}", color = if (v.status == StepStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
+                            Text("${v.status} · ${visitElapsedTime(state!!.status, v.startedAt, v.endedAt, now).displayText()} · 시도 ${v.attempts.size}/${v.attempts.size}", color = if (v.status == StepStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                             v.manualRetryOf?.let { Text("방문 #$it 수동 재시도") }
                             v.attempts.lastOrNull()?.sessionId?.let { id -> TextButton({ clipboard.setText(AnnotatedString(id)) }) { Text(id) } }
                             v.transitionTaken?.let { Text("${it.index + 1}: ${conditionLabel(it.condition)} → ${targetLabel(it.target)}") }
