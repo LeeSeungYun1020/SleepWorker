@@ -1,53 +1,51 @@
-# Phase 3 implementation and verification — 2026-10-06
+# Phase 3 implementation and verification — 2026-10-08
 
 ## Implemented
 
-- `engine/Preflight.kt`: read-only workflow/repository/worktree validation, selected absolute
-  CLI path/version and measured model/effort contract checks, provider-specific auth/models,
-  bounded probes, dirty-tree warnings, git/gh discovery. Unknown versions, authentication,
-  or unmeasured model combinations block execution. No silent replacement.
-- RunViewModel: repository ownership/recovery, immutable version selection/import (explicit
-  warning acknowledgement), version-bound preflight, execution-time recheck, orchestration,
-  notifications, controls, history, shutdown cleanup and per-visit bounded log snapshots.
-- Compose run screen: actual visit timeline, attempt/phase/stream selection, raw/event views,
-  pause/resume/abort confirmation, user decision dialog, interrupted records, copied session IDs,
-  version identity, duration and preflight diagnostics.
-- Typed Message/ToolCall events are streamed and retained in the run log; raw output stays separate.
-- Desktop entry point owns shutdown and releases the repository lease after execution stops.
-- Fixed recovery list sorting after timestamps change and a real desktop startup failure from
-  kotlinx-datetime 0.6.2 compile / 0.7.1 runtime mismatch. Clock/Instant now use Kotlin time;
-  serialized timestamp representation remains ISO-8601.
-- Pipeline/GitHub validation helpers require explicit model, effort and selection reason for
-  model calls. Historical Phase 0 evidence remains unchanged.
+Version-bound preflight, immutable workflow imports, repository ownership, run history and
+recovery, pause/resume, manual retry/skip, abort confirmation, session continuation,
+per-visit bounded logs and provider events are implemented. Unknown CLI versions/model-effort
+pairs fail closed. Quota failures do not trigger wasteful immediate retries. Authentication
+errors require measured signatures; a timeout alone is not classified as logged out.
 
-## Verified
+Native app quit now also shuts down owned processes through a JVM shutdown hook. Recovered
+records show unknown elapsed time when no end timestamp exists; terminal records stop ticking.
+Missing terminal results are shown as unknown rather than live progress.
 
-- `./gradlew build`: 89 Kotlin tests, including 9 Phase 3 tests.
-- `python3 -m unittest discover -s scripts -p 'test_*.py'`: 11 tests.
-- `:desktopApp:createDistributable`: packaged application builds and opens.
-- Real local Git/zsh ViewModel integration: import -> warning acknowledgement -> saved version ->
-  preflight -> sync -> verify/completion command -> log -> completed -> reload history -> reopen lease.
-- Packaged application UI: opened that isolated local repository, selected the stored version,
-  ran preflight and clicked New Run. Visibly observed COMPLETED, ordered sync/verify/log timeline,
-  each exit 0, and final `complete` stdout. No model calls or GitHub writes.
-- Durable app-run evidence copied to `scripts/fixtures/phase3/local-app/`: saved draft/version,
-  run snapshot, visits, attempts, completion check, raw logs and results. Paths in the captured
-  snapshots refer to the original disposable repository; this is evidence, not a portable import.
-- Synthetic preflight tests cover path/version selection, logged-out vs unknown, unsupported
-  model, timeout cleanup, worktree mismatch, shell-only scope, and log retention.
+## Verified evidence
 
-## Remaining external acceptance checks
+- Local build: 99 Kotlin tests, 0 failures; Python collector/publication tests: 11 passing.
+- Packaged desktop app builds and opens. The local shell-only app run is retained in
+  `scripts/fixtures/phase3/local-app`.
+- Codex 0.160.1: Luna medium new/resume, Astra medium and Sol medium actual execution.
+  The user's existing successful Luna desktop session is retained as metadata only.
+- Codex 0.160.0: Luna medium new/resume measured on October 8 using the separately installed
+  CLI. The app-bundled 0.162.0-alpha.2 is unverified and was not implicitly substituted.
+- agy 1.3.0: Flash high new/resume. Initial reported logout did not log out the CLI; those
+  successes are not logged-out evidence.
+- agy 1.3.1: fully logged-out model probe and actual execution both failed with measured
+  sign-in errors on October 7. CLI preflight blocked execution. After user login on October 8,
+  Flash high new/resume and model listing all succeeded. Regression fixtures cover both states.
+- Original Astra-medium/Sol-medium flow: completed all 8 visits in the packaged app on
+  October 7 (`20261007-123122-cd7b16dcf2b5498c`). Independent new planning/implementation
+  sessions; review resumed planning, fix resumed implementation; 3 shell checks made no AI
+  calls. The unit implemented truthful interrupted-record durations. Review approved, so fix
+  was correctly a no-op. Evidence: `scripts/fixtures/phase3/user-flow-sol`.
+- An earlier flow hit account usage limits and was aborted. It is not counted as successful.
+- Actual app buttons: import, preflight, new run, pause requested during implementation,
+  pause at next boundary, resume, manual retry, skip, abort body and abort completion check.
+  Body and child processes were confirmed stopped. Offline integration tests also assert
+  process cleanup, recorded attempts, terminal history, and repository lease reopening.
+- Restart recovered October 7's interrupted run without executing it. October 8 native Cmd+Q
+  test (`20261008-143254-4e9fe162570b49f8`) immediately recorded INTERRUPTED and stopped the
+  owned shell process, before reopening.
 
-Phase 3's full acceptance criteria are **not all satisfied**. The local shell run is not evidence
-of the two-provider §4 workflow or GitHub publication. No model was invoked (calls/usage/cost: 0 /
-not applicable / not applicable).
+## In-progress final acceptance
 
-- GPT-6 Luna execution evidence is still absent from VerifiedCliContract. It remains blocked,
-  even if present in a model list. Do not use an expensive model as an implicit substitute.
-- agy logged-out behavior remains NOT_VERIFIED. A separate unauthenticated account/VM fixture
-  is required; the user's existing login was not removed or changed. Unknown fails closed.
-- The two-provider workflow, live retry/new/resume, manual pause/abort scenarios with live agents,
-  terminal session continuation and authorized exact-SHA draft PR publication/cleanup remain to
-  be verified in an isolated environment. No GitHub target was newly designated in this request.
-- Graph editing and full history/settings UI belong to Phases 4–5. Phase 3 provides history
-  inspection through the run screen and reads the existing settings JSON.
+- Low-cost cross-provider flow uses an explicit Luna-medium planning/review override and
+  Flash-high implementation/fix. The generator's production default remains Astra medium.
+- Final GitHub publication/CI and large-log UI acceptance will be recorded after completion.
+- Graph editing and full history/settings UI remain Phase 4–5 scope.
+
+Provider usage is retained in measured JSON/evidence; monetary cost is not inferred from
+subscription usage. Raw private agent conversations and credentials are not published.
