@@ -2,11 +2,13 @@
 
 기준 문서: `airflow.md` (확정 계획서)
 
-## Phase 3 구현 상태 (2026-10-06)
+## Phase 3 구현 상태 (2026-10-08)
 
-프리플라이트·실행 화면·데스크톱 배선 구현 및 로컬 Git/셸 앱 완주 확인.
-Kotlin 테스트 89개와 Python 테스트 11개 통과. 실제 2-provider 모델 실행,
-agy 미로그인 실측, GitHub 게시 통합은 미완료이며 Phase 3 전체 완료로 간주하지 않는다.
+프리플라이트·실행 화면·기록/복구 및 실제 Astra/Sol 8단계 앱 실행을 검증했다.
+Kotlin 테스트 104개와 Python 테스트 11개 통과. agy 1.3.1의 미로그인 오류와 재로그인 후
+Flash new/resume, Codex 0.160.0 Luna new/resume를 실측했다. 현재 프로젝트는 GitHub 초안
+PR #1에 게시했다. Luna/Flash 8단계 흐름도 자동 재시도 포함 무개입 완주했다. 확장 §4 게시 노드와 원격 실패
+매트릭스 등 원래 계획의 더 넓은 인수 항목은 이번 사용자 흐름 검증과 구분한다.
 상세 범위와 보존 기록: [`scripts/phase3-result.md`](scripts/phase3-result.md).
 
 ## Phase 2 구현 상태 (2026-10-05)

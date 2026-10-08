@@ -14,7 +14,7 @@ Missing terminal results are shown as unknown rather than live progress.
 
 ## Verified evidence
 
-- Local build: 99 Kotlin tests, 0 failures; Python collector/publication tests: 11 passing.
+- Local build: 104 Kotlin tests, 0 failures; Python collector/publication tests: 11 passing.
 - Packaged desktop app builds and opens. The local shell-only app run is retained in
   `scripts/fixtures/phase3/local-app`.
 - Codex 0.160.1: Luna medium new/resume, Astra medium and Sol medium actual execution.
@@ -40,12 +40,29 @@ Missing terminal results are shown as unknown rather than live progress.
   test (`20261008-143254-4e9fe162570b49f8`) immediately recorded INTERRUPTED and stopped the
   owned shell process, before reopening.
 
-## In-progress final acceptance
+## Final acceptance
 
-- Low-cost cross-provider flow uses an explicit Luna-medium planning/review override and
-  Flash-high implementation/fix. The generator's production default remains Astra medium.
-- Final GitHub publication/CI and large-log UI acceptance will be recorded after completion.
-- Graph editing and full history/settings UI remain Phase 4–5 scope.
+- Low-cost cross-provider app flow completed all eight visits without manual intervention:
+  `20261008-143404-511cff81048744de`, 687 seconds. Explicit Luna medium planning/review
+  override, Flash high implementation/fix. The generator's production default remains Astra.
+  Six model calls (including one automatic retry), three shell visits with no model calls.
+  Flash's first implementation attempt timed out at 480 seconds, retained its conversation
+  ID, then automatically resumed and succeeded. Both attempts and usage are retained.
+  Review and fix resumed their original respective sessions; approved fix was a no-op.
+  Evidence: `scripts/fixtures/phase3/user-flow-flash`.
+- Final source review with Luna identified the misleading attempt denominator. Flash's
+  implementation fixed it with five regression cases; the resumed Luna review approved.
+  Review artifact identifies its exact source commit, before documentation-only finalization.
+- Final app: synthetic shell failure exit 7 followed by automatic retry exit 0, visible 2/2;
+  25,001 stdout lines (including final marker), capped UI with truncation notice, last line
+  visible, full raw log persisted. Window resizing and log selection remained responsive.
+- GitHub draft PR: https://github.com/LeeSeungYun1020/SleepWorker/pull/1 . Initial CI passed;
+  final checked source/evidence is pushed to the same PR and final CI checked separately.
+- A packaging attempt while the app was running failed ad-hoc codesigning. Closing the app
+  and rerunning packaging succeeded; final package was then used for UI acceptance.
+- Graph editing and full history/settings UI remain Phase 4–5 scope. The extended §4 sample
+  with an in-workflow publish step and its full remote-mutation fault matrix are not claimed
+  by these narrower user-flow checks; publication here is the actual delivery PR.
 
 Provider usage is retained in measured JSON/evidence; monetary cost is not inferred from
 subscription usage. Raw private agent conversations and credentials are not published.
