@@ -129,7 +129,7 @@ fun RunScreen(vm: RunViewModel) {
                     Card(onClick = { selectedVisit = v.visitNo; selectedAttempt = null; if (compact) showTimeline = false }, colors = CardDefaults.cardColors(containerColor = if (v.visitNo == visit?.visitNo) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {
                             Text("#${v.visitNo} ${if (definition.effectiveKind == StepKind.SHELL) "!" else "Agent"} ${v.stepId} · ${definition.title.orEmpty()}")
-                            Text("${v.status} · ${visitElapsedTime(state!!.status, v.startedAt, v.endedAt, now).displayText()} · 시도 ${v.attempts.size}/${v.attempts.size}", color = if (v.status == StepStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
+                            Text("${v.status} · ${visitElapsedTime(state!!.status, v.startedAt, v.endedAt, now).displayText()} · ${visitAttemptLabel(v)}", color = if (v.status == StepStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                             v.manualRetryOf?.let { Text("방문 #$it 수동 재시도") }
                             v.attempts.lastOrNull()?.sessionId?.let { id -> TextButton({ clipboard.setText(AnnotatedString(id)) }) { Text(id) } }
                             v.transitionTaken?.let { Text("${it.index + 1}: ${conditionLabel(it.condition)} → ${targetLabel(it.target)}") }
@@ -246,4 +246,18 @@ private fun RunStatusBadge(status: RunStatus) {
     Surface(color = background, contentColor = foreground, shape = MaterialTheme.shapes.small) {
         Text(label, Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelLarge)
     }
+}
+
+internal const val DEFAULT_MAX_ATTEMPTS = 2
+
+internal fun visitAttemptLabel(visit: StepVisit, maxAttempts: Int = DEFAULT_MAX_ATTEMPTS): String =
+    visitAttemptLabel(visit.status, visit.attempts, maxAttempts)
+
+internal fun visitAttemptLabel(status: StepStatus, attempts: List<AttemptRecord>, maxAttempts: Int = DEFAULT_MAX_ATTEMPTS): String {
+    val current = when {
+        status == StepStatus.RETRYING -> (attempts.size + 1).coerceAtMost(maxAttempts).coerceAtLeast(1)
+        attempts.isNotEmpty() -> attempts.last().attemptNo.coerceAtLeast(attempts.size)
+        else -> 0
+    }
+    return "시도 $current/$maxAttempts"
 }
