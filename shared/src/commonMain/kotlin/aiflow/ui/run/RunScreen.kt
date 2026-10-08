@@ -42,6 +42,7 @@ fun RunScreen(vm: RunViewModel) {
     var abortConfirm by remember { mutableStateOf(false) }
     var selectedVisit by remember(state?.runId) { mutableStateOf<Int?>(null) }
     var selectedAttempt by remember(selectedVisit, state?.runId) { mutableStateOf<Int?>(null) }
+    var showPreflight by remember(state?.runId) { mutableStateOf(false) }
     var phase by remember(selectedVisit) { mutableStateOf("전체") }
     var stderr by remember { mutableStateOf(false) }
     var summary by remember { mutableStateOf(false) }
@@ -91,7 +92,11 @@ fun RunScreen(vm: RunViewModel) {
         selected?.let { Text("workflowId: ${it.workflowId}   versionId: ${it.versionId}", style = MaterialTheme.typography.labelSmall) }
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         report?.let { r ->
-            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 150.dp)) { items(r.items) { item ->
+            val collapse = compact && state != null && r.passed
+            if (collapse) TextButton({ showPreflight = !showPreflight }) {
+                Text(if (showPreflight) "프리플라이트 상세 접기" else "프리플라이트 통과 · 상세 보기")
+            }
+            if (!collapse || showPreflight) LazyColumn(Modifier.fillMaxWidth().heightIn(max = 150.dp)) { items(r.items) { item ->
                 Text("${item.status} · ${item.name}: ${item.detail}", color = if (item.status == PreflightStatus.ERROR) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodySmall)
             } }
         }
