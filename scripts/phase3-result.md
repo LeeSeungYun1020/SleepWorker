@@ -14,7 +14,7 @@ Missing terminal results are shown as unknown rather than live progress.
 
 ## Verified evidence
 
-- Local build: 104 Kotlin tests, 0 failures; Python collector/publication tests: 11 passing.
+- Local build: 104 Kotlin tests, 0 failures; Python collector/publication tests: 15 passing.
 - Packaged desktop app builds and opens. The local shell-only app run is retained in
   `scripts/fixtures/phase3/local-app`.
 - Codex 0.160.1: Luna medium new/resume, Astra medium and Sol medium actual execution.
@@ -50,7 +50,7 @@ Missing terminal results are shown as unknown rather than live progress.
   ID, then automatically resumed and succeeded. Both attempts and usage are retained.
   Review and fix resumed their original respective sessions; approved fix was a no-op.
   Evidence: `scripts/fixtures/phase3/user-flow-flash`.
-- Final source review with Luna identified the misleading attempt denominator. Flash's
+- Final UI source review with Luna identified the misleading attempt denominator. Flash's
   implementation fixed it with five regression cases; the resumed Luna review approved.
   Review artifact identifies its exact source commit, before documentation-only finalization.
 - Final app: synthetic shell failure exit 7 followed by automatic retry exit 0, visible 2/2;
@@ -60,9 +60,11 @@ Missing terminal results are shown as unknown rather than live progress.
   final checked source/evidence is pushed to the same PR and final CI checked separately.
 - A packaging attempt while the app was running failed ad-hoc codesigning. Closing the app
   and rerunning packaging succeeded; final package was then used for UI acceptance.
-- Graph editing and full history/settings UI remain Phase 4–5 scope. The extended §4 sample
-  with an in-workflow publish step and its full remote-mutation fault matrix are not claimed
-  by these narrower user-flow checks; publication here is the actual delivery PR.
+- On October 9, the remaining in-workflow publication tail and 17 local/remote failure cases
+  passed; the test PR was reused, its exact SHA passed CI, and cleanup plus cleanup retry
+  succeeded. See `scripts/phase3-publication-result.md`. These extend the earlier model-flow
+  runs without repeating their already verified calls. Delivery PR #1 remains separate.
+- Graph editing and full history/settings UI remain Phase 4–5 scope.
 
 Provider usage is retained in measured JSON/evidence; monetary cost is not inferred from
 subscription usage. Raw private agent conversations and credentials are not published.
