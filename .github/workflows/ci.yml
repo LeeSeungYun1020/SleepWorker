@@ -1,0 +1,24 @@
+name: Build and tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Kotlin build and offline tests
+        run: ./gradlew build --console=plain
+      - name: Python fixture and publication guard tests
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'

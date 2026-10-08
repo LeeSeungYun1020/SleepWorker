@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okio.Path.Companion.toPath
 
 fun main(args: Array<String>) {
@@ -12,6 +13,9 @@ fun main(args: Array<String>) {
     val platform = desktopPlatform().let { original -> option("--settings")?.let { original.copy(settingsPath = it.toPath()) } ?: original }
     val viewModel = RunViewModel(platform)
     option("--repository")?.let(viewModel::openRepository)
+    // Native Quit can bypass Window.onCloseRequest. Stop owned processes before JVM exit.
+    val shutdown = Thread({ runBlocking { viewModel.close() } }, "aiflow-shutdown")
+    Runtime.getRuntime().addShutdownHook(shutdown)
     application {
         val scope = rememberCoroutineScope()
         var closing by remember { mutableStateOf(false) }

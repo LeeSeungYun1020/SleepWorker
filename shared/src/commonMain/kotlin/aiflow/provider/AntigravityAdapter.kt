@@ -27,8 +27,13 @@ class AntigravityAdapter : ProviderAdapter {
     }
     override suspend fun probeAuth(exec: ProcessExecutor, cfg: ProviderConfig): AuthStatus = try {
         val result = models(exec, cfg)
-        if (result.exitCode == 0 && parseModels(result.stdout.joinToString("\n")) != null) AuthStatus.LoggedIn
-        else AuthStatus.Unknown("agy unauthenticated contract NOT_VERIFIED; exit=${result.exitCode}\n${(result.stdout + result.stderr).joinToString("\n")}")
+        when {
+            result.exitCode == 0 && parseModels(result.stdout.joinToString("\n")) != null -> AuthStatus.LoggedIn
+            cfg.version == "1.3.1" && result.exitCode == 1 && result.stdout.all { it.isBlank() } && result.stderr.any {
+                it.trim() == "Error: Please sign in to view available models. Launch the CLI without arguments to sign in."
+            } -> AuthStatus.LoggedOut
+            else -> AuthStatus.Unknown("agy authentication response unrecognized; version=${cfg.version}; exit=${result.exitCode}\n${(result.stdout + result.stderr).joinToString("\n")}")
+        }
     } catch (e: TimeoutCancellationException) { AuthStatus.Unknown("Authentication probe timed out: ${e.message}") } catch (e: CancellationException) { throw e } catch (e: Exception) { AuthStatus.Unknown(e.toString()) }
     override suspend fun listModels(exec: ProcessExecutor, cfg: ProviderConfig): List<String>? {
         val result = models(exec, cfg)

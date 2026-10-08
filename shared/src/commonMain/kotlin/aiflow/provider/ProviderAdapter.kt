@@ -21,7 +21,7 @@ data class ProviderConfig(val binaryPath: String, val cwd: String, val version: 
 @Serializable enum class Stream { STDOUT, STDERR }
 @Serializable enum class ProviderOutcome { SUCCEEDED, FAILED, PROTOCOL_ERROR, NOT_APPLICABLE }
 @Serializable enum class Termination { NORMAL, TIMED_OUT, CANCELLED, START_FAILED, OUTPUT_INCOMPLETE }
-@Serializable enum class FailureKind { PREPARATION, AUTH, CONFIG, SESSION_MISSING, SESSION_INVALID, PROVIDER, PROTOCOL, EXIT_CODE, TIMEOUT, OUTPUT_IO, COMPLETION }
+@Serializable enum class FailureKind { PREPARATION, AUTH, QUOTA, CONFIG, SESSION_MISSING, SESSION_INVALID, PROVIDER, PROTOCOL, EXIT_CODE, TIMEOUT, OUTPUT_IO, COMPLETION }
 @Serializable enum class FailurePhase { PREPARING, EXECUTING, FINALIZING, CHECKING }
 @Serializable data class FailureInfo(val kind: FailureKind, val phase: FailurePhase, val detail: String)
 @Serializable data class ProviderReport(val outcome: ProviderOutcome, val sessionId: String?, val finalOutput: String?, val failure: FailureInfo?, val finalEvents: List<AgentEvent>, val usage: JsonElement? = null)

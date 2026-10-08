@@ -1,0 +1,69 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.nvm/versions/node/v24.11.1/bin/codex",
+    "exec",
+    "--json",
+    "-C",
+    "/Users/leeseungyun/project/Airflow/scripts/samples/phase3-acceptance/probe-repo",
+    "-c",
+    "model_reasoning_effort=medium",
+    "-c",
+    "sandbox_mode=danger-full-access",
+    "-c",
+    "approval_policy=never",
+    "-m",
+    "gpt-6-luna",
+    "resume",
+    "01a11bec-a401-75f2-b5b3-7c1d9975487e",
+    "-"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/phase3-acceptance/probe-repo",
+  "version": "codex-cli 0.160.0",
+  "startedAt": "2026-10-08T14:31:01.961246+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.105253,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 77,
+      "elapsedSec": 0.145125,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 24,
+      "elapsedSec": 0.154166,
+      "afterExit": false
+    },
+    {
+      "stream": "stderr",
+      "bytes": 288,
+      "elapsedSec": 0.297733,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 95,
+      "elapsedSec": 3.358337,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 161,
+      "elapsedSec": 3.47452,
+      "afterExit": false
+    }
+  ],
+  "pid": 19257,
+  "finishedAt": "2026-10-08T14:31:06.000100+00:00",
+  "durationSec": 4.038852
+}

@@ -9,7 +9,7 @@ object RetryPolicy {
         result.cleanupError != null -> "process cleanup unconfirmed"
         result.termination == Termination.CANCELLED -> "cancelled"
         !result.bodyStarted -> "body not started"
-        result.failure?.kind in setOf(FailureKind.AUTH, FailureKind.CONFIG, FailureKind.SESSION_MISSING, FailureKind.SESSION_INVALID) -> "non-retryable failure"
+        result.failure?.kind in setOf(FailureKind.AUTH, FailureKind.QUOTA, FailureKind.CONFIG, FailureKind.SESSION_MISSING, FailureKind.SESSION_INVALID) -> "non-retryable failure"
         step.effectiveKind == StepKind.AGENT && boundId == null -> "session id unavailable"
         else -> null
     }

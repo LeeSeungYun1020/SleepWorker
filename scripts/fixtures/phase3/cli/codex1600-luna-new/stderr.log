@@ -1,0 +1,2 @@
+2026-10-08T14:30:56.084560Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-10-08T14:30:56.085206Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/

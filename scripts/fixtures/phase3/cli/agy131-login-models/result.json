@@ -1,0 +1,31 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "models"
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/phase3-acceptance/probe-repo",
+  "version": "1.3.1",
+  "startedAt": "2026-10-08T14:30:38.174188+00:00",
+  "stdinClosed": true,
+  "exitCode": 0,
+  "termination": null,
+  "outputComplete": true,
+  "chunks": [
+    {
+      "stream": "stderr",
+      "bytes": 29,
+      "elapsedSec": 0.409919,
+      "afterExit": false
+    },
+    {
+      "stream": "stdout",
+      "bytes": 643,
+      "elapsedSec": 2.088058,
+      "afterExit": false
+    }
+  ],
+  "pid": 18393,
+  "finishedAt": "2026-10-08T14:30:41.367789+00:00",
+  "durationSec": 3.193726
+}

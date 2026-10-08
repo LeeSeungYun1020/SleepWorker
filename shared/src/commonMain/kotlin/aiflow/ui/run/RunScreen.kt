@@ -34,6 +34,8 @@ fun RunScreen(vm: RunViewModel) {
     val error by vm.error.collectAsState()
     val repository by vm.repository.collectAsState()
     var repo by remember { mutableStateOf("") }
+    LaunchedEffect(repository) { if (repository != null) repo = repository!! }
+    var showTimeline by remember { mutableStateOf(true) }
     var yaml by remember { mutableStateOf("") }
     var versionMenu by remember { mutableStateOf(false) }
     var historyMenu by remember { mutableStateOf(false) }
@@ -107,11 +109,19 @@ fun RunScreen(vm: RunViewModel) {
             }
             run.failure?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
+        if (compact) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(showTimeline, { showTimeline = true }, label = { Text("방문 목록") })
+            FilterChip(!showTimeline, { showTimeline = false }, label = { Text("선택 방문 로그") })
+        }
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            LazyColumn(Modifier.width(if (compact) 210.dp else 300.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val timelineState = rememberLazyListState()
+            LaunchedEffect(state?.visits?.size, selectedVisit) {
+                if (selectedVisit == null && !state?.visits.isNullOrEmpty()) timelineState.scrollToItem(state!!.visits.lastIndex)
+            }
+            if (!compact || showTimeline) LazyColumn((if (compact) Modifier.weight(1f) else Modifier.width(300.dp)).fillMaxHeight(), state = timelineState, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(state?.visits.orEmpty(), key = { it.visitNo }) { v ->
                     val definition = state!!.workflow.steps.first { it.id == v.stepId }
-                    Card(onClick = { selectedVisit = v.visitNo; selectedAttempt = null }, colors = CardDefaults.cardColors(containerColor = if (v.visitNo == visit?.visitNo) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
+                    Card(onClick = { selectedVisit = v.visitNo; selectedAttempt = null; if (compact) showTimeline = false }, colors = CardDefaults.cardColors(containerColor = if (v.visitNo == visit?.visitNo) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {
                             Text("#${v.visitNo} ${if (definition.effectiveKind == StepKind.SHELL) "!" else "Agent"} ${v.stepId} · ${definition.title.orEmpty()}")
                             Text("${v.status} · ${visitElapsedTime(state!!.status, v.startedAt, v.endedAt, now).displayText()} · 시도 ${v.attempts.size}/${v.attempts.size}", color = if (v.status == StepStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
@@ -122,8 +132,8 @@ fun RunScreen(vm: RunViewModel) {
                     }
                 }
             }
-            VerticalDivider()
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (!compact) VerticalDivider()
+            if (!compact || !showTimeline) Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(!stderr, { stderr = false }, label = { Text("stdout") })
                     FilterChip(stderr, { stderr = true }, label = { Text("stderr") })
@@ -135,7 +145,7 @@ fun RunScreen(vm: RunViewModel) {
                     listOf("전체", "본문", "완료 확인", "전이 조건").forEach { p -> FilterChip(phase == p, { phase = p }, label = { Text(p) }) }
                 }
                 attempt?.let { a ->
-                    Text("provider=${a.result?.providerReport?.outcome} · exit=${a.result?.exitCode} · ${a.result?.termination}", style = MaterialTheme.typography.bodySmall)
+                    Text("Provider: ${a.result?.providerReport?.outcome ?: if (step?.effectiveKind == StepKind.SHELL) "해당 없음" else if (active) "수신 중" else "미확인"} · 종료코드: ${a.result?.exitCode ?: if (active) "대기" else "미확인"} · ${a.result?.termination ?: if (active) "진행 중" else "기록 없음"}", style = MaterialTheme.typography.bodySmall)
                     a.result?.failure?.let { Text("${it.kind}: ${it.detail}", color = MaterialTheme.colorScheme.error) }
                     a.retrySkippedReason?.let { Text("자동 재시도 불가: $it") }
                 }
