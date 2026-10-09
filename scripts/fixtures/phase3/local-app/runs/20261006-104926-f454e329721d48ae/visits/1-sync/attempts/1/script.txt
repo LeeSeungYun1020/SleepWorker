@@ -1,0 +1,1 @@
+printf 'sync ready\n'

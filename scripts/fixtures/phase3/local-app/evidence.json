@@ -1,0 +1,10 @@
+{
+  "source": "live local Git/shell and packaged Compose app",
+  "date": "2026-10-06",
+  "modelCalls": 0,
+  "model": null,
+  "effort": null,
+  "selectionReason": "No model is needed to validate UI, preflight, shell execution and persisted records",
+  "scope": "sync -> verify (completion command) -> log -> end; not the two-provider publication workflow",
+  "runId": "20261006-104926-f454e329721d48ae"
+}

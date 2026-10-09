@@ -24,7 +24,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--evidence", type=Path, required=True)
     ap.add_argument("--publish", action="store_true")
+    ap.add_argument("--codex", default="codex")
+    ap.add_argument("--codex-model")
+    ap.add_argument("--codex-effort", choices=["low", "medium", "high", "xhigh", "max"])
+    ap.add_argument("--model-reason")
     args = ap.parse_args()
+    if not args.publish and not all([args.codex_model, args.codex_effort, args.model_reason]):
+        ap.error("preparation requires --codex-model, --codex-effort, --model-reason")
     evidence = args.evidence.resolve()
     state = json.loads((evidence / "summary.json").read_text())
     wt = Path(state["worktree"])
@@ -63,14 +69,16 @@ def main():
         diff = checked("diff", ["git", "diff", base + ".." + head, "--", marker.name])
         target = [head, base]
         save(root / "target.json", target)
-        codex = "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex"
+        codex = args.codex
         prompt = ("Read-only review for an aiflow CLI transport test; not a Manicule feature task. "
                   "Do not edit, delegate, publish or run network commands. Review git diff " + base + ".." + head +
                   ". Only .aiflow-phase0-smoke.md should be added, describing a temporary draft PR that must not merge. "
                   "If that is true, reply with first line exactly APPROVED; otherwise CHANGES_REQUESTED. "
                   "Second line must be " + head + "; third line " + base + ". Then a short rationale.")
-        checked("review", command("codex", codex, wt, "gpt-6-astra"), stdin=prompt, timeout=120,
+        checked("review", command("codex", codex, wt, args.codex_model, effort=args.codex_effort), stdin=prompt, timeout=120,
                 version=state["versions"]["codex"])
+        save(root / "review-selection.json", dict(requestedModel=args.codex_model,
+             requestedEffort=args.codex_effort, selectionReason=args.model_reason, calls=1, source="live"))
         parsed = parse_output("codex", root / "review")
         # Use the last completed agent message, not prior commentary.
         events = [json.loads(line) for line in (root / "review/stdout.log").read_text().splitlines() if line.strip()]

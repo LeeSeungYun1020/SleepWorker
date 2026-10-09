@@ -1,0 +1,395 @@
+{
+    "runId": "20261006-104926-f454e329721d48ae",
+    "workflowId": "1a505950-8c5d-440e-bfd4-297ee10e8062",
+    "versionId": "293c639d-ee35-461d-aa8c-c2dc0d7ab8e9",
+    "workflow": {
+        "name": "Phase 3 local smoke",
+        "repoPath": "/private/var/folders/hg/gm3wrckd1g5dj53dbqpxctwr0000gn/T/aiflow-phase3-7868976206836857855",
+        "baseBranch": "main",
+        "start": "sync",
+        "worktreeRoot": "../aiflow-phase3-7868976206836857855.worktrees",
+        "maxSteps": 50,
+        "worktrees": [],
+        "sessions": {},
+        "steps": [
+            {
+                "id": "sync",
+                "script": "!printf 'sync ready\\n'",
+                "title": null,
+                "kind": "agent",
+                "session": null,
+                "model": null,
+                "effort": null,
+                "workspace": "local",
+                "retryScript": null,
+                "timeoutSec": null,
+                "checkTimeoutSec": 300,
+                "completion": null,
+                "transitions": [
+                    {
+                        "when": "success",
+                        "next": "verify",
+                        "maxVisits": null,
+                        "resetSession": false
+                    }
+                ]
+            },
+            {
+                "id": "verify",
+                "script": "!printf 'local verification\\n'",
+                "title": null,
+                "kind": "agent",
+                "session": null,
+                "model": null,
+                "effort": null,
+                "workspace": "local",
+                "retryScript": null,
+                "timeoutSec": null,
+                "checkTimeoutSec": 300,
+                "completion": {
+                    "fileExists": null,
+                    "command": "test -d .git",
+                    "fileContains": null
+                },
+                "transitions": [
+                    {
+                        "when": "success",
+                        "next": "log",
+                        "maxVisits": null,
+                        "resetSession": false
+                    }
+                ]
+            },
+            {
+                "id": "log",
+                "script": "!printf 'complete\\n'",
+                "title": null,
+                "kind": "agent",
+                "session": null,
+                "model": null,
+                "effort": null,
+                "workspace": "local",
+                "retryScript": null,
+                "timeoutSec": null,
+                "checkTimeoutSec": 300,
+                "completion": null,
+                "transitions": [
+                    {
+                        "when": "success",
+                        "next": "end",
+                        "maxVisits": null,
+                        "resetSession": false
+                    }
+                ]
+            }
+        ],
+        "editor": null
+    },
+    "status": "COMPLETED",
+    "visits": [
+        {
+            "visitNo": 1,
+            "stepId": "sync",
+            "status": "SUCCEEDED",
+            "startedAt": "2026-10-06T10:49:26.842921Z",
+            "endedAt": "2026-10-06T10:49:27.006842Z",
+            "effectiveMode": null,
+            "manualRetryOf": null,
+            "boundSessionId": null,
+            "attempts": [
+                {
+                    "attemptNo": 1,
+                    "status": "SUCCEEDED",
+                    "startedAt": "2026-10-06T10:49:26.846783Z",
+                    "endedAt": "2026-10-06T10:49:27.004165Z",
+                    "sessionId": null,
+                    "metadata": {
+                        "binaryPath": "/bin/zsh",
+                        "binaryVersion": null,
+                        "contractId": null,
+                        "requestedModel": null,
+                        "requestedEffort": null
+                    },
+                    "result": {
+                        "success": true,
+                        "exitCode": 0,
+                        "termination": "NORMAL",
+                        "providerReport": {
+                            "outcome": "NOT_APPLICABLE",
+                            "sessionId": null,
+                            "finalOutput": null,
+                            "failure": null,
+                            "finalEvents": [],
+                            "usage": null
+                        },
+                        "completionResult": {
+                            "result": {
+                                "type": "aiflow.engine.CheckResult.Met"
+                            },
+                            "command": null
+                        },
+                        "failure": null,
+                        "sessionId": null,
+                        "bodyStarted": true,
+                        "finalOutput": null,
+                        "cleanupError": null
+                    },
+                    "retrySkippedReason": null,
+                    "failureDetail": null
+                }
+            ],
+            "result": {
+                "success": true,
+                "exitCode": 0,
+                "termination": "NORMAL",
+                "providerReport": {
+                    "outcome": "NOT_APPLICABLE",
+                    "sessionId": null,
+                    "finalOutput": null,
+                    "failure": null,
+                    "finalEvents": [],
+                    "usage": null
+                },
+                "completionResult": {
+                    "result": {
+                        "type": "aiflow.engine.CheckResult.Met"
+                    },
+                    "command": null
+                },
+                "failure": null,
+                "sessionId": null,
+                "bodyStarted": true,
+                "finalOutput": null,
+                "cleanupError": null
+            },
+            "transitionTaken": {
+                "stepId": "sync",
+                "index": 0,
+                "condition": "success",
+                "target": "verify"
+            },
+            "conditionEvaluations": {},
+            "decision": {
+                "type": "aiflow.engine.Decision.NextStep",
+                "id": "verify",
+                "resetSession": false,
+                "transitionIndex": 0
+            },
+            "controls": []
+        },
+        {
+            "visitNo": 2,
+            "stepId": "verify",
+            "status": "SUCCEEDED",
+            "startedAt": "2026-10-06T10:49:27.013878Z",
+            "endedAt": "2026-10-06T10:49:27.299788Z",
+            "effectiveMode": null,
+            "manualRetryOf": null,
+            "boundSessionId": null,
+            "attempts": [
+                {
+                    "attemptNo": 1,
+                    "status": "SUCCEEDED",
+                    "startedAt": "2026-10-06T10:49:27.015989Z",
+                    "endedAt": "2026-10-06T10:49:27.297265Z",
+                    "sessionId": null,
+                    "metadata": {
+                        "binaryPath": "/bin/zsh",
+                        "binaryVersion": null,
+                        "contractId": null,
+                        "requestedModel": null,
+                        "requestedEffort": null
+                    },
+                    "result": {
+                        "success": true,
+                        "exitCode": 0,
+                        "termination": "NORMAL",
+                        "providerReport": {
+                            "outcome": "NOT_APPLICABLE",
+                            "sessionId": null,
+                            "finalOutput": null,
+                            "failure": null,
+                            "finalEvents": [],
+                            "usage": null
+                        },
+                        "completionResult": {
+                            "result": {
+                                "type": "aiflow.engine.CheckResult.Met"
+                            },
+                            "command": {
+                                "exitCode": 0,
+                                "termination": "NORMAL",
+                                "stdout": [],
+                                "stderr": [],
+                                "elapsedMs": 136,
+                                "error": null,
+                                "cleanupError": null,
+                                "bodyStarted": true
+                            }
+                        },
+                        "failure": null,
+                        "sessionId": null,
+                        "bodyStarted": true,
+                        "finalOutput": null,
+                        "cleanupError": null
+                    },
+                    "retrySkippedReason": null,
+                    "failureDetail": null
+                }
+            ],
+            "result": {
+                "success": true,
+                "exitCode": 0,
+                "termination": "NORMAL",
+                "providerReport": {
+                    "outcome": "NOT_APPLICABLE",
+                    "sessionId": null,
+                    "finalOutput": null,
+                    "failure": null,
+                    "finalEvents": [],
+                    "usage": null
+                },
+                "completionResult": {
+                    "result": {
+                        "type": "aiflow.engine.CheckResult.Met"
+                    },
+                    "command": {
+                        "exitCode": 0,
+                        "termination": "NORMAL",
+                        "stdout": [],
+                        "stderr": [],
+                        "elapsedMs": 136,
+                        "error": null,
+                        "cleanupError": null,
+                        "bodyStarted": true
+                    }
+                },
+                "failure": null,
+                "sessionId": null,
+                "bodyStarted": true,
+                "finalOutput": null,
+                "cleanupError": null
+            },
+            "transitionTaken": {
+                "stepId": "verify",
+                "index": 0,
+                "condition": "success",
+                "target": "log"
+            },
+            "conditionEvaluations": {},
+            "decision": {
+                "type": "aiflow.engine.Decision.NextStep",
+                "id": "log",
+                "resetSession": false,
+                "transitionIndex": 0
+            },
+            "controls": []
+        },
+        {
+            "visitNo": 3,
+            "stepId": "log",
+            "status": "SUCCEEDED",
+            "startedAt": "2026-10-06T10:49:27.306670Z",
+            "endedAt": "2026-10-06T10:49:27.455196Z",
+            "effectiveMode": null,
+            "manualRetryOf": null,
+            "boundSessionId": null,
+            "attempts": [
+                {
+                    "attemptNo": 1,
+                    "status": "SUCCEEDED",
+                    "startedAt": "2026-10-06T10:49:27.309432Z",
+                    "endedAt": "2026-10-06T10:49:27.452275Z",
+                    "sessionId": null,
+                    "metadata": {
+                        "binaryPath": "/bin/zsh",
+                        "binaryVersion": null,
+                        "contractId": null,
+                        "requestedModel": null,
+                        "requestedEffort": null
+                    },
+                    "result": {
+                        "success": true,
+                        "exitCode": 0,
+                        "termination": "NORMAL",
+                        "providerReport": {
+                            "outcome": "NOT_APPLICABLE",
+                            "sessionId": null,
+                            "finalOutput": null,
+                            "failure": null,
+                            "finalEvents": [],
+                            "usage": null
+                        },
+                        "completionResult": {
+                            "result": {
+                                "type": "aiflow.engine.CheckResult.Met"
+                            },
+                            "command": null
+                        },
+                        "failure": null,
+                        "sessionId": null,
+                        "bodyStarted": true,
+                        "finalOutput": null,
+                        "cleanupError": null
+                    },
+                    "retrySkippedReason": null,
+                    "failureDetail": null
+                }
+            ],
+            "result": {
+                "success": true,
+                "exitCode": 0,
+                "termination": "NORMAL",
+                "providerReport": {
+                    "outcome": "NOT_APPLICABLE",
+                    "sessionId": null,
+                    "finalOutput": null,
+                    "failure": null,
+                    "finalEvents": [],
+                    "usage": null
+                },
+                "completionResult": {
+                    "result": {
+                        "type": "aiflow.engine.CheckResult.Met"
+                    },
+                    "command": null
+                },
+                "failure": null,
+                "sessionId": null,
+                "bodyStarted": true,
+                "finalOutput": null,
+                "cleanupError": null
+            },
+            "transitionTaken": {
+                "stepId": "log",
+                "index": 0,
+                "condition": "success",
+                "target": "end"
+            },
+            "conditionEvaluations": {},
+            "decision": {
+                "type": "aiflow.engine.Decision.End"
+            },
+            "controls": []
+        }
+    ],
+    "currentVisit": 3,
+    "sessionIds": {},
+    "sessionBindings": {},
+    "visitCounts": {
+        "sync": 1,
+        "verify": 1,
+        "log": 1
+    },
+    "transitionCounts": {
+        "sync:0": 1,
+        "verify:0": 1,
+        "log:0": 1
+    },
+    "interruptedAt": null,
+    "interruptionReason": null,
+    "previousStatus": null,
+    "previousUpdatedAt": null,
+    "lastUpdatedAt": "2026-10-06T10:49:27.459558Z",
+    "failure": null
+}

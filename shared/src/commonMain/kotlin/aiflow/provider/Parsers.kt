@@ -6,6 +6,7 @@ internal fun JsonObject.string(key: String): String? = (get(key) as? JsonPrimiti
 internal abstract class AgentParser(private val req: ExecRequest) : ProviderParser {
     protected var sessionId = req.resumeSessionId
     protected var output: String? = null
+    protected var usage: JsonElement? = null
     protected var complete = false
     protected var malformed = false
     protected var conflict = false
@@ -19,11 +20,12 @@ internal abstract class AgentParser(private val req: ExecRequest) : ProviderPars
         sessionId = value
         return if (first) listOf(AgentEvent.SessionStarted(value)) else emptyList()
     }
-    protected fun fail(detail: String): AgentEvent.Failed {
+    protected fun fail(detail: String, explicitKind: FailureKind? = null): AgentEvent.Failed {
         // Only called for known structured terminal errors, never arbitrary stderr text.
-        val kind = when {
+        val kind = explicitKind ?: when {
             req.resumeSessionId != null && explicitSessionRejection(detail) -> FailureKind.SESSION_INVALID
             "401 Unauthorized" in detail -> FailureKind.AUTH
+            "You’ve hit your usage limit." in detail -> FailureKind.QUOTA
             else -> FailureKind.PROVIDER
         }
         val info = FailureInfo(kind, FailurePhase.EXECUTING, detail)
@@ -61,7 +63,7 @@ internal abstract class AgentParser(private val req: ExecRequest) : ProviderPars
             code != 0 -> { outcome = ProviderOutcome.FAILED; info = FailureInfo(FailureKind.EXIT_CODE, FailurePhase.FINALIZING, "Exit $code") }
             else -> { outcome = ProviderOutcome.SUCCEEDED; info = null }
         }
-        return ProviderReport(outcome, sessionId, output, info, events)
+        return ProviderReport(outcome, sessionId, output, info, events, usage)
     }
 }
 internal class CodexParser(req: ExecRequest) : AgentParser(req) {
@@ -87,7 +89,7 @@ internal class CodexParser(req: ExecRequest) : AgentParser(req) {
                     else -> listOf(AgentEvent.Raw(line, stream))
                 }
             }
-            "turn.completed" -> { complete = true; listOf(AgentEvent.Completed) }
+            "turn.completed" -> { usage = obj["usage"]; complete = true; listOf(AgentEvent.Completed) }
             "error" -> if (obj.string("message")?.startsWith("Reconnecting...") == true) listOf(AgentEvent.Diagnostic(line))
                 else listOf(fail(obj["error"]?.toString() ?: obj.string("message") ?: line))
             "turn.failed" -> listOf(fail(obj["error"]?.toString() ?: obj.string("message") ?: line))
@@ -101,10 +103,13 @@ internal class CodexParser(req: ExecRequest) : AgentParser(req) {
 }
 internal class AntigravityParser(req: ExecRequest) : AgentParser(req) {
     private val buffer = StringBuilder()
+    private var authenticationRequired = false
     override fun accept(line: String, stream: Stream): List<AgentEvent> {
         checkOpen()
-        return if (stream == Stream.STDERR) listOf(AgentEvent.Diagnostic(line))
-        else { buffer.appendLine(line); listOf(AgentEvent.Raw(line, stream)) }
+        return if (stream == Stream.STDERR) {
+            if (line.trim() == "Error: authentication required. Run 'agy' to log in, then retry.") authenticationRequired = true
+            listOf(AgentEvent.Diagnostic(line))
+        } else { buffer.appendLine(line); listOf(AgentEvent.Raw(line, stream)) }
     }
     override fun finalizeOutput(exitCode: Int?, termination: Termination): ProviderReport {
         checkOpen()
@@ -112,10 +117,12 @@ internal class AntigravityParser(req: ExecRequest) : AgentParser(req) {
         val obj = try { Json.parseToJsonElement(buffer.toString()) as? JsonObject } catch (_: Exception) { null }
         if (obj == null) malformed = true
         else {
+            usage = obj["usage"]
             obj.string("conversation_id")?.takeIf { it.isNotBlank() }?.let { events.addAll(session(it)) }
             obj.string("response")?.let { output = it; events.add(AgentEvent.Message(it)) }
             when {
-                obj.string("status") == "ERROR" || (obj["error"] != null && obj["error"] != JsonNull) -> events.add(fail(obj["error"]?.toString() ?: obj.string("response") ?: obj.toString()))
+                obj.string("status") == "ERROR" || (obj["error"] != null && obj["error"] != JsonNull) -> events.add(fail(obj["error"]?.toString() ?: obj.string("response") ?: obj.toString(),
+                    if (authenticationRequired && exitCode == 1 && obj.string("error") == "authentication failed or timed out" && obj.string("conversation_id").isNullOrEmpty()) FailureKind.AUTH else null))
                 obj.string("status") == "SUCCESS" -> { complete = true; events.add(AgentEvent.Completed) }
                 else -> malformed = true
             }

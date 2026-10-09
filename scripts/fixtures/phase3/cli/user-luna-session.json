@@ -1,0 +1,17 @@
+{
+  "source": "user-existing-desktop-session",
+  "sessionId": "01a110e3-06f8-7452-ae4f-b6e8bfe23e16",
+  "cliVersion": "0.160.1",
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "scope": "desktop session success; exec protocol verified separately in luna-new and luna-resume",
+  "usage": {
+    "input_tokens": 91418,
+    "cached_input_tokens": 30208,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 535,
+    "reasoning_output_tokens": 35,
+    "total_tokens": 91953
+  },
+  "completed": true
+}

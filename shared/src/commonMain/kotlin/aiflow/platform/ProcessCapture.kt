@@ -3,6 +3,8 @@ package aiflow.platform
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 
+fun interface ProcessProbe { suspend fun capture(spec: ProcessSpec): CapturedProcess }
+
 data class CapturedProcess(val exitCode: Int, val stdout: List<String>, val stderr: List<String>)
 /** Bounded probe execution, including both EOFs. Engine execution has its own per-attempt lifecycle. */
 suspend fun captureProcess(executor: ProcessExecutor, spec: ProcessSpec, timeoutMs: Long = 15_000): CapturedProcess {
@@ -20,7 +22,7 @@ suspend fun captureProcess(executor: ProcessExecutor, spec: ProcessSpec, timeout
             }
         }
     } catch (t: Throwable) {
-        try { process.killTreeAndWait() } catch (cleanup: Throwable) { t.addSuppressed(cleanup) }
+        try { withContext(NonCancellable) { withTimeout(5_000) { process.killTreeAndWait() } } } catch (cleanup: Throwable) { t.addSuppressed(cleanup) }
         throw t
     }
 }

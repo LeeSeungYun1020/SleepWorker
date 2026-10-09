@@ -1,0 +1,21 @@
+{
+  "runId": "20261008-144713-987590d6dddd449c",
+  "status": "COMPLETED",
+  "visits": [
+    {
+      "stepId": "body",
+      "status": "SUCCEEDED",
+      "attempts": [
+        {
+          "attemptNo": 1,
+          "exitCode": 0,
+          "termination": "NORMAL"
+        }
+      ]
+    }
+  ],
+  "rawLogLineCount": 25001,
+  "rawLogSha256": "f5bb1c722b9c2e1ed74bcbec5326806e74e71dcf08c4622eb62d3cecc0259731",
+  "firstLine": "line-1",
+  "lastLine": "LOGS_COMPLETE"
+}

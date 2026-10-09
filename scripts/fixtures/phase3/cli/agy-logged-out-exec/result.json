@@ -1,0 +1,26 @@
+{
+  "source": "measured",
+  "argv": [
+    "/Users/leeseungyun/.local/bin/agy",
+    "--output-format",
+    "json",
+    "--effort",
+    "high",
+    "--dangerously-skip-permissions",
+    "--model",
+    "gemini-3.8-flash-low",
+    "-p",
+    "Reply exactly AUTH_PROBE_OK. Do not use tools or change files."
+  ],
+  "cwd": "/Users/leeseungyun/project/Airflow/scripts/samples/phase3-acceptance/probe-repo",
+  "version": null,
+  "startedAt": "2026-10-06T11:31:41.014419+00:00",
+  "stdinClosed": true,
+  "exitCode": -9,
+  "termination": "timeout",
+  "outputComplete": true,
+  "chunks": [],
+  "pid": 32584,
+  "finishedAt": "2026-10-06T11:32:12.060254+00:00",
+  "durationSec": 31.045952
+}

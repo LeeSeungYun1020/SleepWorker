@@ -21,3 +21,10 @@ compose.desktop {
         }
     }
 }
+
+tasks.register<JavaExec>("acceptance") {
+    group = "verification"
+    description = "Explicit live read-only preflight; pass --args='preflight workflow.yaml settings.json'"
+    mainClass.set("AcceptanceMainKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}

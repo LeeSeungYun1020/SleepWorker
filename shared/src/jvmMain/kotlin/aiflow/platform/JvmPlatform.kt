@@ -39,9 +39,10 @@ class JvmRepositoryLock : RepositoryLock {
     }
 }
 class ZshPathDetector(private val executor: ProcessExecutor) : PathDetector {
-    override suspend fun detect(binary: String): String? {
+    override suspend fun detect(binary: String): String? = detect(binary, ProcessProbe { captureProcess(executor, it) })
+    override suspend fun detect(binary: String, probe: ProcessProbe): String? {
         require(Regex("[A-Za-z0-9_.-]+").matches(binary))
-        val result = captureProcess(executor, ProcessSpec(listOf("/bin/zsh", "-lc", "command -v -- '$binary'"), System.getProperty("user.home")))
+        val result = probe.capture(ProcessSpec(listOf("/bin/zsh", "-lc", "command -v -- '$binary'"), System.getProperty("user.home")))
         return result.stdout.lastOrNull()?.takeIf { result.exitCode == 0 && it.startsWith('/') }
     }
 }

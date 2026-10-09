@@ -1,9 +1,20 @@
 # 06 — 실행 화면 + 실제 CLI 연결 + 프리플라이트 (Phase 3)
 
+> 2026-10-09 인수 검증 보충: 기존 모델 실행 흐름에 이어 게시·PR 재사용·원격 실패 조건
+> 17개·테스트 PR 정리를 실제 앱에서 검증했다. 아래는 원래 작업 분해 체크리스트이며,
+> 실측 결과와 적용 범위는 [게시 검증 결과](scripts/phase3-publication-result.md) 및
+> [전체 Phase 3 결과](scripts/phase3-result.md)를 기준으로 확인한다.
+
 선행: `05-engine.md` | 다음: `07-workflow-editor.md`
 
 01에서 이월된 agy 미로그인 오류 실측은 이 단계의 인증 처리 마무리 전에 확인한다.
 그 전까지 확인되지 않은 실패는 Unknown으로 차단·진단하며, Phase 1 진입을 막는 조건으로 되돌리지 않는다.
+
+## 구현 및 검증 상태 (2026-10-06)
+
+프리플라이트·ViewModel·실행 화면·DI 구현과 로컬 Git/셸 앱 완주를 확인했다.
+상세 결과: [`scripts/phase3-result.md`](scripts/phase3-result.md).
+아래 체크리스트는 실모델/미로그인/GitHub 검증을 포함하므로 전체 완료 표시는 보류한다.
 
 ## 목표
 

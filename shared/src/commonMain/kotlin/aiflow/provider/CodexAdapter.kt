@@ -18,13 +18,13 @@ class CodexAdapter : ProviderAdapter {
         return ProcessSpec(args, req.cwd, stdin = req.script)
     }
     override fun createParser(req: ExecRequest): ProviderParser = CodexParser(req)
-    override suspend fun probeAuth(exec: ProcessExecutor, cfg: ProviderConfig): AuthStatus = try {
-        val result = captureProcess(exec, ProcessSpec(listOf(cfg.binaryPath, "login", "status"), cfg.cwd))
+    override suspend fun probeAuth(exec: ProcessProbe, cfg: ProviderConfig): AuthStatus = try {
+        val result = exec.capture(ProcessSpec(listOf(cfg.binaryPath, "login", "status"), cfg.cwd))
         when {
             result.exitCode == 0 -> AuthStatus.LoggedIn
             result.exitCode == 1 && result.stderr.any { it.trim() == "Not logged in" } -> AuthStatus.LoggedOut
             else -> AuthStatus.Unknown("exit=${result.exitCode}\n${(result.stdout + result.stderr).joinToString("\n")}")
         }
     } catch (e: TimeoutCancellationException) { AuthStatus.Unknown("Authentication probe timed out: ${e.message}") } catch (e: CancellationException) { throw e } catch (e: Exception) { AuthStatus.Unknown(e.toString()) }
-    override suspend fun listModels(exec: ProcessExecutor, cfg: ProviderConfig): List<String>? = null
+    override suspend fun listModels(exec: ProcessProbe, cfg: ProviderConfig): List<String>? = null
 }

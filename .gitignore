@@ -10,3 +10,6 @@ __pycache__/
 **/build/
 .idea/
 *.iml
+
+# Local workflow runtime and agent handoff artifacts
+.aiflow/

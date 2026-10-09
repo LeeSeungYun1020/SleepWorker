@@ -1,0 +1,88 @@
+{
+  "source": "packaged application buttons + persisted run records",
+  "date": "2026-10-08",
+  "runs": [
+    {
+      "runId": "20261007-124134-2e8c06c4dbe14683",
+      "status": "COMPLETED",
+      "visits": [
+        {
+          "stepId": "body",
+          "status": "FAILED",
+          "attempts": 2
+        },
+        {
+          "stepId": "body",
+          "status": "FAILED",
+          "attempts": 2
+        }
+      ]
+    },
+    {
+      "runId": "20261007-124236-799281e897954e7b",
+      "status": "ABORTED",
+      "visits": [
+        {
+          "stepId": "body",
+          "status": "INTERRUPTED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "runId": "20261007-124319-03c4d30035e74a6a",
+      "status": "ABORTED",
+      "visits": [
+        {
+          "stepId": "body",
+          "status": "INTERRUPTED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "runId": "20261007-124408-cfe73d2ae151432c",
+      "status": "INTERRUPTED",
+      "visits": [
+        {
+          "stepId": "body",
+          "status": "INTERRUPTED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "runId": "20261008-143254-4e9fe162570b49f8",
+      "status": "INTERRUPTED",
+      "visits": [
+        {
+          "stepId": "body",
+          "status": "INTERRUPTED",
+          "attempts": 1
+        }
+      ]
+    }
+  ],
+  "processes": [
+    {
+      "role": "body",
+      "pid": 70611,
+      "aliveAtCheck": false
+    },
+    {
+      "role": "child",
+      "pid": 70676,
+      "aliveAtCheck": false
+    },
+    {
+      "role": "check",
+      "pid": 71019,
+      "aliveAtCheck": false
+    },
+    {
+      "role": "recovery",
+      "pid": 25466,
+      "aliveAtCheck": false
+    }
+  ]
+}

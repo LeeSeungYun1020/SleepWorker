@@ -1,5 +1,8 @@
 # 05 — 실행 엔진 (Phase 2)
 
+> 2026-10-05 구현 및 검증 완료: [`scripts/phase2-result.md`](scripts/phase2-result.md).
+> 아래 체크리스트는 계획 원문이며 구현 API와 검증 근거는 결과 문서를 따른다.
+
 선행: `03-data-model.md`, `04-provider-adapters.md` | 다음: `06-run-screen.md`
 
 ## 목표
