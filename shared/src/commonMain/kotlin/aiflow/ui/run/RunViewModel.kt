@@ -5,6 +5,7 @@ import aiflow.model.*
 import aiflow.platform.*
 import aiflow.storage.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.encodeToString
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -102,8 +103,9 @@ class RunViewModel(private val platform: Platform) {
         check(checked.version == version && checked.passed) { "선택 버전 프리플라이트 실패" }
         logs.value = emptyList(); truncated.value = emptySet()
         val orchestrator = RunOrchestrator(store!!, recorder!!, platform.processes, platform.tempFiles,
-            preflight = Preflight { saved, config, _ ->
-                val fresh = checker.inspect(saved, config)
+            preflight = Preflight { saved, config, io ->
+                io.recorder.write(io.runId, "preflight/expected.json", io.recorder.json.encodeToString(checked), immutable = true)
+                val fresh = checker.inspect(saved, config, io)
                 report.value = fresh
                 check(fresh.passed && fresh.settings == checked.settings && fresh.metadata == checked.metadata) { "실행 직전 프리플라이트 실패 또는 CLI 변경" }
             }, metadata = checked.metadata)

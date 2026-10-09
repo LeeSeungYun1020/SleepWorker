@@ -9,8 +9,10 @@ interface ProviderAdapter {
     val id: Provider?
     fun buildCommand(req: ExecRequest): ProcessSpec
     fun createParser(req: ExecRequest): ProviderParser
-    suspend fun probeAuth(exec: ProcessExecutor, cfg: ProviderConfig): AuthStatus
-    suspend fun listModels(exec: ProcessExecutor, cfg: ProviderConfig): List<String>?
+    suspend fun probeAuth(exec: ProcessExecutor, cfg: ProviderConfig): AuthStatus = probeAuth(ProcessProbe { captureProcess(exec, it) }, cfg)
+    suspend fun probeAuth(exec: ProcessProbe, cfg: ProviderConfig): AuthStatus
+    suspend fun listModels(exec: ProcessExecutor, cfg: ProviderConfig): List<String>? = listModels(ProcessProbe { captureProcess(exec, it) }, cfg)
+    suspend fun listModels(exec: ProcessProbe, cfg: ProviderConfig): List<String>?
 }
 interface ProviderParser {
     fun accept(line: String, stream: Stream): List<AgentEvent>

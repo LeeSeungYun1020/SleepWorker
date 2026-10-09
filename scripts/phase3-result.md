@@ -14,7 +14,7 @@ Missing terminal results are shown as unknown rather than live progress.
 
 ## Verified evidence
 
-- Local build: 104 Kotlin tests, 0 failures; Python collector/publication tests: 15 passing.
+- Local build: 111 Kotlin tests, 0 failures; Python collector/publication tests: 15 passing.
 - Packaged desktop app builds and opens. The local shell-only app run is retained in
   `scripts/fixtures/phase3/local-app`.
 - Codex 0.160.1: Luna medium new/resume, Astra medium and Sol medium actual execution.
@@ -68,3 +68,17 @@ Missing terminal results are shown as unknown rather than live progress.
 
 Provider usage is retained in measured JSON/evidence; monetary cost is not inferred from
 subscription usage. Raw private agent conversations and credentials are not published.
+
+## PR #1 review follow-up — 2026-10-09
+
+- P1: runtime preflight now executes version/auth/model/Git/path-discovery probes through the
+  run's ManagedProcessRunner and ExecutionIO. Cleanup/storage failures cannot be swallowed by
+  provider auth reporting; further probes stop and unconfirmed abort cleanup becomes FAILED.
+  Standalone preview probes also stop on cleanup failure.
+- P2: `preflight/expected.json`, `preflight/report.json`, and numbered probe command/stdout/
+  stderr/process-result files preserve execution-time evidence, including failed/cancelled
+  checks, for history/restart diagnosis.
+- Seven lifecycle regressions and expanded real Git/shell ViewModel integration pass.
+  Local Gradle build: 111 Kotlin tests; Python: 15 tests. No model calls for this follow-up.
+- Review changes are implemented; the original CHANGES_REQUESTED review is left for reviewer
+  reassessment. Draft is removed after the updated commit passes CI; no merge is performed.

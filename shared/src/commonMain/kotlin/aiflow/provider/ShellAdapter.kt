@@ -19,6 +19,6 @@ class ShellAdapter : ProviderAdapter {
             return ProviderReport(ProviderOutcome.NOT_APPLICABLE, null, null, null, emptyList())
         }
     }
-    override suspend fun probeAuth(exec: ProcessExecutor, cfg: ProviderConfig) = AuthStatus.NotApplicable
-    override suspend fun listModels(exec: ProcessExecutor, cfg: ProviderConfig): List<String>? = null
+    override suspend fun probeAuth(exec: ProcessProbe, cfg: ProviderConfig) = AuthStatus.NotApplicable
+    override suspend fun listModels(exec: ProcessProbe, cfg: ProviderConfig): List<String>? = null
 }

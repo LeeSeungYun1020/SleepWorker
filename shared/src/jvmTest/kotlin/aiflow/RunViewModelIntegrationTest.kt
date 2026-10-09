@@ -50,6 +50,16 @@ class RunViewModelIntegrationTest {
             withTimeout(10_000) { vm.history.first { it.any { entry -> entry.runId == done.runId } } }
             assertTrue(vm.logs.value.any { it.text == "complete" })
             assertTrue(FileSystem.SYSTEM.exists("$repo/.aiflow/runs/${done.runId}/run.json".toPath()))
+            val evidence = directory.resolve(".aiflow/runs/${done.runId}/preflight")
+            assertTrue(evidence.resolve("expected.json").isFile)
+            val recorded = kotlinx.serialization.json.Json.decodeFromString<PreflightReport>(evidence.resolve("report.json").readText())
+            assertTrue(recorded.passed)
+            assertEquals(done.versionId, recorded.version.versionId)
+            val probes = evidence.resolve("probes").listFiles()!!.toList()
+            val commands = probes.map { it.resolve("command.txt").readText() }
+            assertTrue(commands.any { it.contains("command -v -- 'git'") })
+            assertTrue(commands.any { it.contains("command -v -- 'gh'") })
+            assertTrue(probes.all { it.resolve("stdout.log").isFile && it.resolve("stderr.log").isFile && it.resolve("process.json").isFile })
             vm.showHistory(done)
             withTimeout(10_000) { vm.logs.first { it.any { line -> line.text == "complete" } } }
             println("PHASE3_LOCAL_EVIDENCE=$repo/.aiflow/runs/${done.runId}")
