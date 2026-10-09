@@ -90,7 +90,7 @@ fun HistoryScreen(vm: RunViewModel, onEditor: () -> Unit) {
                         } }
                     }
                     Text("기록 파일 — 선택 시 지연 로드", style = MaterialTheme.typography.titleMedium)
-                    val prefix = visitNo?.let { number -> selected.visits.first { it.visitNo == number }.let { "visits/$number-${it.stepId}/" } }
+                    val prefix = visitNo?.let { number -> selected.visits.firstOrNull { it.visitNo == number }?.let { "visits/$number-${it.stepId}/" } }
                     OutlinedTextField(fileFilter, { fileFilter = it }, label = { Text("파일명 검색 · stdout / script / result / checks") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                     LazyColumn(Modifier.fillMaxWidth().height(180.dp)) {
                         items(files.filter { (prefix == null || it.startsWith(prefix)) && it.contains(fileFilter, true) }, key = { it }) { relative ->
