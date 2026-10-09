@@ -16,14 +16,18 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 
+@Composable
+fun SelectField(label: String, value: String, options: List<String>, enabled: Boolean = true, onSelect: (String) -> Unit) =
+    SelectField(label, value, options.distinct(), { it.ifBlank { "없음" } }, enabled, onSelect)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectField(label: String, value: String, options: List<String>, enabled: Boolean = true, onSelect: (String) -> Unit) {
+fun <T> SelectField(label: String, value: T?, options: List<T>, optionLabel: (T) -> String, enabled: Boolean = true, onSelect: (T) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded && enabled, { if (enabled) expanded = it }) {
-        OutlinedTextField(value.ifBlank { "없음" }, {}, readOnly = true, enabled = enabled, label = { Text(label) }, singleLine = true,
+        OutlinedTextField(value?.let(optionLabel) ?: "선택 필요", {}, readOnly = true, enabled = enabled, label = { Text(label) }, singleLine = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) }, modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth())
-        ExposedDropdownMenu(expanded && enabled, { expanded = false }) { options.distinct().forEach { option -> DropdownMenuItem(text = { Text(option.ifBlank { "없음" }) }, onClick = { expanded = false; onSelect(option) }) } }
+        ExposedDropdownMenu(expanded && enabled, { expanded = false }) { options.forEach { option -> DropdownMenuItem(text = { Text(optionLabel(option)) }, onClick = { expanded = false; onSelect(option) }) } }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +36,7 @@ fun ComboField(label: String, value: String, suggestions: List<String>, enabled:
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded && enabled, { expanded = it }) {
         OutlinedTextField(value, { onValueChange(it); expanded = true }, enabled = enabled, label = { Text(label) }, singleLine = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded, Modifier.menuAnchor(ExposedDropdownMenuAnchorType.SecondaryEditable)) }, modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable).fillMaxWidth())
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded, Modifier.menuAnchor(ExposedDropdownMenuAnchorType.SecondaryEditable)) }, modifier = Modifier.trackTextInputFocus().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable).fillMaxWidth())
         ExposedDropdownMenu(expanded && enabled, { expanded = false }) { suggestions.filter { value.isBlank() || it.contains(value, true) }.distinct().forEach { option -> DropdownMenuItem(text = { Text(option) }, onClick = { expanded = false; onValueChange(option) }) } }
     }
 }
@@ -44,16 +48,26 @@ fun <T> SegmentedChoice(options: List<T>, selected: T, label: (T) -> String, ena
 @Composable
 fun CommitTextField(label: String, value: String, enabled: Boolean = true, validate: (String) -> String? = { null }, onCommit: (String) -> Unit) {
     var text by remember(value) { mutableStateOf(value) }
+    var accepted by remember(value) { mutableStateOf(value) }
+    val registry = LocalPendingIdentifierEdits.current
+    val token = remember { Any() }
     var error by remember(value) { mutableStateOf<String?>(null) }
     var focused by remember { mutableStateOf(false) }
     val latestValue by rememberUpdatedState(value)
     val latestCommit by rememberUpdatedState(onCommit)
-    fun commit() { if (enabled && text != latestValue) { error = validate(text); if (error == null) try { latestCommit(text) } catch (e: Exception) { error = e.message ?: "이름을 확인하세요" } } }
+    fun commit(): Boolean {
+        if (!enabled || text == accepted) return true
+        error = validate(text)
+        if (error != null) return false
+        return try { latestCommit(text); accepted = text; true } catch (e: Exception) { error = e.message ?: "이름을 확인하세요"; false }
+    }
+    SideEffect { registry?.register(token, if (text != accepted) ::commit else null) }
+    DisposableEffect(registry) { onDispose { registry?.register(token, null) } }
     val invalid = error ?: if (text != value) validate(text) else null
     OutlinedTextField(text, { text = it; error = null }, label = { Text(label) }, enabled = enabled, singleLine = true, isError = invalid != null,
         supportingText = { Text(invalid ?: if (text != value) "Enter 또는 포커스 이탈 시 반영 · Esc 취소" else "참조도 함께 갱신됩니다") },
         trailingIcon = { if (text != value) Icon(Icons.Outlined.Edit, "반영 대기") }, keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done), keyboardActions = KeyboardActions(onDone = { commit() }),
-        modifier = Modifier.fillMaxWidth().onPreviewKeyEvent { e -> when { e.type != KeyEventType.KeyDown -> false; e.key == Key.Escape -> { text = latestValue; error = null; true }; e.key == Key.Enter -> { commit(); true }; else -> false } }.onFocusChanged { state -> if (focused && !state.isFocused) commit(); focused = state.isFocused })
+        modifier = Modifier.trackTextInputFocus().fillMaxWidth().onPreviewKeyEvent { e -> when { e.type != KeyEventType.KeyDown -> false; e.key == Key.Escape && (text != latestValue || error != null) -> { text = latestValue; error = null; true }; e.key == Key.Enter -> { commit(); true }; else -> false } }.onFocusChanged { state -> if (focused && !state.isFocused) commit(); focused = state.isFocused })
 }
 @Composable
 fun SectionCard(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
@@ -86,8 +100,8 @@ fun EmptyState(title: String, description: String, action: String? = null, onAct
 @Composable
 fun DetailRow(label: String, value: String) { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { Text(label, Modifier.width(120.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(value, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall) } }
 @Composable
-fun StatusBadge(label: String) {
+fun StatusBadge(label: String, icon: ImageVector = Icons.Outlined.Edit) {
     Surface(color = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer, shape = MaterialTheme.shapes.small) {
-        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) { Icon(Icons.Outlined.Edit, null, Modifier.size(16.dp)); Text(label, style = MaterialTheme.typography.labelLarge) }
+        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) { Icon(icon, null, Modifier.size(16.dp)); Text(label, style = MaterialTheme.typography.labelLarge) }
     }
 }

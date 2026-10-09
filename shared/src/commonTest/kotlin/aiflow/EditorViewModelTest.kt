@@ -246,4 +246,15 @@ class EditorViewModelTest {
         assertEquals(before, vm.workflow); assertEquals(EdgeSelection("first", index), vm.selectedEdge.value)
     }
 
+    @Test fun numericVisitLimitsMergeWithoutCombiningDifferentFields() = runTest {
+        val vm = editor(); vm.newWorkflow(WorkflowTemplate.LINEAR)
+        val originalLimit = vm.workflow!!.maxSteps
+        vm.edit("maxSteps") { it.copy(maxSteps = 5) }; vm.edit("maxSteps") { it.copy(maxSteps = 50) }
+        val transition = vm.step("first").transitions.first()
+        vm.updateTransition("first", 0, transition.copy(maxVisits = 1))
+        vm.updateTransition("first", 0, transition.copy(maxVisits = 10))
+        vm.undo(); assertNull(vm.step("first").transitions.first().maxVisits); assertEquals(50, vm.workflow!!.maxSteps)
+        vm.undo(); assertEquals(originalLimit, vm.workflow!!.maxSteps)
+    }
+
 }

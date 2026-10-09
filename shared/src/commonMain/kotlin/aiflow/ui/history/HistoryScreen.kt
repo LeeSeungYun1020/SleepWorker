@@ -69,6 +69,7 @@ fun HistoryScreen(vm: RunViewModel, onEditor: () -> Unit) {
                 } } }
             }
             if (!compact || (detail && !viewer)) Column(Modifier.weight(1f).background(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.shapes.large).padding(12.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (run == null) EmptyState("실행 기록을 선택하세요", "목록에서 실행 기록을 선택하면 상세를 볼 수 있습니다.", if (compact) "목록 보기" else null) { detail = false }
                 run?.let { selected ->
                     Text("${selected.workflow.name} · ${selected.versionId}")
                     if (selected.status == RunStatus.INTERRUPTED) Text("중단된 실행 · 직전 ${selected.previousStatus?.label()}\n마지막 기록 ${selected.previousUpdatedAt}\n사유 ${selected.interruptionReason} · 발견 ${selected.interruptedAt}\n실제 종료 시각과 외부 프로세스 상태는 알 수 없습니다. 로그가 일부만 남았을 수 있습니다. 버전을 선택해 새로 실행하세요.")
@@ -114,7 +115,7 @@ fun HistoryScreen(vm: RunViewModel, onEditor: () -> Unit) {
                     }
                     Text("기록 파일 — 선택 시 지연 로드", style = MaterialTheme.typography.titleMedium)
                     val prefix = visitNo?.let { number -> selected.visits.firstOrNull { it.visitNo == number }?.let { "visits/$number-${it.stepId}/" } }
-                    OutlinedTextField(fileFilter, { fileFilter = it }, label = { Text("파일명 검색 · stdout / script / result / checks") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    OutlinedTextField(fileFilter, { fileFilter = it }, label = { Text("파일명 검색 · stdout / script / result / checks") }, modifier = Modifier.trackTextInputFocus().fillMaxWidth(), singleLine = true)
                     LazyColumn(Modifier.fillMaxWidth().height(180.dp)) {
                         items(files.filter { (prefix == null || it.startsWith(prefix)) && it.contains(fileFilter, true) }, key = { it }) { relative ->
                             SelectionItem(relative, selected = relative == file, enabled = !busy && !active, icon = Icons.Outlined.Description) { vm.readHistoryFile(relative); if (compact) { detail = true; viewer = true } }
@@ -131,7 +132,7 @@ fun HistoryScreen(vm: RunViewModel, onEditor: () -> Unit) {
             }
             if (!compact || viewer) Column(Modifier.weight(1f).background(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.shapes.large).padding(12.dp).verticalScroll(rememberScrollState())) {
                 Text("파일 뷰어", style = MaterialTheme.typography.titleSmall)
-                file?.let { Text("$repository/.aiflow/runs/${run?.runId}/$it", style = MaterialTheme.typography.labelSmall); SelectionContainer { Text(text, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) } } ?: EmptyState("파일을 선택하세요", "실행 상세의 기록 파일을 선택하면 원문을 표시합니다.")
+                file?.let { Text("$repository/.aiflow/runs/${run?.runId}/$it", style = MaterialTheme.typography.labelSmall); SelectionContainer { Text(text, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) } } ?: if (run == null) EmptyState("실행 기록을 선택하세요", "목록에서 실행 기록을 먼저 선택하세요.", if (compact) "목록 보기" else null) { detail = false; viewer = false } else EmptyState("파일을 선택하세요", "실행 상세의 기록 파일을 선택하면 원문을 표시합니다.", if (compact) "상세 보기" else null) { viewer = false; detail = true }
             }
         }
     }

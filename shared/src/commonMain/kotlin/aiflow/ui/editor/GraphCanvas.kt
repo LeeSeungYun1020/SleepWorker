@@ -30,7 +30,7 @@ private data class Curve(val from: Offset, val c1: Offset, val c2: Offset, val t
 }
 
 @Composable
-fun GraphCanvas(vm: EditorViewModel, w: Workflow, focus: Pair<String, Int>?, onConnect: (String, String) -> Unit, modifier: Modifier = Modifier, editingEnabled: Boolean = !vm.readOnly) {
+fun GraphCanvas(vm: EditorViewModel, w: Workflow, focus: Pair<String, Int>?, onConnect: (String, String) -> Unit, modifier: Modifier = Modifier, editingEnabled: Boolean = !vm.readOnly, beforeSelection: () -> Boolean = { true }) {
     val node by vm.selectedNode.collectAsState(); val selectedEdge by vm.selectedEdge.collectAsState()
     val issues by vm.issues.collectAsState()
     val density = LocalDensity.current.density
@@ -72,9 +72,11 @@ fun GraphCanvas(vm: EditorViewModel, w: Workflow, focus: Pair<String, Int>?, onC
                 pan = centroid / density - before * zoom + movement / density
             } }
             .pointerInput(edges, positions, zoom, pan) { detectTapGestures { pointer ->
+                val previousNode = vm.selectedNode.value
+                if (!beforeSelection()) return@detectTapGestures
                 val p = logical(pointer)
                 val nearest = edges.mapNotNull { (source, i, t) -> curve(source, i, targetId(t.next))?.let { c -> Triple(source, i, (0..40).minOf { (c.at(it / 40f) - p).getDistance() }) } }.minByOrNull { it.third }
-                if (nearest != null && nearest.third < 20 / zoom && nearest.second >= 0) vm.selectEdge(nearest.first, nearest.second) else vm.selectNode(null)
+                if (nearest != null && nearest.third < 20 / zoom && nearest.second >= 0) vm.selectEdge(if (nearest.first == previousNode && vm.workflow?.steps?.none { it.id == nearest.first } == true) vm.selectedNode.value ?: nearest.first else nearest.first, nearest.second) else vm.selectNode(null)
             } }) {
             edges.forEach { (source, index, transition) ->
                 val c = curve(source, index, targetId(transition.next)) ?: return@forEach
@@ -100,8 +102,8 @@ fun GraphCanvas(vm: EditorViewModel, w: Workflow, focus: Pair<String, Int>?, onC
             Surface(color = when { node == id -> colors.primaryContainer; orphan -> colors.surfaceContainerHigh; else -> colors.surfaceContainerHigh }, border = BorderStroke(if (node == id) 2.dp else 1.dp, if (badges.any { it.severity == Severity.ERROR }) colors.error else colors.outlineVariant), shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.offset { IntOffset(((p.x * zoom + pan.x) * density).roundToInt(), ((p.y * zoom + pan.y) * density).roundToInt()) }.size((220 * zoom).dp, (115 * zoom).dp)
                     .pointerInput(id, zoom, editingEnabled) {
-                        if (editingEnabled) detectDragGestures(onDragStart = { vm.selectNode(id); dragging = id to savedPosition }, onDragCancel = { dragging = null }, onDragEnd = { dragging?.let { vm.moveNode(it.first, it.second) }; dragging = null }) { change, amount -> change.consume(); val origin = dragging?.second ?: savedPosition; dragging = id to NodePosition(origin.x + amount.x / density / zoom, origin.y + amount.y / density / zoom) }
-                    }.semantics { contentDescription = "단계 $id ${step?.title.orEmpty()}" }.clickable { vm.selectNode(id) }) {
+                        if (editingEnabled) detectDragGestures(onDragStart = { if (beforeSelection() && (id in GraphLayout.special || vm.workflow?.steps?.any { it.id == id } == true)) { vm.selectNode(id); dragging = id to savedPosition } }, onDragCancel = { dragging = null }, onDragEnd = { dragging?.let { vm.moveNode(it.first, it.second) }; dragging = null }) { change, amount -> change.consume(); val origin = dragging?.second ?: return@detectDragGestures; dragging = id to NodePosition(origin.x + amount.x / density / zoom, origin.y + amount.y / density / zoom) }
+                    }.semantics { contentDescription = "단계 $id ${step?.title.orEmpty()}" }.clickable { if (beforeSelection() && (id in GraphLayout.special || vm.workflow?.steps?.any { it.id == id } == true)) vm.selectNode(id) }) {
                 Box {
                     Column(Modifier.padding((10 * zoom).dp)) {
                         Text(if (step == null) id.uppercase() else "${step.id} ${step.title.orEmpty()}", fontSize = (14 * zoom).sp, lineHeight = (18 * zoom).sp, maxLines = 1)

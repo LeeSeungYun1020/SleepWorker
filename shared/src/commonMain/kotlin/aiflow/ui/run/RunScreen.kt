@@ -70,11 +70,11 @@ fun RunScreen(vm: RunViewModel) {
         if (state != null) TextButton({ showTarget = !showTarget }) { Text(if (showTarget) "실행 대상 접기" else "실행 대상 변경 · ${selected?.workflow?.name.orEmpty()}") }
         if (showTarget || state == null) SectionCard("실행 대상") {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(yaml, { yaml = it }, label = { Text("가져올 YAML 경로") }, modifier = Modifier.weight(1f), singleLine = true,
+                OutlinedTextField(yaml, { yaml = it }, label = { Text("가져올 YAML 경로") }, modifier = Modifier.trackTextInputFocus().weight(1f), singleLine = true,
                     trailingIcon = { ToolIcon("YAML 파일 선택", Icons.Outlined.FolderOpen, !active && !busy) { scope.launch { vm.chooseYaml()?.let { yaml = it } } } })
                 OutlinedButton({ vm.importYaml(yaml) }, enabled = !active && !busy && yaml.isNotBlank()) { Text("버전 가져오기") }
             }
-            SelectField("저장 버전", selected?.let { "${it.workflow.name} · ${it.versionId.take(8)} · ${it.createdAt}" }.orEmpty(), versions.map { "${it.workflow.name} · ${it.versionId.take(8)} · ${it.createdAt}" }, !active && !busy) { choice -> versions.firstOrNull { "${it.workflow.name} · ${it.versionId.take(8)} · ${it.createdAt}" == choice }?.let(vm::select) }
+            SelectField("저장 버전", selected, versions, { "${it.workflow.name} · ${it.versionId.take(8)} · ${it.createdAt}" }, !active && !busy, vm::select)
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

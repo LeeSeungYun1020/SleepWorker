@@ -7,8 +7,7 @@ import aiflow.ui.run.RunViewModel
 import androidx.compose.runtime.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyShortcut
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import kotlinx.coroutines.*
@@ -36,9 +35,15 @@ fun main(args: Array<String>) {
         val clean = remember { MutableStateFlow(false) }
         val dirty by (editor?.dirty ?: clean).collectAsState()
         val busy by viewModel.busy.collectAsState()
-        val editorRevision by (editor?.revision ?: MutableStateFlow(0L)).collectAsState()
-        // Reading revision makes menu enabled states follow edits and undo/redo.
-        @Suppress("UNUSED_VARIABLE") val observedRevision = editorRevision
+        val canUndo by (editor?.canUndo ?: clean).collectAsState()
+        val canRedo by (editor?.canRedo ?: clean).collectAsState()
+        val emptyPreview = remember { MutableStateFlow<aiflow.model.WorkflowVersion?>(null) }
+        val emptyDraft = remember { MutableStateFlow<aiflow.model.WorkflowDraft?>(null) }
+        val preview by (editor?.preview ?: emptyPreview).collectAsState()
+        val draft by (editor?.draft ?: emptyDraft).collectAsState()
+        val editorVisible by viewModel.editorVisible.collectAsState()
+        val inputFocused by viewModel.textInputFocus.active.collectAsState()
+        val workflowUndoEnabled = editorVisible && !inputFocused && preview == null && !busy
         val geometry = initial.window
         val visiblePosition = geometry.x != null && geometry.y != null && java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.any { device -> device.defaultConfiguration.bounds.contains(geometry.x!! + 80, geometry.y!! + 40) }
         val state = rememberWindowState(width = geometry.width.coerceIn(800, 4000).dp, height = geometry.height.coerceIn(600, 3000).dp,
@@ -71,19 +76,23 @@ fun main(args: Array<String>) {
                 }
             }
         }
-        Window(onCloseRequest = { requestClose() }, title = "aiflow", state = state) {
+        Window(onCloseRequest = { requestClose() }, title = "aiflow", state = state, onPreviewKeyEvent = { event ->
+            if (event.type == KeyEventType.KeyDown && event.key == Key.Z && event.isMetaPressed && !event.isAltPressed && !event.isCtrlPressed && viewModel.editorVisible.value && !viewModel.textInputFocus.active.value && !viewModel.busy.value && editor?.readOnly == false) {
+                viewModel.undoWorkflow(event.isShiftPressed); true
+            } else false
+        }) {
             MenuBar {
                 Menu("File") {
                     Item("새 워크플로", onClick = { viewModel.menu("new") }, enabled = editor != null && !busy, shortcut = KeyShortcut(Key.N, meta = true))
                     Item("열기", onClick = { viewModel.menu("open") }, enabled = editor != null && !busy, shortcut = KeyShortcut(Key.O, meta = true))
-                    Item("저장", onClick = { viewModel.menu("save") }, enabled = editor?.workflow != null && !busy && editor?.readOnly == false, shortcut = KeyShortcut(Key.S, meta = true))
-                    Item("버전 기록", onClick = { viewModel.menu("versions") }, enabled = editor?.draft?.value != null && !busy)
+                    Item("저장", onClick = { viewModel.menu("save") }, enabled = (draft != null || preview != null) && !busy && preview == null, shortcut = KeyShortcut(Key.S, meta = true))
+                    Item("버전 기록", onClick = { viewModel.menu("versions") }, enabled = draft != null && !busy)
                     Separator()
                     Item("종료", onClick = { requestClose() }, enabled = !busy && !closing, shortcut = KeyShortcut(Key.Q, meta = true))
                 }
                 Menu("Edit") {
-                    Item("실행 취소", onClick = { viewModel.menu("undo") }, enabled = editor?.canUndo?.value == true && editor?.readOnly == false && !busy, shortcut = KeyShortcut(Key.Z, meta = true))
-                    Item("다시 적용", onClick = { viewModel.menu("redo") }, enabled = editor?.canRedo?.value == true && editor?.readOnly == false && !busy, shortcut = KeyShortcut(Key.Z, meta = true, shift = true))
+                    Item("실행 취소 (⌘Z)", onClick = { viewModel.undoWorkflow() }, enabled = canUndo && workflowUndoEnabled)
+                    Item("다시 적용 (⇧⌘Z)", onClick = { viewModel.undoWorkflow(true) }, enabled = canRedo && workflowUndoEnabled)
                     Item("노드 찾기", onClick = { viewModel.menu("search") }, enabled = editor != null, shortcut = KeyShortcut(Key.F, meta = true))
                 }
                 Menu("Run") {

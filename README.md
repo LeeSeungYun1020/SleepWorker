@@ -234,7 +234,9 @@ Step IDs, session names and worktree names update references on Enter or focus e
 restores the accepted name. Duplicate names stay uncommitted with a field error. Ordinary
 values and transition fields update the draft immediately; invalid drafts remain saveable
 but cannot publish an executable version. Same-field typing within 300 ms shares one undo
-entry. Edit menu offers Cmd+Z, Shift+Cmd+Z and Cmd+F; Run offers Cmd+R and Shift+Cmd+P.
+entry. Cmd+Z and Shift+Cmd+Z undo/redo the workflow only in Editor with no text input
+focused; focused fields keep their text undo. Edit offers Cmd+F; Run offers Cmd+R and Shift+Cmd+P.
+Selecting another node or edge first commits valid pending names; invalid names block selection.
 
 History shows list/detail/file panes side by side in wide windows and switches between them
 in compact windows. See [design review and results](scripts/phase6-result.md).

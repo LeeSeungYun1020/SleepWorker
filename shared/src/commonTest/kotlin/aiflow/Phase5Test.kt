@@ -31,6 +31,46 @@ class Phase5Test {
         override suspend fun detect(binary: String) = "/bin/$binary"
     }, object : RepositoryLock { override fun acquire(repoPath: okio.Path) = lease }, "/settings.json".toPath())
 
+    @Test fun pickerErrorsAreInlineAndCancellationStillPropagates() = runTest {
+        var diagnosed = 0
+        val failingDialogs = object : FileDialogs {
+            override suspend fun directory(): String? = error("picker unavailable")
+            override suspend fun file(): String? = error("picker unavailable")
+            override suspend fun openYaml(): String? = error("picker unavailable")
+            override suspend fun saveYaml(suggestedName: String): String? = error("unused")
+        }
+        val desktop = platform(FakeProcessExecutor()).copy(fileDialogs = failingDialogs, diagnostics = { diagnosed++ })
+        val settings = SettingsViewModel(desktop, backgroundScope)
+        val run = aiflow.ui.run.RunViewModel(desktop)
+        try {
+            assertNull(settings.chooseFile()); assertNull(settings.chooseDirectory())
+            assertNull(run.chooseRepository()); assertNull(run.chooseYaml())
+            assertContains(settings.error.value!!, "picker unavailable")
+            assertContains(run.error.value!!, "picker unavailable")
+            assertNull(run.fatalError.value); assertEquals(4, diagnosed)
+        } finally { run.close() }
+        val cancelled = SettingsViewModel(desktop.copy(fileDialogs = object : FileDialogs by failingDialogs {
+            override suspend fun file(): String? = throw CancellationException("cancelled")
+        }), backgroundScope)
+        assertFailsWith<CancellationException> { cancelled.chooseFile() }
+        assertNull(cancelled.error.value)
+    }
+    @Test fun workflowUndoNeverRunsOutsideEditorOrWhileTyping() = runTest {
+        val run = aiflow.ui.run.RunViewModel(platform(FakeProcessExecutor()))
+        val editor = aiflow.ui.editor.EditorViewModel(WorkflowStore(fs, lease), fs, "/repo", scope = backgroundScope)
+        editor.newWorkflow(aiflow.ui.editor.WorkflowTemplate.LINEAR)
+        val original = editor.workflow!!.name
+        editor.edit { it.copy(name = "changed") }; run.editor.value = editor
+        try {
+            run.undoWorkflow(); assertEquals("changed", editor.workflow!!.name)
+            run.editorVisible.value = true
+            val field = Any(); run.textInputFocus.update(field, true)
+            run.undoWorkflow(); assertEquals("changed", editor.workflow!!.name)
+            run.textInputFocus.update(field, false)
+            run.undoWorkflow(); assertEquals(original, editor.workflow!!.name)
+            run.undoWorkflow(true); assertEquals("changed", editor.workflow!!.name)
+        } finally { run.close() }
+    }
     @Test fun legacySettingsAndUnknownKeysLoadWithDefaults() = runTest {
         fs.write("/settings.json".toPath()) { writeUtf8("""{"codexPath":"/bin/codex","futureKey":true}""") }
         val settings = SettingsStore(fs, "/settings.json".toPath()).load()

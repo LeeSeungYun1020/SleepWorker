@@ -182,7 +182,7 @@ class EditorViewModel(
         val current = workflow?.steps?.firstOrNull { it.id == source }?.transitions?.getOrNull(index) ?: return
         if (current == transition) return
         var selected = index
-        val argumentKey = if (conditionName(current.`when`) == conditionName(transition.`when`) && current.copy(`when` = transition.`when`) == transition) when (val old = current.`when`) {
+        val argumentKey = if (current.copy(maxVisits = transition.maxVisits) == transition) "maxVisits" else if (conditionName(current.`when`) == conditionName(transition.`when`) && current.copy(`when` = transition.`when`) == transition) when (val old = current.`when`) {
             is Condition.Command -> "command"
             is Condition.FileExists -> "path"
             is Condition.FileContains -> if ((transition.`when` as Condition.FileContains).path != old.path) "path" else "text"

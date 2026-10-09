@@ -5,6 +5,7 @@ import aiflow.model.*
 import aiflow.platform.*
 import aiflow.storage.*
 import aiflow.ui.editor.EditorViewModel
+import aiflow.ui.components.TextInputFocus
 import aiflow.ui.history.*
 import aiflow.ui.settings.SettingsViewModel
 import kotlinx.coroutines.*
@@ -25,6 +26,11 @@ class RunViewModel(private val platform: Platform) {
     private var runJob: Job? = null
     val settingsModel = SettingsViewModel(platform, scope)
     private val settings get() = settingsModel.settings.value
+    val textInputFocus = TextInputFocus()
+    val editorVisible = MutableStateFlow(false)
+    fun undoWorkflow(redo: Boolean = false) {
+        if (editorVisible.value && !textInputFocus.active.value && !busy.value) editor.value?.let { if (redo) it.redo() else it.undo() }
+    }
     val menuActions = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val editorCommand = MutableStateFlow<Pair<Long, String>?>(null)
     val fatalError = MutableStateFlow<String?>(null)
@@ -62,8 +68,11 @@ class RunViewModel(private val platform: Platform) {
         catch (e: Exception) { platform.diagnostics(e); error.value = e.message ?: e.toString() }
         finally { busy.value = false }
     } } }
-    suspend fun chooseRepository(): String? = platform.fileDialogs?.directory()
-    suspend fun chooseYaml(): String? = platform.fileDialogs?.openYaml()
+    private suspend fun pickFile(pick: suspend () -> String?): String? = try { pick() }
+    catch (e: CancellationException) { throw e }
+    catch (e: Exception) { platform.diagnostics(e); error.value = "파일 선택 실패: ${e.message ?: e.toString()}"; null }
+    suspend fun chooseRepository(): String? = pickFile { platform.fileDialogs?.directory() }
+    suspend fun chooseYaml(): String? = pickFile { platform.fileDialogs?.openYaml() }
     fun openRepository(path: String) = action {
         check(!active) { "실행 종료 후 저장소를 변경하세요" }
         if (editor.value?.dirty?.value == true) { pendingRepository.value = path; return@action }

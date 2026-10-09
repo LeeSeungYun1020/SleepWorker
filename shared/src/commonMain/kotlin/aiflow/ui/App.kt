@@ -28,6 +28,7 @@ fun App(viewModel: RunViewModel) {
     val fatal by viewModel.fatalError.collectAsState()
     LaunchedEffect(viewModel) { viewModel.menuActions.collect { command ->
         if (command == "abort") abortConfirm = true
+        else if (command == "undo" || command == "redo") viewModel.undoWorkflow(command == "redo")
         else { focusManager.clearFocus(); tab = AppDestination.EDITOR; viewModel.editorCommand.value = (viewModel.editorCommand.value?.first ?: 0L) + 1 to command }
     } }
     val settings by viewModel.settingsModel.settings.collectAsState()
@@ -36,6 +37,9 @@ fun App(viewModel: RunViewModel) {
     val scope = rememberCoroutineScope()
     var path by remember(repository) { mutableStateOf(repository.orEmpty()) }
     val error by viewModel.error.collectAsState()
+    val isEditorVisible = tab == AppDestination.EDITOR
+    SideEffect { viewModel.editorVisible.value = isEditorVisible }
+    CompositionLocalProvider(LocalTextInputFocus provides viewModel.textInputFocus) {
     AiflowTheme(settings.themeMode) {
         Surface(Modifier.fillMaxSize()) {
             Row {
@@ -45,11 +49,11 @@ fun App(viewModel: RunViewModel) {
                 }
                 Column(Modifier.weight(1f)) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(path, { path = it }, label = { Text("Git 저장소") }, singleLine = true, modifier = Modifier.weight(1f), enabled = !busy && run?.status?.terminal != false,
+                        OutlinedTextField(path, { path = it }, label = { Text("Git 저장소") }, singleLine = true, modifier = Modifier.trackTextInputFocus().weight(1f), enabled = !busy && run?.status?.terminal != false,
                             trailingIcon = { ToolIcon("저장소 폴더 선택", Icons.Outlined.FolderOpen, !busy && run?.status?.terminal != false) { scope.launch { viewModel.chooseRepository()?.let { path = it; viewModel.openRepository(it) } } } })
                         FilledTonalButton({ focusManager.clearFocus(); viewModel.openRepository(path) }, enabled = path.isNotBlank() && !busy && run?.status?.terminal != false) { Text("열기") }
                     }
-                    if (repository == null) error?.let { Text(it, Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.error) }
+                    if (tab != AppDestination.RUN && tab != AppDestination.HISTORY) error?.let { Text(it, Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.error) }
                     HorizontalDivider()
                     Box(Modifier.weight(1f)) {
                         when(tab) {
@@ -68,5 +72,6 @@ fun App(viewModel: RunViewModel) {
         if (pendingRepository != null) AlertDialog(onDismissRequest = { viewModel.cancelRepositoryChange() }, title = { Text("저장하지 않은 편집 내용") }, text = { Text("초안을 저장하거나 변경을 버린 뒤 저장소를 변경하세요.") },
             confirmButton = { Button({ viewModel.confirmRepositoryChange(true) }, enabled = !busy) { Text("저장 후 이동") } },
             dismissButton = { Row { TextButton({ viewModel.confirmRepositoryChange(false) }, enabled = !busy) { Text("버리기·이동") }; TextButton({ viewModel.cancelRepositoryChange() }) { Text("취소") } } })
+    }
     }
 }
