@@ -1,0 +1,12 @@
+{
+    "exitCode": 0,
+    "termination": "NORMAL",
+    "stdout": [
+        "/usr/bin/git"
+    ],
+    "stderr": [],
+    "elapsedMs": 130,
+    "error": null,
+    "cleanupError": null,
+    "bodyStarted": true
+}

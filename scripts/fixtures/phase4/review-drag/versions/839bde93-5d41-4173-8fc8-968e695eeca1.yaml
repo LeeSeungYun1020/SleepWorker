@@ -1,0 +1,56 @@
+workflowId: "7777b3f3-084b-4599-a139-de96f86e2dc0"
+versionId: "839bde93-5d41-4173-8fc8-968e695eeca1"
+createdAt: "2026-10-09T13:08:37.175734Z"
+workflow:
+  name: "선형 3단계"
+  repoPath: "/private/var/folders/hg/gm3wrckd1g5dj53dbqpxctwr0000gn/T/aiflow-review-drag-i19v0x3h"
+  baseBranch: "main"
+  start: "first"
+  steps:
+  - id: "first"
+    script: "!printf '%s\\n' 'first'"
+    kind: "shell"
+    workspace: "local"
+    transitions:
+    - when: "success"
+      next: "second"
+    - when: "failure"
+      next: "ask"
+  - id: "second"
+    script: "!printf '%s\\n' 'second'"
+    kind: "shell"
+    workspace: "local"
+    transitions:
+    - when: "success"
+      next: "third"
+    - when: "failure"
+      next: "ask"
+  - id: "third"
+    script: "!printf '%s\\n' 'third'"
+    kind: "shell"
+    workspace: "local"
+    transitions:
+    - when: "success"
+      next: "end"
+    - when: "failure"
+      next: "ask"
+  editor:
+    nodes:
+      "start":
+        x: 30.0
+        y: 50.0
+      "first":
+        x: 383.19995
+        y: 119.3333
+      "second":
+        x: 600.0
+        y: 50.0
+      "third":
+        x: 900.0
+        y: 50.0
+      "end":
+        x: 1200.0
+        y: 50.0
+      "ask":
+        x: 1200.0
+        y: 250.0

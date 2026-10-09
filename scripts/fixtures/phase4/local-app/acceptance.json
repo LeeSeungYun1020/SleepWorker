@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-09",
+  "modelCalls": 0,
+  "repository": "/private/var/folders/hg/gm3wrckd1g5dj53dbqpxctwr0000gn/T/aiflow-phase4-ui-4oo7gpf5",
+  "runId": "20261009-055801-dde39292d3d340a0",
+  "workflowId": "02755e54-71e0-447f-9b3d-5b9b317de225",
+  "executedVersionId": "a69605fb-ea58-4afa-afc6-bc42c1e4150d",
+  "laterVersionId": "2303b930-0417-4dfb-9e6f-dee0d5b5ffc9",
+  "restoredVersionId": "581a0e40-6d99-4e6a-84f8-9419286c977b",
+  "checks": [
+    "graph fit",
+    "node drag",
+    "self-loop connector drag and maxVisits badge",
+    "undo of connector addition",
+    "save and preflight and local shell execution via editor button",
+    "previous version read-only preview",
+    "restore confirmation and new version provenance",
+    "bang addition and removal toggles shell/agent",
+    "invalid disconnected node draft save",
+    "restart and reopen invalid draft",
+    "issue click centers selected node",
+    "issue click scrolls to related properties",
+    "native directory chooser and cancellation",
+    "save-before-file-change continues requested dialog",
+    "window close save/discard/cancel",
+    "save empty draft on window close"
+  ]
+}

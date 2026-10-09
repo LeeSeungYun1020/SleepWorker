@@ -23,4 +23,11 @@ interface PathDetector {
 }
 interface RepositoryLease { val writeMutex: kotlinx.coroutines.sync.Mutex; val repoPath: Path; fun requireHeld(); fun release() }
 interface RepositoryLock { fun acquire(repoPath: Path): RepositoryLease }
-data class Platform(val processes: ProcessExecutor, val files: FileSystem, val tempFiles: TempFiles, val notifier: Notifier, val pathDetector: PathDetector, val repositoryLock: RepositoryLock, val settingsPath: Path)
+data class Platform(val processes: ProcessExecutor, val files: FileSystem, val tempFiles: TempFiles, val notifier: Notifier, val pathDetector: PathDetector, val repositoryLock: RepositoryLock, val settingsPath: Path, val fileDialogs: FileDialogs? = null)
+
+/** Native pickers return null on cancellation. Implementations marshal to their UI thread. */
+interface FileDialogs {
+    suspend fun directory(): String?
+    suspend fun openYaml(): String?
+    suspend fun saveYaml(suggestedName: String): String?
+}

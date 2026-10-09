@@ -1,0 +1,158 @@
+{
+    "version": {
+        "workflowId": "02755e54-71e0-447f-9b3d-5b9b317de225",
+        "versionId": "a69605fb-ea58-4afa-afc6-bc42c1e4150d",
+        "createdAt": "2026-10-09T05:57:58.434006Z",
+        "restoredFrom": null,
+        "workflow": {
+            "name": "선형 3단계",
+            "repoPath": "/private/var/folders/hg/gm3wrckd1g5dj53dbqpxctwr0000gn/T/aiflow-phase4-ui-4oo7gpf5",
+            "baseBranch": "main",
+            "start": "first",
+            "worktreeRoot": "../aiflow-phase4-ui-4oo7gpf5.worktrees",
+            "maxSteps": 50,
+            "worktrees": [],
+            "sessions": {},
+            "steps": [
+                {
+                    "id": "first",
+                    "script": "!printf '%s\\n' 'first'",
+                    "title": null,
+                    "kind": "shell",
+                    "session": null,
+                    "model": null,
+                    "effort": null,
+                    "workspace": "local",
+                    "retryScript": null,
+                    "timeoutSec": null,
+                    "checkTimeoutSec": 300,
+                    "completion": null,
+                    "transitions": [
+                        {
+                            "when": "success",
+                            "next": "second",
+                            "maxVisits": null,
+                            "resetSession": false
+                        },
+                        {
+                            "when": "failure",
+                            "next": "ask",
+                            "maxVisits": null,
+                            "resetSession": false
+                        }
+                    ]
+                },
+                {
+                    "id": "second",
+                    "script": "!printf '%s\\n' 'second'",
+                    "title": null,
+                    "kind": "shell",
+                    "session": null,
+                    "model": null,
+                    "effort": null,
+                    "workspace": "local",
+                    "retryScript": null,
+                    "timeoutSec": null,
+                    "checkTimeoutSec": 300,
+                    "completion": null,
+                    "transitions": [
+                        {
+                            "when": "success",
+                            "next": "third",
+                            "maxVisits": null,
+                            "resetSession": false
+                        },
+                        {
+                            "when": "failure",
+                            "next": "ask",
+                            "maxVisits": null,
+                            "resetSession": false
+                        }
+                    ]
+                },
+                {
+                    "id": "third",
+                    "script": "!printf '%s\\n' 'third'",
+                    "title": null,
+                    "kind": "shell",
+                    "session": null,
+                    "model": null,
+                    "effort": null,
+                    "workspace": "local",
+                    "retryScript": null,
+                    "timeoutSec": null,
+                    "checkTimeoutSec": 300,
+                    "completion": null,
+                    "transitions": [
+                        {
+                            "when": "success",
+                            "next": "end",
+                            "maxVisits": null,
+                            "resetSession": false
+                        },
+                        {
+                            "when": "failure",
+                            "next": "ask",
+                            "maxVisits": null,
+                            "resetSession": false
+                        }
+                    ]
+                }
+            ],
+            "editor": {
+                "nodes": {
+                    "start": {
+                        "x": 30.0,
+                        "y": 50.0
+                    },
+                    "first": {
+                        "x": 291.38297,
+                        "y": 370.55374
+                    },
+                    "second": {
+                        "x": 600.0,
+                        "y": 50.0
+                    },
+                    "third": {
+                        "x": 900.0,
+                        "y": 50.0
+                    },
+                    "end": {
+                        "x": 1200.0,
+                        "y": 50.0
+                    },
+                    "ask": {
+                        "x": 1200.0,
+                        "y": 250.0
+                    }
+                }
+            }
+        }
+    },
+    "settings": {
+        "codexPath": null,
+        "agyPath": null,
+        "codexModels": [],
+        "agyModelsCache": null,
+        "defaultWorktreeRoot": null,
+        "notificationsEnabled": true
+    },
+    "items": [
+        {
+            "name": "저장소",
+            "status": "WARN",
+            "detail": "커밋되지 않은 변경 있음"
+        },
+        {
+            "name": "git",
+            "status": "OK",
+            "detail": "/usr/bin/git"
+        },
+        {
+            "name": "gh",
+            "status": "OK",
+            "detail": "/opt/homebrew/bin/gh"
+        }
+    ],
+    "metadata": {}
+}
