@@ -62,6 +62,8 @@ class RunViewModel(private val platform: Platform) {
         catch (e: Exception) { platform.diagnostics(e); error.value = e.message ?: e.toString() }
         finally { busy.value = false }
     } } }
+    suspend fun chooseRepository(): String? = platform.fileDialogs?.directory()
+    suspend fun chooseYaml(): String? = platform.fileDialogs?.openYaml()
     fun openRepository(path: String) = action {
         check(!active) { "실행 종료 후 저장소를 변경하세요" }
         if (editor.value?.dirty?.value == true) { pendingRepository.value = path; return@action }

@@ -1,0 +1,57 @@
+# Phase 6 — 디자인 개선 결과
+
+2026-10-10 · 계획: [09-design-improvement.md](../09-design-improvement.md)
+
+## 검토 결과
+
+선택 요소를 행동 버튼과 구분하고, 식별자 반영과 패널 위계를 정리하는 방향을 적용했다.
+절대적 버튼 개수 규칙, 시간만 사용하는 undo 병합, 전이 문자열 지연 저장은 계획 6절의 기준으로 조정했다.
+참고: [M3 buttons](https://m3.material.io/components/all-buttons),
+[Compose Desktop APIs](https://kotlinlang.org/docs/multiplatform/compose-desktop-components.html).
+
+## 변경
+
+- 공통 SelectField, ComboField, SegmentedChoice, CommitTextField, SectionCard,
+  ExpandableSection, SelectionItem, ToolIcon, EmptyState, DetailRow, StatusBadge 추가.
+- 시스템/라이트/다크 설정과 중립적인 surface 토큰, 상태 색, 데스크톱 typography/shape 적용.
+  기존 설정 파일은 themeMode가 없어도 SYSTEM으로 읽힌다.
+- 왼쪽 NavigationRail과 공용 저장소 선택기. 기존 초안 저장/버리기/취소 보호 유지.
+- 에디터 주 행동은 저장 후 실행, 저장은 tonal. 나머지 파일 작업은 overflow로 이동.
+  그래프/정의/일반 탐색은 enum과 SecondaryTabRow 사용.
+- 식별자 Enter/포커스 이탈 반영, 중복 실시간 검증, Esc 되돌리기. 이름 변경 버튼 제거.
+  같은 필드의 연속 입력만 undo 병합. 전이 즉시 수정, otherwise 이동 후 선택 유지.
+- 모델 입력과 후보 목록을 콤보로 통합. 단계 종류/세션 모드를 segmented choice로 표현.
+  초안/버전/노드/이슈/전이/기록 파일은 list/card로 표현.
+- 단계 속성 및 일반/정의/설정 화면 섹션화. 셸 강조 색과 그래프 색을 테마에 연결.
+  그래프 도구 모음은 floating Surface + tooltip 아이콘. 노드 접근성 설명 추가.
+- 실행 대상 접기, stdout/stderr 및 phase 단일 선택, 로그 pane 톤 적용.
+- 히스토리는 넓은 창에서 목록/상세/파일 3열, 좁은 창에서는 세 화면 전환.
+  시도 메타데이터를 key-value 행으로 표시하고 미관측 값은 계속 알 수 없음으로 남긴다.
+- CLI 후보 radio 목록, 모델 목록 조작 아이콘, Enter 모델 추가, 알림 이벤트 행 전체 선택.
+  저장소/YAML/CLI/기본 루트 native picker 제공.
+- Edit 메뉴와 ⌘Z/⇧⌘Z/⌘F, Run ⌘R/⇧⌘P 추가. 메뉴 활성 상태는 편집 revision을 관찰한다.
+  삭제/강제 중지에 error 색과 구체적인 확인 동사를 적용했다.
+
+## 검증
+
+- `./gradlew build`: 기존 전체 테스트와 새 테스트 156건 통과 (실패/오류/skip 0).
+- `./gradlew :desktopApp:createDistributable`: 앱 생성 성공.
+- 새 회귀 검사: 필드별 undo 병합 및 undo 이후 병합 경계, otherwise 이동 후 연결 선택 유지,
+  중복 otherwise 거부 시 초안 유지, 기존 설정 기본 테마 및 테마 저장/CLI 경로 보존.
+- 실제 빌드한 앱을 별도의 설정 파일과 `/tmp/aiflow-design-review/repo`로 실행.
+  사용자 설정 파일이나 실제 작업 저장소에서 워크플로를 실행하지 않았다.
+- 1280×850 / 790×742 창의 라이트·다크 화면을 스크린샷으로 시각 검사.
+  편집기 패널/일반 카드, 실행 도구, 설정, 히스토리 list-detail 및 넓은 3열을 확인했다.
+  좁은 창 재실행의 초기 폭은 기존 geometry 하한에 따라 800이며 790 검사는 resize로 수행했다.
+- 실제 ID `first` → `entry` Enter 반영, `second` 중복 거부, Esc 복구를 확인했다.
+- 실제 ⌘O 초안 열기, ⌘F 노드 목록 열기, ⌘Z/⇧⌘Z 일반 필드 되돌리기/재적용, ⌘S 버전 저장 확인.
+- 선형 셸 3단계 저장 → preflight → 완료 → 과거 시도 메타데이터 → command.txt 지연 로드 확인.
+  runId `20261009-153653-9b5fb88af74f4f7f`, 세 방문 모두 exit 0.
+  에이전트 모델 호출이나 CLI 인증 변경은 수행하지 않았다.
+
+## 검증 한계
+
+OS 스크린리더 전체 탐색, 모든 키보드 조합의 end-to-end 검사, 확대 글꼴/모든 창 크기는 인증하지 않았다.
+사용한 파일/로그 원문 및 CLI 진단에는 기술 식별자가 그대로 표시된다.
+Material Icons Extended의 용량 절감용 벡터 개별 추출, 아이콘 전부의 디자인 통일은 별도 최적화 대상이다.
+DMG 재배포/서명/설치는 이번 UI 작업의 검증 대상이 아니다.

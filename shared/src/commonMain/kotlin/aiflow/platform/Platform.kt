@@ -33,6 +33,7 @@ data class Platform(val processes: ProcessExecutor, val files: FileSystem, val t
 /** Native pickers return null on cancellation. Implementations marshal to their UI thread. */
 interface FileDialogs {
     suspend fun directory(): String?
+    suspend fun file(): String? = null
     suspend fun openYaml(): String?
     suspend fun saveYaml(suggestedName: String): String?
 }

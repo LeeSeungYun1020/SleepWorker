@@ -223,4 +223,27 @@ class EditorViewModelTest {
         assertEquals("unsaved", store.loadDraft(v.workflowId).workflow.name)
         assertEquals(v, store.loadVersion(v.workflowId, v.versionId))
     }
+    @Test fun typingMergesOnlyTheSameFieldAndUndoBreaksTheGroup() = runTest {
+        val vm = editor(); vm.newWorkflow(WorkflowTemplate.LINEAR)
+        val original = vm.workflow!!.name
+        vm.edit("name") { it.copy(name = "a") }; vm.edit("name") { it.copy(name = "ab") }
+        vm.updateStep("first", "title") { it.copy(title = "new") }
+        vm.undo(); assertEquals("ab", vm.workflow!!.name); assertNull(vm.step("first").title)
+        vm.undo(); assertEquals(original, vm.workflow!!.name)
+        vm.redo(); assertEquals("ab", vm.workflow!!.name)
+        vm.edit("name") { it.copy(name = "abc") }; vm.undo(); assertEquals("ab", vm.workflow!!.name)
+    }
+    @Test fun liveTransitionEditingKeepsSelectionAfterOtherwiseReordering() = runTest {
+        val vm = editor(); vm.newWorkflow(WorkflowTemplate.LINEAR)
+        vm.selectEdge("first", 0)
+        vm.updateTransition("first", 0, Transition(Condition.Otherwise, Target.End))
+        val index = vm.step("first").transitions.lastIndex
+        assertEquals(EdgeSelection("first", index), vm.selectedEdge.value)
+        vm.updateTransition("first", index, Transition(Condition.Otherwise, Target.Ask, 3))
+        assertEquals(Target.Ask, vm.step("first").transitions[index].next)
+        val before = vm.workflow
+        assertFails { vm.updateTransition("first", 0, Transition(Condition.Otherwise, Target.End)) }
+        assertEquals(before, vm.workflow); assertEquals(EdgeSelection("first", index), vm.selectedEdge.value)
+    }
+
 }

@@ -35,7 +35,13 @@ class Phase5Test {
         fs.write("/settings.json".toPath()) { writeUtf8("""{"codexPath":"/bin/codex","futureKey":true}""") }
         val settings = SettingsStore(fs, "/settings.json".toPath()).load()
         assertEquals(20_000, settings.logBufferLimit); assertEquals(4, settings.notificationEvents.size)
-        assertEquals("/bin/codex", settings.codexPath)
+        assertEquals("/bin/codex", settings.codexPath); assertEquals(ThemeMode.SYSTEM, settings.themeMode)
+    }
+    @Test fun themeChoicePersistsWithoutChangingCliSettings() = runTest {
+        val store = SettingsStore(fs, "/settings.json".toPath())
+        store.save(AppSettings(codexPath = "/bin/codex", themeMode = ThemeMode.DARK))
+        assertEquals(ThemeMode.DARK, store.load().themeMode)
+        assertEquals("/bin/codex", store.load().codexPath)
     }
     @Test fun invalidSettingsDoNotReplacePersistedFile() = runTest {
         val store = SettingsStore(fs, "/settings.json".toPath())

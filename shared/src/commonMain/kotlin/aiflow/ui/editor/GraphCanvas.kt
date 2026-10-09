@@ -1,6 +1,11 @@
 package aiflow.ui.editor
 
 import aiflow.model.*
+import aiflow.ui.components.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import aiflow.model.Target
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.*
@@ -92,18 +97,18 @@ fun GraphCanvas(vm: EditorViewModel, w: Workflow, focus: Pair<String, Int>?, onC
             val savedPosition by rememberUpdatedState(w.editor?.nodes?.get(id) ?: p)
             val step = w.steps.firstOrNull { it.id == id }
             val badges = issues.filter { it.stepId == id }; val orphan = step != null && id !in reachable
-            Surface(color = when { node == id -> colors.primaryContainer; orphan -> colors.surfaceVariant; else -> colors.surfaceContainerHigh }, border = BorderStroke(if (node == id) 2.dp else 1.dp, if (badges.any { it.severity == Severity.ERROR }) colors.error else colors.outlineVariant), shape = MaterialTheme.shapes.medium,
+            Surface(color = when { node == id -> colors.primaryContainer; orphan -> colors.surfaceContainerHigh; else -> colors.surfaceContainerHigh }, border = BorderStroke(if (node == id) 2.dp else 1.dp, if (badges.any { it.severity == Severity.ERROR }) colors.error else colors.outlineVariant), shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.offset { IntOffset(((p.x * zoom + pan.x) * density).roundToInt(), ((p.y * zoom + pan.y) * density).roundToInt()) }.size((220 * zoom).dp, (115 * zoom).dp)
                     .pointerInput(id, zoom, editingEnabled) {
                         if (editingEnabled) detectDragGestures(onDragStart = { vm.selectNode(id); dragging = id to savedPosition }, onDragCancel = { dragging = null }, onDragEnd = { dragging?.let { vm.moveNode(it.first, it.second) }; dragging = null }) { change, amount -> change.consume(); val origin = dragging?.second ?: savedPosition; dragging = id to NodePosition(origin.x + amount.x / density / zoom, origin.y + amount.y / density / zoom) }
-                    }.clickable { vm.selectNode(id) }) {
+                    }.semantics { contentDescription = "단계 $id ${step?.title.orEmpty()}" }.clickable { vm.selectNode(id) }) {
                 Box {
                     Column(Modifier.padding((10 * zoom).dp)) {
                         Text(if (step == null) id.uppercase() else "${step.id} ${step.title.orEmpty()}", fontSize = (14 * zoom).sp, lineHeight = (18 * zoom).sp, maxLines = 1)
                         if (step != null) {
-                            Text(if (step.effectiveKind == StepKind.SHELL) "! Shell" else "${w.sessions[step.session?.ref]?.provider ?: "Agent"} · ${step.session?.ref.orEmpty()} / ${step.session?.mode ?: "?"}", fontSize = (11 * zoom).sp, lineHeight = (15 * zoom).sp, maxLines = 1)
-                            Text(if (step.effectiveKind == StepKind.AGENT) "${step.model ?: "모델 기본값"} · ${step.effort ?: "effort 기본값"}" else "${step.workspace ?: "workspace 필요"}", fontSize = (10 * zoom).sp, lineHeight = (14 * zoom).sp, maxLines = 1)
-                            Text(if (badges.isNotEmpty()) "E${badges.count { it.severity == Severity.ERROR }} W${badges.count { it.severity == Severity.WARNING }}" else if (orphan) "도달 불가" else "출력 ●에서 연결", fontSize = (10 * zoom).sp, lineHeight = (14 * zoom).sp, color = if (badges.any { it.severity == Severity.ERROR }) colors.error else colors.onSurfaceVariant)
+                            Text(if (step.effectiveKind == StepKind.SHELL) "! Shell" else "${w.sessions[step.session?.ref]?.provider ?: "Agent"} · ${step.session?.ref.orEmpty()} / ${step.session?.mode?.label() ?: "?"}", fontSize = (11 * zoom).sp, lineHeight = (15 * zoom).sp, maxLines = 1)
+                            Text(if (step.effectiveKind == StepKind.AGENT) "${step.model ?: "모델 기본값"} · ${step.effort?.name?.lowercase() ?: "effort 기본값"}" else "${step.workspace?.label() ?: "workspace 필요"}", fontSize = (10 * zoom).sp, lineHeight = (14 * zoom).sp, maxLines = 1)
+                            Text(if (badges.isNotEmpty()) "오류 ${badges.count { it.severity == Severity.ERROR }} · 경고 ${badges.count { it.severity == Severity.WARNING }}" else if (orphan) "도달 불가" else "출력 ●에서 연결", fontSize = (10 * zoom).sp, lineHeight = (14 * zoom).sp, color = if (badges.any { it.severity == Severity.ERROR }) colors.error else colors.onSurfaceVariant)
                         }
                     }
                     if (editingEnabled && id !in listOf("end", "ask")) Box(Modifier.align(Alignment.CenterEnd).size((26 * zoom).dp).background(colors.primary, androidx.compose.foundation.shape.CircleShape)
@@ -113,13 +118,15 @@ fun GraphCanvas(vm: EditorViewModel, w: Workflow, focus: Pair<String, Int>?, onC
                 }
             }
         }
-        Row(Modifier.align(Alignment.BottomStart).padding(8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            FilledTonalButton({ vm.addNode() }, enabled = editingEnabled) { Text("+ 노드") }
-            OutlinedButton({ vm.autoLayout() }, enabled = editingEnabled) { Text("자동 배치") }
-            OutlinedButton({ fit() }) { Text("맞춤") }
-            OutlinedButton({ zoom = (zoom / 1.2f).coerceAtLeast(.18f) }) { Text("−") }
-            OutlinedButton({ zoom = (zoom * 1.2f).coerceAtMost(2f) }) { Text("+") }
-            Text("${(zoom * 100).toInt()}%", Modifier.padding(8.dp))
+        Surface(Modifier.align(Alignment.BottomStart).padding(12.dp), shape = MaterialTheme.shapes.large, tonalElevation = 6.dp, shadowElevation = 2.dp) {
+            Row(Modifier.horizontalScroll(rememberScrollState()).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                ToolIcon("노드 추가", Icons.Outlined.Add, editingEnabled) { vm.addNode() }
+                ToolIcon("자동 배치", Icons.Outlined.AutoAwesomeMosaic, editingEnabled) { vm.autoLayout() }
+                ToolIcon("전체 맞춤", Icons.Outlined.FitScreen) { fit() }
+                ToolIcon("축소", Icons.Outlined.ZoomOut) { zoom = (zoom / 1.2f).coerceAtLeast(.18f) }
+                ToolIcon("확대", Icons.Outlined.ZoomIn) { zoom = (zoom * 1.2f).coerceAtMost(2f) }
+                Text("${(zoom * 100).toInt()}%", Modifier.padding(12.dp))
+            }
         }
     }
 }
