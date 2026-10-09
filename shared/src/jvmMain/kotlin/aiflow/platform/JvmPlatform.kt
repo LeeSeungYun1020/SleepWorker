@@ -1,6 +1,7 @@
 package aiflow.platform
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.swing.Swing
 import kotlinx.coroutines.flow.toList
 import okio.FileSystem
 import okio.Path
@@ -56,5 +57,25 @@ class MacNotifier(private val executor: ProcessExecutor) : Notifier {
 fun desktopPlatform(): Platform {
     val executor = JvmProcessExecutor()
     return Platform(executor, FileSystem.SYSTEM, JvmTempFiles(), MacNotifier(executor), ZshPathDetector(executor), JvmRepositoryLock(),
-        System.getProperty("user.home").toPath() / "Library" / "Application Support" / "aiflow" / "settings.json")
+        System.getProperty("user.home").toPath() / "Library" / "Application Support" / "aiflow" / "settings.json", JvmFileDialogs())
+}
+
+class JvmFileDialogs : FileDialogs {
+    private suspend fun pick(mode: Int, directory: Boolean, name: String? = null): String? = withContext(Dispatchers.Swing) {
+        val property = "apple.awt.fileDialogForDirectories"
+        val previous = System.getProperty(property)
+        val dialog = java.awt.FileDialog(null as java.awt.Frame?, if (directory) "저장소 선택" else "YAML 파일", mode)
+        try {
+            System.setProperty(property, directory.toString())
+            if (name != null) dialog.file = name
+            dialog.isVisible = true
+            dialog.file?.let { java.io.File(dialog.directory, it).absolutePath }
+        } finally {
+            dialog.dispose()
+            if (previous == null) System.clearProperty(property) else System.setProperty(property, previous)
+        }
+    }
+    override suspend fun directory() = pick(java.awt.FileDialog.LOAD, true)
+    override suspend fun openYaml() = pick(java.awt.FileDialog.LOAD, false)
+    override suspend fun saveYaml(suggestedName: String) = pick(java.awt.FileDialog.SAVE, false, suggestedName)
 }

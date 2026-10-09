@@ -4,6 +4,7 @@ import aiflow.engine.*
 import aiflow.model.*
 import aiflow.platform.*
 import aiflow.storage.*
+import aiflow.ui.editor.EditorViewModel
 import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 import kotlinx.coroutines.flow.*
@@ -22,6 +23,7 @@ class RunViewModel(private val platform: Platform) {
     private var runJob: Job? = null
     private var settings = AppSettings()
     private val checker = CliPreflight(platform)
+    val editor = MutableStateFlow<EditorViewModel?>(null)
     val versions = MutableStateFlow<List<WorkflowVersion>>(emptyList())
     val selected = MutableStateFlow<WorkflowVersion?>(null)
     val report = MutableStateFlow<PreflightReport?>(null)
@@ -34,6 +36,7 @@ class RunViewModel(private val platform: Platform) {
     val busy = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
     val repository = MutableStateFlow<String?>(null)
+    val pendingRepository = MutableStateFlow<String?>(null)
     val active get() = runJob?.isActive == true
     private fun action(block: suspend () -> Unit) { scope.launch { gate.withLock {
         busy.value = true
@@ -44,6 +47,8 @@ class RunViewModel(private val platform: Platform) {
     } } }
     fun openRepository(path: String) = action {
         check(!active) { "실행 종료 후 저장소를 변경하세요" }
+        if (editor.value?.dirty?.value == true) { pendingRepository.value = path; return@action }
+        if (lease?.repoPath == path.toPath(normalize = true)) return@action
         val next = platform.repositoryLock.acquire(path.toPath())
         try {
             val nextStore = WorkflowStore(platform.files, next)
@@ -53,12 +58,26 @@ class RunViewModel(private val platform: Platform) {
             settings = try { SettingsStore(platform.files, platform.settingsPath).load() } catch (e: Exception) {
                 error.value = "설정 로드 실패 — 기본값 사용: ${e.message}"; AppSettings()
             }
-            lease?.release(); lease = next; store = nextStore; recorder = nextRecorder
+            editor.value?.close(); lease?.release(); lease = next; store = nextStore; recorder = nextRecorder
             pendingImport.value = null; importWarnings.value = emptyList()
             repository.value = next.repoPath.toString(); versions.value = available
             selected.value = available.lastOrNull(); report.value = null
+            editor.value = EditorViewModel(nextStore, platform.files, next.repoPath.toString(), settings, platform.fileDialogs,
+                isRunning = { id -> active && state.value?.workflowId == id },
+                onVersion = { saved -> gate.withLock {
+                    if (lease !== next) return@withLock
+                    versions.value = nextStore.listWorkflows().flatMap { nextStore.listVersions(it) }
+                    if (!active) { selected.value = saved; report.value = null; state.value = null; logs.value = emptyList() }
+                } })
             history.value = recovered; state.value = null; logs.value = emptyList(); engine = null
         } catch (e: Throwable) { next.release(); throw e }
+    }
+    fun cancelRepositoryChange() { pendingRepository.value = null }
+    fun confirmRepositoryChange(save: Boolean) = action {
+        val path = pendingRepository.value ?: return@action
+        if (save) editor.value?.preserveDraftOnShutdown() else editor.value?.discard()
+        pendingRepository.value = null
+        openRepository(path)
     }
     fun select(version: WorkflowVersion) = action {
         check(!active); selected.value = version; report.value = null; state.value = null; logs.value = emptyList()
@@ -91,14 +110,27 @@ class RunViewModel(private val platform: Platform) {
         selected.value = saved; report.value = null; state.value = null; logs.value = emptyList()
         pendingImport.value = null; importWarnings.value = emptyList()
     }
+    fun runEditorVersion(version: WorkflowVersion) = action {
+        check(!active)
+        require(editor.value?.draft?.value?.workflowId == version.workflowId && editor.value?.draft?.value?.workflow == version.workflow && editor.value?.dirty?.value == false) { "편집 내용과 저장 버전이 다릅니다" }
+        require(version.workflow.repoPath.toPath(normalize = true) == lease!!.repoPath) { "워크플로 경로가 열린 저장소와 다릅니다" }
+        selected.value = version; state.value = null; report.value = null
+        val checked = checker.inspect(version, settings)
+        report.value = checked
+        editor.value?.cliVersions?.value = checked.metadata.mapNotNull { (key, value) -> value.first?.let { key to it } }.toMap()
+        check(checked.passed) { "프리플라이트 실패 — 실행하지 않았습니다" }
+        start()
+    }
     fun runPreflight() = action {
         check(!active)
         report.value = null
         report.value = checker.inspect(selected.value ?: error("저장 버전 선택 필요"), settings)
+        editor.value?.cliVersions?.value = report.value!!.metadata.mapNotNull { (key, value) -> value.first?.let { key to it } }.toMap()
     }
     fun start() = action {
         check(!active)
         val version = selected.value ?: error("저장 버전 선택 필요")
+        require(version.workflow.repoPath.toPath(normalize = true) == lease!!.repoPath) { "워크플로 경로가 열린 저장소와 다릅니다" }
         val checked = report.value ?: error("프리플라이트 필요")
         check(checked.version == version && checked.passed) { "선택 버전 프리플라이트 실패" }
         logs.value = emptyList(); truncated.value = emptySet()
@@ -148,9 +180,18 @@ class RunViewModel(private val platform: Platform) {
         selected.value = versions.value.firstOrNull { it.workflowId == run.workflowId && it.versionId == run.versionId }
         report.value = null
     }
+    suspend fun refreshVersions() = gate.withLock {
+        versions.value = store?.listWorkflows()?.flatMap { store!!.listVersions(it) }.orEmpty()
+        if (selected.value !in versions.value) { selected.value = versions.value.lastOrNull(); report.value = null }
+    }
     suspend fun close() {
         gate.withLock {
             engine?.interruptForShutdown(); runJob?.join()
+            // Native Quit may bypass Compose confirmation; preserve unfinished work as a draft.
+            editor.value?.let { editor ->
+                try { editor.preserveDraftOnShutdown() } catch (e: Exception) { error.value = "종료 시 초안 저장 실패: ${e.message}" }
+                editor.close()
+            }
             scope.coroutineContext[Job]?.cancelAndJoin()
             lease?.release(); lease = null
         }

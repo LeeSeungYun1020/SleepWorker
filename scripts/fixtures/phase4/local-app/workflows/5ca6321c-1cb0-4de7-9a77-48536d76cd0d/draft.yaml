@@ -1,0 +1,17 @@
+workflowId: "5ca6321c-1cb0-4de7-9a77-48536d76cd0d"
+workflow:
+  name: "새 워크플로"
+  repoPath: "/private/var/folders/hg/gm3wrckd1g5dj53dbqpxctwr0000gn/T/aiflow-phase4-ui-4oo7gpf5"
+  baseBranch: "main"
+  start: ""
+  editor:
+    nodes:
+      "start":
+        x: 30.0
+        y: 50.0
+      "end":
+        x: 600.0
+        y: 50.0
+      "ask":
+        x: 600.0
+        y: 250.0

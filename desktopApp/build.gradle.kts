@@ -8,6 +8,7 @@ kotlin { jvmToolchain(21) }
 dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
 }
 compose.desktop {
     application {

@@ -1,0 +1,11 @@
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/1","stream":"STDOUT","text":"true","timestamp":"2026-10-09T05:58:01.779772Z"}
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/2","stream":"STDOUT","text":"?? .aiflow/","timestamp":"2026-10-09T05:58:01.798009Z"}
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/3","stream":"STDOUT","text":"worktree /private/var/folders/hg/gm3wrckd1g5dj53dbqpxctwr0000gn/T/aiflow-phase4-ui-4oo7gpf5","timestamp":"2026-10-09T05:58:01.813596Z"}
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/3","stream":"STDOUT","text":"HEAD 0000000000000000000000000000000000000000","timestamp":"2026-10-09T05:58:01.814070Z"}
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/3","stream":"STDOUT","text":"branch refs/heads/main","timestamp":"2026-10-09T05:58:01.814433Z"}
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/3","stream":"STDOUT","text":"","timestamp":"2026-10-09T05:58:01.815002Z"}
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/4","stream":"STDOUT","text":"/usr/bin/git","timestamp":"2026-10-09T05:58:01.947182Z"}
+{"visitNo":null,"attemptNo":null,"phase":"preflight/probes/5","stream":"STDOUT","text":"/opt/homebrew/bin/gh","timestamp":"2026-10-09T05:58:02.079882Z"}
+{"visitNo":1,"attemptNo":1,"phase":"visits/1-first/attempts/1","stream":"STDOUT","text":"first","timestamp":"2026-10-09T05:58:02.238481Z"}
+{"visitNo":2,"attemptNo":1,"phase":"visits/2-second/attempts/1","stream":"STDOUT","text":"second","timestamp":"2026-10-09T05:58:02.413122Z"}
+{"visitNo":3,"attemptNo":1,"phase":"visits/3-third/attempts/1","stream":"STDOUT","text":"third","timestamp":"2026-10-09T05:58:02.565031Z"}

@@ -1,5 +1,8 @@
 # 07 — 워크플로 편집기 (Phase 4)
 
+> 2026-10-09 구현 및 검증 완료: [`scripts/phase4-result.md`](scripts/phase4-result.md).
+> 아래 체크리스트는 계획 원문이며 실제 검증 범위와 보존 근거는 결과 문서를 따른다.
+
 선행: `06-run-screen.md` | 다음: `08-history-settings-packaging.md`
 
 ## 목표

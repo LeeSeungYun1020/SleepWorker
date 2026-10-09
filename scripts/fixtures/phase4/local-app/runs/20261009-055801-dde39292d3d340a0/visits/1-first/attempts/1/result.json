@@ -1,0 +1,40 @@
+{
+    "attemptNo": 1,
+    "status": "SUCCEEDED",
+    "startedAt": "2026-10-09T05:58:02.096108Z",
+    "endedAt": "2026-10-09T05:58:02.250492Z",
+    "sessionId": null,
+    "metadata": {
+        "binaryPath": "/bin/zsh",
+        "binaryVersion": null,
+        "contractId": null,
+        "requestedModel": null,
+        "requestedEffort": null
+    },
+    "result": {
+        "success": true,
+        "exitCode": 0,
+        "termination": "NORMAL",
+        "providerReport": {
+            "outcome": "NOT_APPLICABLE",
+            "sessionId": null,
+            "finalOutput": null,
+            "failure": null,
+            "finalEvents": [],
+            "usage": null
+        },
+        "completionResult": {
+            "result": {
+                "type": "aiflow.engine.CheckResult.Met"
+            },
+            "command": null
+        },
+        "failure": null,
+        "sessionId": null,
+        "bodyStarted": true,
+        "finalOutput": null,
+        "cleanupError": null
+    },
+    "retrySkippedReason": null,
+    "failureDetail": null
+}

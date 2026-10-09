@@ -22,6 +22,7 @@ class WorkflowValidator(private val fs: FileSystem) {
             if (invalid) error("Invalid check path: $value", step, edge)
         }
         fun command(value: String, step: String, edge: Int? = null) { if (value.isBlank()) error("Empty check command", step, edge) }
+        if (w.name.isBlank()) error("Workflow name must not be blank")
         if (w.steps.isEmpty()) error("Workflow needs steps")
         val byId = w.steps.associateBy { it.id }
         if (w.start.isBlank() || w.start !in byId) error("start must reference an explicit step")

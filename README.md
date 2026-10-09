@@ -1,9 +1,9 @@
 # aiflow
 
 Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity and shell steps.
-Phases 1–3 implement workflow storage, provider adapters, the execution engine, CLI preflight,
-and the desktop run screen. Local Git/shell app execution is verified; live two-provider and
-GitHub acceptance checks remain pending. Graph editing and full history/settings follow in Phases 4–5.
+Phases 1–4 implement workflow storage, provider adapters, execution, CLI preflight, the desktop
+run screen and graph editing with draft/version history. Local Git/shell editor execution and
+Phase 3 two-provider/GitHub acceptance are verified. Full history/settings follow in Phase 5.
 
 ## Build and run
 
@@ -53,9 +53,9 @@ observed exit code and `Termination` separately; a cancelled agy process can exi
 
 `VerifiedCliContract.validateRequest` is the fail-closed preflight building block. Versions,
 features and measured model/effort pairs have separate evidence. Candidate model settings do not
-prove support. The example's GPT-6 Luna selection is preserved, and remains unverified until an
-explicit later measurement. Unmeasured authentication failures are `Unknown`; agy logged-out
-behavior is intentionally deferred to Phase 3. Binary paths are injected, not machine-specific defaults.
+prove support. The example's model/effort selections are preserved. Verified Luna medium execution does not
+establish support for Luna low on every CLI version. Authentication classification uses measured
+signatures; unmatched failures remain `Unknown`. Binary paths are injected, not machine-specific defaults.
 
 `RunningProcess.stdout` and `stderr` are single-consumer streams buffered from process start.
 `ManagedProcessRunner` owns every process for a run and permanently blocks further starts after
@@ -72,7 +72,7 @@ from `scripts/fixtures/phase0` (measured and synthetic sources remain distinct),
 fixtures that could drift. Reports: `shared/build/reports/tests/jvmTest/index.html`.
 
 See [Phase 1 results](scripts/phase1-result.md), [Phase 2 results](scripts/phase2-result.md),
-[Phase 3 results](scripts/phase3-result.md), and the [phase plan](00-overview.md).
+[Phase 3 results](scripts/phase3-result.md), [Phase 4 results](scripts/phase4-result.md), and the [phase plan](00-overview.md).
 
 ## Execution engine
 
@@ -111,3 +111,23 @@ Agent runs require the exact measured CLI version and model/effort pair; unverif
 remain blocked. Specify binary paths in `~/Library/Application Support/aiflow/settings.json`.
 Use the timeline to select visits and the log controls to select attempts, streams and phases.
 History records never resume automatically; interrupted runs require a new preflight and run.
+
+## Graph editor
+
+Open a repository, select Editor, then create an empty/linear/example workflow or open a draft.
+Drag nodes to move them and output ports to create connections; choose a condition before
+confirming. Edges show their evaluation priority. The properties panel offers the same connection
+operations, including loops, target reconnection, visit limits and explicit reordering.
+Layout and search sorting never change execution order.
+
+Save always persists a draft first. Errors keep it non-executable; warnings require acknowledgement
+before an immutable version is saved. Save and Run uses that exact version and preflight, with no
+fallback to an older version. To run an older version, explicitly select it in the run screen.
+Version History provides read-only previews and confirmed restoration to a draft; saving the
+restored draft creates a new version and keeps all existing history. YAML export is standalone.
+
+File/repository changes and window close protect dirty edits with save/discard/cancel. Native
+Cmd+Q preserves dirty drafts through the shutdown hook. New/copy nodes have no connections;
+deleting nodes removes adjacent edges without adding bypass links. `!` at the first nonwhitespace
+script position toggles Shell mode; removing it returns to Agent with its session/model settings.
+Model catalogs are candidates; CLI version/model/effort execution contracts still gate runs.

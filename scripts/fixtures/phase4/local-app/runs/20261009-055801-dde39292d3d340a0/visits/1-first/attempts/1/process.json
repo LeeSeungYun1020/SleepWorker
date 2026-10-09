@@ -1,0 +1,12 @@
+{
+    "exitCode": 0,
+    "termination": "NORMAL",
+    "stdout": [
+        "first"
+    ],
+    "stderr": [],
+    "elapsedMs": 131,
+    "error": null,
+    "cleanupError": null,
+    "bodyStarted": true
+}
