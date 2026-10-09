@@ -17,8 +17,9 @@ class RunViewModelIntegrationTest {
     @Test fun savedVersionPreflightExecutionAndHistoryThroughViewModel() = runBlocking {
         val directory = Files.createTempDirectory("aiflow-phase3-").toFile()
         val repo = directory.canonicalPath
+        val notified = java.util.concurrent.CopyOnWriteArrayList<String>()
         val platform = desktopPlatform().copy(settingsPath = (directory.toPath().toString() + "/settings.json").toPath(), notifier = object : Notifier {
-            override suspend fun notify(title: String, body: String) {}
+            override suspend fun notify(title: String, body: String) { delay(100); notified.add(body) }
         })
         suspend fun git(vararg args: String) {
             assertEquals(0, captureProcess(platform.processes, ProcessSpec(listOf("git") + args, repo)).exitCode)
@@ -48,6 +49,8 @@ class RunViewModelIntegrationTest {
             assertEquals(RunStatus.COMPLETED, done.status, done.failure)
             assertEquals(listOf("sync", "verify", "log"), done.visits.map { it.stepId })
             withTimeout(10_000) { vm.history.first { it.any { entry -> entry.runId == done.runId } } }
+            withTimeout(10_000) { while (notified.none { "실행 완료" in it }) delay(20) }
+            assertEquals(1, notified.count { "실행 완료" in it })
             assertTrue(vm.logs.value.any { it.text == "complete" })
             assertTrue(FileSystem.SYSTEM.exists("$repo/.aiflow/runs/${done.runId}/run.json".toPath()))
             val evidence = directory.resolve(".aiflow/runs/${done.runId}/preflight")

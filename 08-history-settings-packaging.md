@@ -1,5 +1,8 @@
 # 08 — 히스토리·설정·알림·패키징 (Phase 5)
 
+> 2026-10-09 구현 및 검증 범위: [`scripts/phase5-result.md`](scripts/phase5-result.md).
+> 아래는 계획 원문이다. 설치본 검증 근거와 agy 1.3.2·OS 배너/Gatekeeper의 미검증 범위는 결과 문서를 따른다.
+
 선행: `07-workflow-editor.md` | 다음: 없음 (릴리스)
 
 ## 목표

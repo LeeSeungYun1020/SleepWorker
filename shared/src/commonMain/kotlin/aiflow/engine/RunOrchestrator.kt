@@ -75,7 +75,7 @@ class RunOrchestrator(
         val stored = store.loadVersion(version.workflowId, version.versionId)
         require(stored.workflow.repoPath.toPath(normalize = true) == recorder.lease.repoPath) { "Repository lease does not match workflow" }
         require(WorkflowValidator(fs).validate(stored.workflow).none { it.severity == Severity.ERROR }) { "Invalid workflow" }
-        val initial = RunState(runId(), stored.workflowId, stored.versionId, stored.workflow, RunStatus.PREFLIGHT, lastUpdatedAt = now())
+        val initial = RunState(runId(), stored.workflowId, stored.versionId, stored.workflow, RunStatus.PREFLIGHT, lastUpdatedAt = now(), startedAt = now())
         try { recorder.save(initial) } catch (e: Exception) {
             appLog(e.stackTraceToString())
             mutableState.value = initial.copy(status = RunStatus.FAILED, failure = e.message)

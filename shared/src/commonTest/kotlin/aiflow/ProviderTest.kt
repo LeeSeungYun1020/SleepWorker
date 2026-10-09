@@ -89,15 +89,18 @@ class ProviderTest {
         assertNull(agy.parseModels("slug\t"))
         assertNull(agy.parseModels("slug\tLabel\npartial"))
     }
-    @Test fun contractDoesNotPromoteUnverifiedModelsOrFeatures() {
+    @Test fun measurementsDoNotRestrictVersionsModelsOrUnmeasuredFeatures() {
         val c = VerifiedCliContract.antigravity
         val measured = req.copy(model = "gemini-3.8-flash-low")
         assertTrue(c.validateRequest("1.2.16", measured).isEmpty())
-        assertTrue(c.validateRequest("1.2.15", measured).isNotEmpty())
-        assertTrue(c.validateRequest("1.2.16", measured.copy(effort = Effort.MAX)).isNotEmpty())
+        assertTrue(c.validateRequest("1.3.2", measured).isEmpty())
+        assertTrue(c.validateRequest("1.2.16", measured.copy(model = "new-model", effort = Effort.MAX)).isEmpty())
         assertTrue(c.validateRequest("1.2.16", measured, setOf("modelsJson")).isNotEmpty())
-        assertTrue(c.validateRequest("1.2.16", measured, setOf("unauthenticated")).isNotEmpty())
-        assertTrue(VerifiedCliContract.codex.validateRequest("0.160.0", req.copy(model = "gpt-6-luna")).isNotEmpty())
+        assertTrue(c.validateRequest("1.2.16", measured, setOf("unauthenticated")).isEmpty())
+        assertTrue(c.validateRequest("1.3.2", measured, setOf("modelsJson")).isEmpty())
+        assertTrue(VerifiedCliContract.codex.validateRequest("0.160.0", req.copy(model = "gpt-6-luna")).isEmpty())
+        assertTrue(c.validateRequest("1.3.2", measured.copy(model = "")).isNotEmpty())
+        assertNull(c.modelEfforts[ModelEffort("new-model", Effort.MAX)])
     }
     @Test fun cleanupFailureBlocksAdditionalExecution() = runTest {
         val fake = FakeProcessExecutor(FakeResult(stdout = listOf("evidence"), cleanupFailure = ProcessCleanupException("denied")))

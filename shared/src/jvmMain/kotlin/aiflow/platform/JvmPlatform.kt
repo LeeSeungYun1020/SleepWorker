@@ -40,6 +40,39 @@ class JvmRepositoryLock : RepositoryLock {
     }
 }
 class ZshPathDetector(private val executor: ProcessExecutor) : PathDetector {
+    override suspend fun candidates(binary: String): List<String> = candidates(binary, ProcessProbe { captureProcess(executor, it) })
+    override suspend fun candidates(binary: String, probe: ProcessProbe): List<String> = buildList {
+        detect(binary, probe)?.let(::add)
+        val home = System.getProperty("user.home")
+        val paths = if (binary == "codex") listOf(
+            "/Applications/Codex.app/Contents/Resources/codex", "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+            "$home/.local/bin/codex", "/opt/homebrew/bin/codex", "/usr/local/bin/codex")
+        else listOf("$home/.local/bin/agy", "/opt/homebrew/bin/agy", "/usr/local/bin/agy")
+        addAll(paths.filter { Files.isExecutable(java.nio.file.Path.of(it)) })
+        if (binary == "codex") {
+            // Finder does not load NVM's interactive shell profile. Discover its installed
+            // launchers and native binaries as explicit candidates, never as defaults.
+            val nvm = java.nio.file.Path.of(home, ".nvm", "versions", "node")
+            if (Files.isDirectory(nvm)) Files.list(nvm).use { versions ->
+                versions.sorted().limit(32).forEach { version ->
+                    val launcher = version.resolve("bin/codex")
+                    if (Files.isExecutable(launcher)) add(launcher.toString())
+                }
+            }
+            toList().forEach { candidate ->
+                try {
+                    val root = java.nio.file.Path.of(candidate).toRealPath().parent.parent
+                    val arm = System.getProperty("os.arch") in listOf("aarch64", "arm64")
+                    val arch = if (arm) "arm64" else "x64"
+                    val target = if (arm) "aarch64-apple-darwin" else "x86_64-apple-darwin"
+                    listOf("node_modules/@openai/codex-darwin-$arch/vendor/$target/bin/codex", "vendor/$target/codex/codex").forEach { relative ->
+                        val native = root.resolve(relative)
+                        if (Files.isExecutable(native)) add(native.toString())
+                    }
+                } catch (_: Exception) { }
+            }
+        }
+    }.distinct()
     override suspend fun detect(binary: String): String? = detect(binary, ProcessProbe { captureProcess(executor, it) })
     override suspend fun detect(binary: String, probe: ProcessProbe): String? {
         require(Regex("[A-Za-z0-9_.-]+").matches(binary))
@@ -49,15 +82,16 @@ class ZshPathDetector(private val executor: ProcessExecutor) : PathDetector {
 }
 class MacNotifier(private val executor: ProcessExecutor) : Notifier {
     private fun quote(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") + "\""
-    override suspend fun notify(title: String, body: String) {
-        val result = captureProcess(executor, ProcessSpec(listOf("/usr/bin/osascript", "-e", "display notification ${quote(body)} with title ${quote(title)}"), System.getProperty("user.home")))
+    override suspend fun notify(title: String, body: String) = notify(title, body, "")
+    override suspend fun notify(title: String, body: String, subtitle: String) {
+        val result = captureProcess(executor, ProcessSpec(listOf("/usr/bin/osascript", "-e", "display notification ${quote(body)} with title ${quote(title)} subtitle ${quote(subtitle)}"), System.getProperty("user.home")))
         check(result.exitCode == 0) { result.stderr.joinToString("\n") }
     }
 }
 fun desktopPlatform(): Platform {
     val executor = JvmProcessExecutor()
     return Platform(executor, FileSystem.SYSTEM, JvmTempFiles(), MacNotifier(executor), ZshPathDetector(executor), JvmRepositoryLock(),
-        System.getProperty("user.home").toPath() / "Library" / "Application Support" / "aiflow" / "settings.json", JvmFileDialogs())
+        System.getProperty("user.home").toPath() / "Library" / "Application Support" / "aiflow" / "settings.json", JvmFileDialogs(), JvmAppLog::write)
 }
 
 class JvmFileDialogs : FileDialogs {

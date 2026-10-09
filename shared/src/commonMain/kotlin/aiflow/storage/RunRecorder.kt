@@ -82,12 +82,36 @@ class RunRecorder(val fs: FileSystem, val lease: RepositoryLease) {
             }
         }
     }
+    suspend fun files(runId: String): List<String> = guarded {
+        val directory = path(runId, "")
+        if (!fs.exists(directory)) emptyList() else fs.listRecursively(directory, followSymlinks = false).map { file ->
+            val relative = file.relativeTo(directory).toString()
+            path(runId, relative)
+            relative to fs.metadata(file).isRegularFile
+        }.filter { it.second }.map { it.first }.toList().sorted()
+    }
+    /** Read only the selected artifact, with a bounded preview for large logs. */
+    suspend fun read(runId: String, relative: String, limit: Long = 512_000): String = guarded {
+        require(limit in 1..2_000_000)
+        fs.read(path(runId, relative)) {
+            val bytes = readByteArray(limit.coerceAtMost(fs.metadata(path(runId, relative)).size ?: 0))
+            bytes.decodeToString() + if (!exhausted()) "\n… 미리보기 상한 도달 — 원본 파일에서 전체 열람" else ""
+        }
+    }
+    suspend fun delete(runId: String, confirmed: Boolean) = guarded {
+        require(confirmed)
+        val directory = path(runId, "")
+        val run = json.decodeFromString<RunState>(fs.read(path(runId, "run.json")) { readUtf8() })
+        require(run.status.terminal) { "미완료 실행 기록은 삭제할 수 없습니다" }
+        fs.listRecursively(directory, followSymlinks = false).forEach { path(runId, it.relativeTo(directory).toString()) }
+        fs.deleteRecursively(directory)
+    }
     suspend fun list(): List<RunState> = guarded {
         // Also checks every storage ancestor even for an empty repository.
         path("20000101-000000-00000000", "")
         if (!fs.exists(root)) emptyList() else fs.list(root).filter { !it.name.startsWith('.') }.map { dir ->
             val file = path(dir.name, "run.json")
             if (!fs.exists(file)) null else json.decodeFromString<RunState>(fs.read(file) { readUtf8() }).also { require(it.runId == dir.name) }
-        }.filterNotNull().sortedByDescending { it.lastUpdatedAt }
+        }.filterNotNull().sortedByDescending { it.runId }
     }
 }

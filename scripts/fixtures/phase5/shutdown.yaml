@@ -1,0 +1,17 @@
+name: Phase 5 shutdown and pause
+repoPath: /path/to/acceptance/repo
+baseBranch: main
+start: slow
+steps:
+  - id: slow
+    workspace: local
+    script: "!printf 'pause boundary fixture\n'; sleep 15"
+    transitions:
+      - { when: success, next: finish }
+      - { when: failure, next: ask }
+  - id: finish
+    workspace: local
+    script: "!printf 'finish\n'"
+    transitions:
+      - { when: success, next: end }
+      - { when: failure, next: ask }

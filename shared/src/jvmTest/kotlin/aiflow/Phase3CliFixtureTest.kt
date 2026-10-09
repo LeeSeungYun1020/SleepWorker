@@ -47,11 +47,12 @@ class Phase3CliFixtureTest {
         assertEquals(FailureKind.QUOTA, report.failure?.kind)
         assertEquals("non-retryable failure", aiflow.engine.RetryPolicy.skippedReason(agent("x", SessionMode.NEW), aiflow.engine.StepResult(false, failure = report.failure, bodyStarted = true), "session"))
     }
-    @Test fun contractsAreVersionAndEffortSpecific() {
+    @Test fun evidenceRemainsVersionAndEffortSpecificWithoutBlockingExecution() {
         val request = ExecRequest("/fixture", "x", "gpt-6-luna", Effort.MEDIUM, binaryPath = "/codex")
         assertTrue(VerifiedCliContract.forVersion(Provider.CODEX, "0.160.1")!!.validateRequest("0.160.1", request).isEmpty())
         assertTrue(VerifiedCliContract.codex.validateRequest("0.160.0", request).isEmpty())
-        assertTrue(VerifiedCliContract.codex1601.validateRequest("0.160.1", request.copy(effort = Effort.LOW)).isNotEmpty())
+        assertTrue(VerifiedCliContract.codex1601.validateRequest("0.160.1", request.copy(effort = Effort.LOW)).isEmpty())
+        assertNull(VerifiedCliContract.codex1601.modelEfforts[ModelEffort("gpt-6-luna", Effort.LOW)])
         assertNull(VerifiedCliContract.forVersion(Provider.CODEX, "0.160.2"))
         assertEquals(Verification.VERIFIED, VerifiedCliContract.antigravity131.features["unauthenticated"]!!.status)
     }

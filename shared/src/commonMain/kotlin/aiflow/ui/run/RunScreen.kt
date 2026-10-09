@@ -217,7 +217,7 @@ private fun conditionLabel(condition: Condition): String = when (condition) {
 }
 
 @Composable
-private fun RunStatusBadge(status: RunStatus) {
+fun RunStatusBadge(status: RunStatus) {
     val label = when (status) {
         RunStatus.IDLE -> "대기"
         RunStatus.PREFLIGHT -> "사전 검사 중"

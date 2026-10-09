@@ -24,14 +24,17 @@ class PreflightTest {
         assertTrue(report.passed, report.items.toString())
         assertTrue(fake.requests.all { it.command.first() == "git" })
     }
-    @Test fun wrongVersionBlocksWithoutAuthOrModelExecution() = runTest {
-        val fake = FakeProcessExecutor(FakeResult(listOf("codex-cli 0.146.0")), *git())
-        val h = EngineHarness(fake)
-        h.fs.write("/codex".toPath()) { writeUtf8("") }
-        val report = CliPreflight(platform(h)).inspect(h.version(agents(agent("a", SessionMode.NEW))), AppSettings())
-        assertFalse(report.passed)
-        assertEquals(1, fake.requests.count { it.command.first() == "/codex" })
-        assertTrue(report.items.any { "0.146.0" in it.detail })
+    @Test fun unmeasuredVersionsPassWithAuthenticationAndKeepHonestMetadata() = runTest {
+        for (version in listOf("0.146.0", "0.161.0", "1.0.0-alpha.1")) {
+            val fake = FakeProcessExecutor(FakeResult(listOf("codex-cli $version")), FakeResult(), *git())
+            val h = EngineHarness(fake)
+            h.fs.write("/codex".toPath()) { writeUtf8("") }
+            val report = CliPreflight(platform(h)).inspect(h.version(agents(agent("a", SessionMode.NEW))), AppSettings())
+            assertTrue(report.passed, report.items.toString())
+            assertEquals(2, fake.requests.count { it.command.first() == "/codex" })
+            assertTrue(report.items.any { version in it.detail && it.status == PreflightStatus.WARN })
+            assertEquals(version to null, report.metadata[Provider.CODEX])
+        }
     }
     @Test fun loggedOutAndUnknownAreDistinctAndBlock() = runTest {
         for (result in listOf(FakeResult(stderr = listOf("Not logged in"), exitCode = 1), FakeResult(stderr = listOf("network"), exitCode = 2))) {
@@ -57,8 +60,23 @@ class PreflightTest {
         val h = EngineHarness(fake)
         h.fs.write("/codex".toPath()) { writeUtf8("") }
         val report = CliPreflight(platform(h)).inspect(h.version(agents(agent("a", SessionMode.NEW).copy(model = "gpt-6-luna", effort = Effort.LOW))), AppSettings())
-        assertFalse(report.passed)
-        assertTrue(report.items.any { "model/effort" in it.detail })
+        assertTrue(report.passed, report.items.toString())
+        assertEquals("gpt-6-luna", report.version.workflow.steps.single().model)
+        assertEquals(Effort.LOW, report.version.workflow.steps.single().effort)
+        assertTrue(report.items.any { it.name == "a" && it.status == PreflightStatus.WARN })
+    }
+    @Test fun updatedAgyAllowsModelsMissingFromCatalog() = runTest {
+        val fake = FakeProcessExecutor(FakeResult(listOf("agy 1.3.2")),
+            FakeResult(listOf("catalog-model\tCatalog model")), FakeResult(listOf("catalog-model\tCatalog model")), *git())
+        val h = EngineHarness(fake)
+        h.fs.write("/agy".toPath()) { writeUtf8("") }
+        val w = agents(agent("a", SessionMode.NEW).copy(model = "new-model", effort = Effort.MAX))
+            .copy(sessions = mapOf("s" to SessionDef(Provider.ANTIGRAVITY, Workspace.Local)))
+        val report = CliPreflight(platform(h)).inspect(h.version(w), AppSettings())
+        assertTrue(report.passed, report.items.toString())
+        assertEquals("1.3.2" to null, report.metadata[Provider.ANTIGRAVITY])
+        assertTrue(report.items.any { it.name == "모델" && it.status == PreflightStatus.WARN })
+        assertEquals("new-model", report.version.workflow.steps.single().model)
     }
     @Test fun authTimeoutBlocksAndCleansProbe() = runTest {
         val fake = FakeProcessExecutor(FakeResult(listOf("codex-cli 0.160.0")), FakeResult(delayMs = 31_000), *git())

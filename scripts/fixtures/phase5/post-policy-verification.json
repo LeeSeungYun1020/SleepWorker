@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-09T14:16:46.944207+00:00",
+  "command": "./gradlew build :desktopApp:packageDmg",
+  "build": "SUCCESS",
+  "tests": {
+    "tests": 153,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testExecution": "Gradle confirmed the current jvmTest inputs/results up to date; test-result XML totals are recorded above.",
+  "dmg": {
+    "path": "desktopApp/build/compose/binaries/main/dmg/aiflow-1.0.0.dmg",
+    "sha256": "be36ae4d637948cfe9805ad129bb43f02da59eb0ec0ce711b1ce936bb6b55a1f",
+    "bytes": 82445408
+  },
+  "cliPolicy": "Unmeasured CLI versions/models/efforts warn and preserve requested values; measurement evidence is not an execution allowlist.",
+  "additionalModelCalls": 0,
+  "liveAcceptance": "Original installed UI/provider evidence remains in acceptance-summary.json; final policy change was verified with fake CLI regression tests and a rebuilt package, without repeating installed UI/provider acceptance."
+}

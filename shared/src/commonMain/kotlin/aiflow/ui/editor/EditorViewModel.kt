@@ -26,7 +26,7 @@ class EditorViewModel(
     private val store: WorkflowStore,
     private val fs: FileSystem,
     val repository: String,
-    val settings: AppSettings = AppSettings(),
+    var settings: AppSettings = AppSettings(),
     val dialogs: FileDialogs? = null,
     private val isRunning: (String) -> Boolean = { false },
     private val onVersion: suspend (WorkflowVersion) -> Unit = {},
@@ -72,6 +72,7 @@ class EditorViewModel(
         undo.clear(); redo.clear(); selectedNode.value = null; selectedEdge.value = null; savedVersion.value = null
         updated(); validateNow()
     }
+    fun importSnapshot(workflow: Workflow) = load(WorkflowDraft(Uuid.random().toString(), workflow = workflow.copy(repoPath = repository)), false)
     fun newWorkflow(template: WorkflowTemplate) = load(WorkflowDraft(Uuid.random().toString(), workflow = WorkflowTemplates.create(template, repository, settings.defaultWorktreeRoot)), false)
     suspend fun open(workflowId: String) = gate.withLock { load(store.loadDraft(workflowId), true) }
     suspend fun listDrafts(): List<WorkflowDraft> = store.listWorkflows().map { store.loadDraft(it) }

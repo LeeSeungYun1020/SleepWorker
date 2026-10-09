@@ -18,7 +18,7 @@ compose.desktop {
             packageName = "aiflow"
             packageVersion = "1.0.0"
             modules("java.instrument", "java.management", "jdk.unsupported")
-            macOS { bundleID = "dev.aiflow.desktop" }
+            macOS { bundleID = "dev.local.aiflow"; iconFile.set(project.file("src/main/resources/aiflow.icns")) }
         }
     }
 }
@@ -28,4 +28,8 @@ tasks.register<JavaExec>("acceptance") {
     description = "Explicit live read-only preflight; pass --args='preflight workflow.yaml settings.json'"
     mainClass.set("AcceptanceMainKt")
     classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.processResources {
+    from(rootProject.file("airflow.md")) { rename { "plan.md" } }
 }
