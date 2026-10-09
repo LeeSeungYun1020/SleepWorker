@@ -86,3 +86,27 @@ separate evidence. No authentication changes, remote writes or paid model valida
 CLI settings refresh, broader history/settings controls and release packaging remain Phase 5.
 Window close has an interactive draft decision; native Cmd+Q uses draft preservation because it
 can bypass the Compose window callback. OS-enforced shutdown cannot guarantee a disk write.
+
+## PR #3 review follow-up — 2026-10-09
+
+- P1: Save and Run captures the editor instance, draft and monotonic revision at request time,
+  before waiting for the action mutex. It rechecks them after preview preflight and during
+  execution-time preflight. A changed/reopened/restored draft or edit followed by undo invalidates
+  the request and clears its report. Preflight and startup share one action; explicit saved-version
+  runs remain supported independently of editor changes.
+- P2: Node drag handlers read the latest committed position through `rememberUpdatedState`.
+  Recomposition from drag previews keeps the current gesture alive; repeated drags, undo and
+  auto layout use the current coordinates.
+
+`./gradlew build :desktopApp:createDistributable` passes **136 Kotlin tests**. Five new real
+Git/shell regression tests block read-only preflight probes to exercise invalid edits, edit/undo,
+reopening the same draft, action-queue waiting and execution-time preflight changes. Rejected
+requests execute no step bodies; execution-time rejection records FAILED with no visits.
+Python verification still passes **15 tests**. `./gradlew :desktopApp:packageDmg` also succeeds
+with the reviewed fixes. No model calls.
+
+Packaged-app drag evidence is retained in `scripts/fixtures/phase4/review-drag/acceptance.json`
+and its immutable saved-version YAML files. At 72% zoom, the first node moved from `(300, 50)`
+to `(300, 230.38194)`, then `(438.71527, 230.38194)` on a second drag. After undo, a new drag
+started from the restored position and reached `(383.19995, 299.71524)`. After auto layout, the
+same gesture started from `(300, 50)` and reached `(383.19995, 119.3333)`.

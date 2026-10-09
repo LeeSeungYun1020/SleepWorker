@@ -34,6 +34,8 @@ class EditorViewModel(
 ) {
     val draft = MutableStateFlow<WorkflowDraft?>(null)
     val dirty = MutableStateFlow(false)
+    private val editRevision = MutableStateFlow(0L)
+    val revision: StateFlow<Long> = editRevision.asStateFlow()
     val selectedNode = MutableStateFlow<String?>(null)
     val selectedEdge = MutableStateFlow<EdgeSelection?>(null)
     val issues = MutableStateFlow<List<Issue>>(emptyList())
@@ -51,6 +53,7 @@ class EditorViewModel(
     val issueMap get() = issues.value.groupBy { it.stepId }
     fun validateNow(): List<Issue> = workflow?.let { WorkflowValidator(fs).validate(it) }.orEmpty().also { issues.value = it }
     private fun updated() {
+        editRevision.update { it + 1 }
         dirty.value = draft.value != baseline
         canUndo.value = undo.isNotEmpty(); canRedo.value = redo.isNotEmpty()
         validation?.cancel(); validation = scope.launch { delay(300); validateNow() }
@@ -113,8 +116,8 @@ class EditorViewModel(
         return outcome
     }
     suspend fun versions(): List<WorkflowVersion> = draft.value?.let { store.listVersions(it.workflowId) }.orEmpty()
-    fun showVersion(version: WorkflowVersion) { preview.value = version; selectNode(null); validateNow() }
-    fun closePreview() { preview.value = null; validateNow() }
+    fun showVersion(version: WorkflowVersion) { editRevision.update { it + 1 }; preview.value = version; selectNode(null); validateNow() }
+    fun closePreview() { editRevision.update { it + 1 }; preview.value = null; validateNow() }
     suspend fun restore(version: WorkflowVersion, confirmed: Boolean) = gate.withLock {
         require(confirmed); require(version.workflowId == draft.value?.workflowId)
         load(store.restoreToDraft(version.workflowId, version.versionId), true)

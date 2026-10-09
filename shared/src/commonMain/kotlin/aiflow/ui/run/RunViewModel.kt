@@ -110,16 +110,31 @@ class RunViewModel(private val platform: Platform) {
         selected.value = saved; report.value = null; state.value = null; logs.value = emptyList()
         pendingImport.value = null; importWarnings.value = emptyList()
     }
-    fun runEditorVersion(version: WorkflowVersion) = action {
-        check(!active)
-        require(editor.value?.draft?.value?.workflowId == version.workflowId && editor.value?.draft?.value?.workflow == version.workflow && editor.value?.dirty?.value == false) { "편집 내용과 저장 버전이 다릅니다" }
-        require(version.workflow.repoPath.toPath(normalize = true) == lease!!.repoPath) { "워크플로 경로가 열린 저장소와 다릅니다" }
-        selected.value = version; state.value = null; report.value = null
-        val checked = checker.inspect(version, settings)
-        report.value = checked
-        editor.value?.cliVersions?.value = checked.metadata.mapNotNull { (key, value) -> value.first?.let { key to it } }.toMap()
-        check(checked.passed) { "프리플라이트 실패 — 실행하지 않았습니다" }
-        start()
+    fun runEditorVersion(version: WorkflowVersion) {
+        // Bind the request before it waits for the action gate, not after preflight starts.
+        val source = editor.value
+        val draft = source?.draft?.value
+        val revision = source?.revision?.value
+        val verifyEditor = {
+            val matches = source != null && editor.value === source && source.revision.value == revision &&
+                source.draft.value == draft && !source.dirty.value && !source.readOnly &&
+                draft?.workflowId == version.workflowId && draft.workflow == version.workflow
+            if (!matches) report.value = null
+            require(matches) { "편집 내용과 저장 버전이 다릅니다 — 다시 저장·실행하세요" }
+        }
+        action {
+            check(!active)
+            verifyEditor()
+            require(version.workflow.repoPath.toPath(normalize = true) == lease!!.repoPath) { "워크플로 경로가 열린 저장소와 다릅니다" }
+            selected.value = version; state.value = null; report.value = null
+            val checked = checker.inspect(version, settings)
+            verifyEditor()
+            report.value = checked
+            source!!.cliVersions.value = checked.metadata.mapNotNull { (key, value) -> value.first?.let { key to it } }.toMap()
+            check(checked.passed) { "프리플라이트 실패 — 실행하지 않았습니다" }
+            // Stay in the same action so another queued action cannot change the version first.
+            startRun(version, checked, verifyEditor)
+        }
     }
     fun runPreflight() = action {
         check(!active)
@@ -128,16 +143,20 @@ class RunViewModel(private val platform: Platform) {
         editor.value?.cliVersions?.value = report.value!!.metadata.mapNotNull { (key, value) -> value.first?.let { key to it } }.toMap()
     }
     fun start() = action {
+        startRun(selected.value ?: error("저장 버전 선택 필요"), report.value ?: error("프리플라이트 필요"))
+    }
+    private fun startRun(version: WorkflowVersion, checked: PreflightReport, verifyEditor: (() -> Unit)? = null) {
         check(!active)
-        val version = selected.value ?: error("저장 버전 선택 필요")
+        verifyEditor?.invoke()
         require(version.workflow.repoPath.toPath(normalize = true) == lease!!.repoPath) { "워크플로 경로가 열린 저장소와 다릅니다" }
-        val checked = report.value ?: error("프리플라이트 필요")
-        check(checked.version == version && checked.passed) { "선택 버전 프리플라이트 실패" }
+        check(selected.value == version && checked.version == version && checked.passed) { "선택 버전 프리플라이트 실패" }
         logs.value = emptyList(); truncated.value = emptySet()
         val orchestrator = RunOrchestrator(store!!, recorder!!, platform.processes, platform.tempFiles,
             preflight = Preflight { saved, config, io ->
+                verifyEditor?.invoke()
                 io.recorder.write(io.runId, "preflight/expected.json", io.recorder.json.encodeToString(checked), immutable = true)
                 val fresh = checker.inspect(saved, config, io)
+                verifyEditor?.invoke()
                 report.value = fresh
                 check(fresh.passed && fresh.settings == checked.settings && fresh.metadata == checked.metadata) { "실행 직전 프리플라이트 실패 또는 CLI 변경" }
             }, metadata = checked.metadata)

@@ -88,12 +88,14 @@ fun GraphCanvas(vm: EditorViewModel, w: Workflow, focus: Pair<String, Int>?, onC
             wire?.let { (source, end) -> positions[source]?.let { p -> drawLine(colors.primary, screen(Offset(p.x + 220, p.y + 58)), screen(end), 2.dp.toPx()) } }
         }
         (GraphLayout.special + w.steps.map { it.id }).distinct().forEach { id ->
-            val p = positions[id] ?: return@forEach; val step = w.steps.firstOrNull { it.id == id }
+            val p = positions[id] ?: return@forEach
+            val savedPosition by rememberUpdatedState(w.editor?.nodes?.get(id) ?: p)
+            val step = w.steps.firstOrNull { it.id == id }
             val badges = issues.filter { it.stepId == id }; val orphan = step != null && id !in reachable
             Surface(color = when { node == id -> colors.primaryContainer; orphan -> colors.surfaceVariant; else -> colors.surfaceContainerHigh }, border = BorderStroke(if (node == id) 2.dp else 1.dp, if (badges.any { it.severity == Severity.ERROR }) colors.error else colors.outlineVariant), shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.offset { IntOffset(((p.x * zoom + pan.x) * density).roundToInt(), ((p.y * zoom + pan.y) * density).roundToInt()) }.size((220 * zoom).dp, (115 * zoom).dp)
                     .pointerInput(id, zoom, editingEnabled) {
-                        if (editingEnabled) detectDragGestures(onDragStart = { vm.selectNode(id); dragging = id to p }, onDragCancel = { dragging = null }, onDragEnd = { dragging?.let { vm.moveNode(it.first, it.second) }; dragging = null }) { change, amount -> change.consume(); val origin = dragging?.second ?: p; dragging = id to NodePosition(origin.x + amount.x / density / zoom, origin.y + amount.y / density / zoom) }
+                        if (editingEnabled) detectDragGestures(onDragStart = { vm.selectNode(id); dragging = id to savedPosition }, onDragCancel = { dragging = null }, onDragEnd = { dragging?.let { vm.moveNode(it.first, it.second) }; dragging = null }) { change, amount -> change.consume(); val origin = dragging?.second ?: savedPosition; dragging = id to NodePosition(origin.x + amount.x / density / zoom, origin.y + amount.y / density / zoom) }
                     }.clickable { vm.selectNode(id) }) {
                 Box {
                     Column(Modifier.padding((10 * zoom).dp)) {

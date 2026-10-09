@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-09",
+  "surface": "rebuilt macOS packaged app",
+  "workflowTemplate": "LINEAR",
+  "zoom": 0.72,
+  "observations": [
+    {
+      "action": "initial",
+      "position": [
+        300.0,
+        50.0
+      ]
+    },
+    {
+      "action": "drag down 130 screen pixels at 72%",
+      "position": [
+        300.0,
+        230.38194
+      ]
+    },
+    {
+      "action": "second drag right 100 screen pixels at 72%",
+      "position": [
+        438.71527,
+        230.38194
+      ]
+    },
+    {
+      "action": "undo second drag, then drag right 60 and down 50 screen pixels",
+      "position": [
+        383.19995,
+        299.71524
+      ]
+    },
+    {
+      "action": "auto layout, then drag right 60 and down 50 screen pixels",
+      "position": [
+        383.19995,
+        119.3333
+      ]
+    }
+  ],
+  "savedVersions": [
+    {
+      "versionFile": "0a58dcf6-b2eb-4a24-a768-734b96827723.yaml",
+      "firstPosition": [
+        383.19995,
+        299.71524
+      ]
+    },
+    {
+      "versionFile": "839bde93-5d41-4173-8fc8-968e695eeca1.yaml",
+      "firstPosition": [
+        383.19995,
+        119.3333
+      ]
+    },
+    {
+      "versionFile": "90b06e5c-b7ee-4027-ad73-aebd0c2921db.yaml",
+      "firstPosition": [
+        300.0,
+        230.38194
+      ]
+    },
+    {
+      "versionFile": "964054b8-0d61-4e04-aa3e-8390ca281ac0.yaml",
+      "firstPosition": [
+        300.0,
+        50.0
+      ]
+    },
+    {
+      "versionFile": "9715bd8d-c3cd-46df-8c6a-4e320d3dba7c.yaml",
+      "firstPosition": [
+        438.71527,
+        230.38194
+      ]
+    }
+  ],
+  "checks": [
+    "second drag retained the y coordinate from the first drag",
+    "undo returned to the first drag position before the next drag",
+    "auto layout returned to (300, 50) before the next drag"
+  ],
+  "modelCalls": 0
+}
