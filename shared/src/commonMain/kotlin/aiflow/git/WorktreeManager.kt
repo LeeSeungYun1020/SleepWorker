@@ -11,6 +11,16 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 
 class WorktreeManager(private val fs: FileSystem, private val io: ExecutionIO, private val controlTimeoutMs: Long = 30_000) {
+    companion object {
+        /** History-only maintenance does not invent a workflow run to record a Git operation. */
+        suspend fun remove(repoPath: String, path: String, runner: CommandRunner) {
+            val result = runner.run(ProcessSpec(listOf("git", "worktree", "remove", "--", path), repoPath), 30_000)
+            currentCoroutineContext().ensureActive()
+            check(result.cleanupError == null && result.termination == Termination.NORMAL && result.exitCode == 0) {
+                result.cleanupError ?: result.error ?: "Worktree remove failed: ${result.stderr.joinToString("\n")}"
+            }
+        }
+    }
     private var sequence = 0
     fun resolvePath(workflow: Workflow, workspace: Workspace): String = WorkspacePaths(fs).resolve(workflow, workspace).toString()
     private suspend fun git(repo: String, args: List<String>, path: String): CommandResult {

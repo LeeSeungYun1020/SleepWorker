@@ -1,0 +1,273 @@
+{
+  "date": "2026-10-09",
+  "timezone": "Asia/Seoul",
+  "provenance": "DMG-installed app launched with Launch Services via open; isolated repository/settings; caller PATH=/usr/bin:/bin; UI verified with CUA. Terminal app unavailable to CUA, so manual continuation used the recorded argv in a local subprocess.",
+  "runs": [
+    {
+      "runId": "20261009-133428-c96609011ead4308",
+      "workflowId": "1643ed40-b978-400c-b20f-46b9e0665fe8",
+      "versionId": "8463b32f-0eb6-4545-96c3-96f8ea4029be",
+      "status": "COMPLETED",
+      "startedAt": null,
+      "lastUpdatedAt": "2026-10-09T13:34:29.035985Z",
+      "previousStatus": null,
+      "previousUpdatedAt": null,
+      "interruptionReason": null,
+      "interruptedAt": null,
+      "visits": [
+        {
+          "visitNo": 1,
+          "stepId": "first",
+          "status": "SUCCEEDED",
+          "startedAt": "2026-10-09T13:34:28.715607Z",
+          "endedAt": "2026-10-09T13:34:28.881926Z",
+          "manualRetryOf": null,
+          "transitionTaken": {
+            "stepId": "first",
+            "index": 0,
+            "condition": "success",
+            "target": "last"
+          },
+          "attempts": [
+            {
+              "attemptNo": 1,
+              "metadata": {
+                "binaryPath": "/bin/zsh",
+                "binaryVersion": null,
+                "contractId": null,
+                "requestedModel": null,
+                "requestedEffort": null
+              },
+              "exitCode": 0,
+              "termination": "NORMAL",
+              "providerOutcome": "NOT_APPLICABLE",
+              "usage": null,
+              "sessionIdHash": null
+            }
+          ]
+        },
+        {
+          "visitNo": 2,
+          "stepId": "last",
+          "status": "SUCCEEDED",
+          "startedAt": "2026-10-09T13:34:28.889094Z",
+          "endedAt": "2026-10-09T13:34:29.031323Z",
+          "manualRetryOf": null,
+          "transitionTaken": {
+            "stepId": "last",
+            "index": 0,
+            "condition": "success",
+            "target": "end"
+          },
+          "attempts": [
+            {
+              "attemptNo": 1,
+              "metadata": {
+                "binaryPath": "/bin/zsh",
+                "binaryVersion": null,
+                "contractId": null,
+                "requestedModel": null,
+                "requestedEffort": null
+              },
+              "exitCode": 0,
+              "termination": "NORMAL",
+              "providerOutcome": "NOT_APPLICABLE",
+              "usage": null,
+              "sessionIdHash": null
+            }
+          ]
+        }
+      ],
+      "snapshotSha256": "b6a2323556e10cf7a0d6908a902bb380af3739a226c18c5a4cbf3bc3c0c055a9"
+    },
+    {
+      "runId": "20261009-134604-d98fb5df7e1e4f04",
+      "workflowId": "e388e991-3e97-42fd-8f96-ac5fd057e837",
+      "versionId": "79d8537a-c716-4876-961a-a159387cbeff",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-09T13:46:04.194568Z",
+      "lastUpdatedAt": "2026-10-09T13:46:21.231264Z",
+      "previousStatus": null,
+      "previousUpdatedAt": null,
+      "interruptionReason": null,
+      "interruptedAt": null,
+      "visits": [
+        {
+          "visitNo": 1,
+          "stepId": "codex-new",
+          "status": "SUCCEEDED",
+          "startedAt": "2026-10-09T13:46:04.714006Z",
+          "endedAt": "2026-10-09T13:46:15.034704Z",
+          "manualRetryOf": null,
+          "transitionTaken": {
+            "stepId": "codex-new",
+            "index": 0,
+            "condition": "success",
+            "target": "codex-resume"
+          },
+          "attempts": [
+            {
+              "attemptNo": 1,
+              "metadata": {
+                "binaryPath": "/Users/leeseungyun/.nvm/versions/node/v24.11.1/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+                "binaryVersion": "0.160.0",
+                "contractId": "codex-0.160.0-phase0",
+                "requestedModel": "gpt-6-luna",
+                "requestedEffort": "medium"
+              },
+              "exitCode": 0,
+              "termination": "NORMAL",
+              "providerOutcome": "SUCCEEDED",
+              "usage": {
+                "input_tokens": 34846,
+                "cached_input_tokens": 24064,
+                "cache_write_input_tokens": 0,
+                "output_tokens": 78,
+                "reasoning_output_tokens": 0
+              },
+              "sessionIdHash": "64f7833996d3dacc438c012adf97f385d14d6ef20f865af3abc4cacff65a6fb0"
+            }
+          ]
+        },
+        {
+          "visitNo": 2,
+          "stepId": "codex-resume",
+          "status": "SUCCEEDED",
+          "startedAt": "2026-10-09T13:46:15.043503Z",
+          "endedAt": "2026-10-09T13:46:21.226718Z",
+          "manualRetryOf": null,
+          "transitionTaken": {
+            "stepId": "codex-resume",
+            "index": 0,
+            "condition": "success",
+            "target": "end"
+          },
+          "attempts": [
+            {
+              "attemptNo": 1,
+              "metadata": {
+                "binaryPath": "/Users/leeseungyun/.nvm/versions/node/v24.11.1/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+                "binaryVersion": "0.160.0",
+                "contractId": "codex-0.160.0-phase0",
+                "requestedModel": "gpt-6-luna",
+                "requestedEffort": "medium"
+              },
+              "exitCode": 0,
+              "termination": "NORMAL",
+              "providerOutcome": "SUCCEEDED",
+              "usage": {
+                "input_tokens": 75913,
+                "cached_input_tokens": 61440,
+                "cache_write_input_tokens": 0,
+                "output_tokens": 173,
+                "reasoning_output_tokens": 33
+              },
+              "sessionIdHash": "64f7833996d3dacc438c012adf97f385d14d6ef20f865af3abc4cacff65a6fb0"
+            }
+          ]
+        }
+      ],
+      "snapshotSha256": "5d591c5db2e1808b2c762e20c7ddd0af154f5a9a89323bb4b64cb66af85f2fc8"
+    },
+    {
+      "runId": "20261009-134846-c7f012bedcc04521",
+      "workflowId": "27877894-0e00-4530-9912-88d76f47463b",
+      "versionId": "f88df014-fc1d-41d7-8ab9-600f013bbe6a",
+      "status": "INTERRUPTED",
+      "startedAt": "2026-10-09T13:48:46.497519Z",
+      "lastUpdatedAt": "2026-10-09T13:49:15.759128Z",
+      "previousStatus": "PAUSED",
+      "previousUpdatedAt": "2026-10-09T13:49:02.059872Z",
+      "interruptionReason": "app_shutdown",
+      "interruptedAt": "2026-10-09T13:49:15.759056Z",
+      "visits": [
+        {
+          "visitNo": 1,
+          "stepId": "slow",
+          "status": "SUCCEEDED",
+          "startedAt": "2026-10-09T13:48:46.871713Z",
+          "endedAt": "2026-10-09T13:49:02.054441Z",
+          "manualRetryOf": null,
+          "transitionTaken": null,
+          "attempts": [
+            {
+              "attemptNo": 1,
+              "metadata": {
+                "binaryPath": "/bin/zsh",
+                "binaryVersion": null,
+                "contractId": null,
+                "requestedModel": null,
+                "requestedEffort": null
+              },
+              "exitCode": 0,
+              "termination": "NORMAL",
+              "providerOutcome": "NOT_APPLICABLE",
+              "usage": null,
+              "sessionIdHash": null
+            }
+          ]
+        }
+      ],
+      "snapshotSha256": "979c3a3f3c9bbe3fc9f9a863bfe298c6da7411749646f1de0d4d77b0438789a8"
+    }
+  ],
+  "modelCalls": 3,
+  "actualModel": null,
+  "cost": null,
+  "manualResume": {
+    "exitCode": 0,
+    "elapsedSeconds": 5.02094775,
+    "binaryPath": "/Users/leeseungyun/.nvm/versions/node/v24.11.1/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "requestedModel": "gpt-6-luna",
+    "requestedEffort": "medium",
+    "usage": [
+      {
+        "input_tokens": 99963,
+        "cached_input_tokens": 81664,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 183,
+        "reasoning_output_tokens": 33
+      }
+    ],
+    "sameSessionId": true,
+    "response": [
+      "TERMINAL_RESUME_OK"
+    ]
+  },
+  "tests": {
+    "total": 151,
+    "failures": 0,
+    "skipped": 0
+  },
+  "dmg": {
+    "path": "desktopApp/build/compose/binaries/main/dmg/aiflow-1.0.0.dmg",
+    "sha256": "14d7a3d1e1bf704eb4d380bdf14929eb35f6fae4e30404994d6421a5d221c30d",
+    "bundleId": "dev.local.aiflow",
+    "signedWithDeveloperId": false,
+    "notarized": false
+  },
+  "restoredVersion": {
+    "source": "f88df014-fc1d-41d7-8ab9-600f013bbe6a",
+    "newVersions": [
+      "948f6e7b-22c7-449e-8090-c7c63d8b1c43"
+    ],
+    "sourceStillExists": true
+  },
+  "limitations": [
+    "agy changed from 1.3.1 to 1.3.2 during verification; unverified execution blocked with zero model calls. No 1.3.2 contract added.",
+    "All four notification event gates and quoting tested; completed/paused dispatched by installed workflows. User screenshot confirms COMPLETED/PAUSED in Notification Center; FAILED/AWAITING_USER visual display remains unverified.",
+    "Final History presentation-only edit was repackaged and installed; model execution was not repeated."
+  ],
+  "notifications": {
+    "evidence": "notifications-completed-paused.png",
+    "provenance": "User-supplied Notification Center screenshot; visually inspected. Direct CUA access exposed a widget window, not the notification list.",
+    "visuallyConfirmed": [
+      "COMPLETED",
+      "PAUSED"
+    ],
+    "notVisuallyConfirmed": [
+      "FAILED",
+      "AWAITING_USER"
+    ]
+  }
+}

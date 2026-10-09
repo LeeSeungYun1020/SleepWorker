@@ -63,6 +63,16 @@ fun EditorScreen(run: RunViewModel, onRun: () -> Unit) {
         is SaveOutcome.Invalid -> { showIssues = true }
         is SaveOutcome.Saved -> if (execute) { run.runEditorVersion(outcome.version); onRun() }
     } }
+    val menuCommand by run.editorCommand.collectAsState()
+    LaunchedEffect(menuCommand) {
+        when (menuCommand?.second) {
+            "new" -> guard { picker = "new" }
+            "open" -> guard { work { drafts = editor.listDrafts(); picker = "open" } }
+            "save" -> if (w != null && preview == null) work { saved(editor.save(), false) }
+            "versions" -> if (draft != null) work { versions = editor.versions(); picker = "versions" }
+        }
+        run.editorCommand.value = null
+    }
     LaunchedEffect(message) { message?.let { snackbar.showSnackbar(it); editor.message.value = null } }
     Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -233,7 +243,7 @@ private fun StepPanel(vm: EditorViewModel, w: Workflow, s: Step, onDelete: () ->
             val cache = if (definition.provider == Provider.ANTIGRAVITY) vm.settings.agyModelsCache else null
             cache?.let { Text("${it.binaryPath} · ${it.binaryVersion}\n${it.queriedAt}", style = MaterialTheme.typography.labelSmall) }
             EditorChoice("effort", s.effort?.name.orEmpty(), listOf("") + Effort.entries.map { "${it.name} · ${vm.effortStatus(definition.provider, s.model, it, cliVersions[definition.provider] ?: cache?.binaryVersion)}" }) { value -> vm.updateStep(s.id) { it.copy(effort = value.substringBefore(' ').takeIf { it.isNotBlank() }?.let(Effort::valueOf)) } }
-            Text("Codex CLI 버전은 프리플라이트에서 확인합니다. 미검증 조합은 실행할 수 없습니다.", style = MaterialTheme.typography.bodySmall)
+            Text("Codex CLI 버전은 프리플라이트에서 확인합니다. 실측 기록이 없는 버전·모델·effort도 실행할 수 있습니다.", style = MaterialTheme.typography.bodySmall)
         }
         var retry by remember(s.id) { mutableStateOf(false) }
         TextButton({ retry = !retry }) { Text("retryScript ${if (retry) "접기" else "펼치기"}") }

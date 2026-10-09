@@ -12,15 +12,18 @@ data class VerifiedCliContract(
     val features: Map<String, ContractEvidence>,
     val modelEfforts: Map<ModelEffort, ContractEvidence>,
 ) {
-    /** Fail closed; matching versions or listing a model is not a successful execution measurement. */
+    /** Measurements are evidence, not an allowlist. Only explicit incompatibilities on this version reject a request. */
     fun validateRequest(actualVersion: String, request: ExecRequest, requiredFeatures: Set<String> = emptySet()): List<FailureInfo> = buildList {
         fun reject(detail: String) { add(FailureInfo(FailureKind.CONFIG, FailurePhase.PREPARING, detail)) }
-        if (actualVersion != version) reject("CLI version $actualVersion does not match contract $id ($version)")
+        try { request.validate() } catch (e: ProviderConfigException) { reject(e.message.orEmpty()) }
+        if (actualVersion != version) return@buildList
         val execution = if (request.resumeSessionId == null) "new" else "resume"
         (requiredFeatures + execution).forEach { feature ->
-            if (features[feature]?.status != Verification.VERIFIED) reject("$feature is ${features[feature]?.status ?: Verification.NOT_VERIFIED}")
+            if (features[feature]?.status == Verification.UNSUPPORTED) reject("$feature is UNSUPPORTED")
         }
-        if (request.model == null || request.effort == null || modelEfforts[ModelEffort(request.model, request.effort)]?.status != Verification.VERIFIED) reject("Requested model/effort has no verified execution contract")
+        request.effort?.let { effort ->
+            if (modelEfforts[ModelEffort(request.model.orEmpty(), effort)]?.status == Verification.UNSUPPORTED) reject("Requested model/effort is UNSUPPORTED")
+        }
     }
     companion object {
         private fun measured(path: String, detail: String) = ContractEvidence(Verification.VERIFIED, "scripts/fixtures/phase0/$path", detail)

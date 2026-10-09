@@ -5,6 +5,8 @@ import aiflow.model.*
 import aiflow.platform.*
 import aiflow.storage.*
 import aiflow.ui.editor.EditorViewModel
+import aiflow.ui.history.*
+import aiflow.ui.settings.SettingsViewModel
 import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 import kotlinx.coroutines.flow.*
@@ -21,7 +23,14 @@ class RunViewModel(private val platform: Platform) {
     private var recorder: RunRecorder? = null
     private var engine: RunOrchestrator? = null
     private var runJob: Job? = null
-    private var settings = AppSettings()
+    val settingsModel = SettingsViewModel(platform, scope)
+    private val settings get() = settingsModel.settings.value
+    val menuActions = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    val editorCommand = MutableStateFlow<Pair<Long, String>?>(null)
+    val fatalError = MutableStateFlow<String?>(null)
+    fun menu(command: String) { menuActions.tryEmit(command) }
+    val historyController = MutableStateFlow<HistoryViewModel?>(null)
+    private var previewSettings: AppSettings? = null
     private val checker = CliPreflight(platform)
     val editor = MutableStateFlow<EditorViewModel?>(null)
     val versions = MutableStateFlow<List<WorkflowVersion>>(emptyList())
@@ -38,11 +47,19 @@ class RunViewModel(private val platform: Platform) {
     val repository = MutableStateFlow<String?>(null)
     val pendingRepository = MutableStateFlow<String?>(null)
     val active get() = runJob?.isActive == true
+    init { scope.launch {
+        var previous: AppSettings? = null
+        settingsModel.settings.collect { value ->
+            editor.value?.settings = value
+            if (!active && previous?.let { it.codexPath != value.codexPath || it.agyPath != value.agyPath || it.codexModels != value.codexModels || it.agyModelsCache != value.agyModelsCache } == true) report.value = null
+            previous = value
+        }
+    } }
     private fun action(block: suspend () -> Unit) { scope.launch { gate.withLock {
         busy.value = true
         try { error.value = null; block() }
         catch (e: CancellationException) { throw e }
-        catch (e: Exception) { error.value = e.message ?: e.toString() }
+        catch (e: Exception) { platform.diagnostics(e); error.value = e.message ?: e.toString() }
         finally { busy.value = false }
     } } }
     fun openRepository(path: String) = action {
@@ -55,9 +72,8 @@ class RunViewModel(private val platform: Platform) {
             val nextRecorder = RunRecorder(platform.files, next)
             val recovered = RunRecovery(nextRecorder).recover()
             val available = nextStore.listWorkflows().flatMap { nextStore.listVersions(it) }
-            settings = try { SettingsStore(platform.files, platform.settingsPath).load() } catch (e: Exception) {
-                error.value = "설정 로드 실패 — 기본값 사용: ${e.message}"; AppSettings()
-            }
+            settingsModel.current()
+            historyController.value?.close()
             editor.value?.close(); lease?.release(); lease = next; store = nextStore; recorder = nextRecorder
             pendingImport.value = null; importWarnings.value = emptyList()
             repository.value = next.repoPath.toString(); versions.value = available
@@ -69,6 +85,7 @@ class RunViewModel(private val platform: Platform) {
                     versions.value = nextStore.listWorkflows().flatMap { nextStore.listVersions(it) }
                     if (!active) { selected.value = saved; report.value = null; state.value = null; logs.value = emptyList() }
                 } })
+            historyController.value = HistoryViewModel(nextRecorder, platform.processes)
             history.value = recovered; state.value = null; logs.value = emptyList(); engine = null
         } catch (e: Throwable) { next.release(); throw e }
     }
@@ -127,7 +144,9 @@ class RunViewModel(private val platform: Platform) {
             verifyEditor()
             require(version.workflow.repoPath.toPath(normalize = true) == lease!!.repoPath) { "워크플로 경로가 열린 저장소와 다릅니다" }
             selected.value = version; state.value = null; report.value = null
-            val checked = checker.inspect(version, settings)
+            val inputSettings = settings
+            val checked = checker.inspect(version, inputSettings)
+            previewSettings = inputSettings
             verifyEditor()
             report.value = checked
             source!!.cliVersions.value = checked.metadata.mapNotNull { (key, value) -> value.first?.let { key to it } }.toMap()
@@ -139,7 +158,9 @@ class RunViewModel(private val platform: Platform) {
     fun runPreflight() = action {
         check(!active)
         report.value = null
-        report.value = checker.inspect(selected.value ?: error("저장 버전 선택 필요"), settings)
+        val inputSettings = settings
+        report.value = checker.inspect(selected.value ?: error("저장 버전 선택 필요"), inputSettings)
+        previewSettings = inputSettings
         editor.value?.cliVersions?.value = report.value!!.metadata.mapNotNull { (key, value) -> value.first?.let { key to it } }.toMap()
     }
     fun start() = action {
@@ -149,6 +170,7 @@ class RunViewModel(private val platform: Platform) {
         check(!active)
         verifyEditor?.invoke()
         require(version.workflow.repoPath.toPath(normalize = true) == lease!!.repoPath) { "워크플로 경로가 열린 저장소와 다릅니다" }
+        check(previewSettings?.let { sameExecutionSettings(it, settings) } == true) { "설정이 변경되었습니다 — 프리플라이트를 다시 수행하세요" }
         check(selected.value == version && checked.version == version && checked.passed) { "선택 버전 프리플라이트 실패" }
         logs.value = emptyList(); truncated.value = emptySet()
         val orchestrator = RunOrchestrator(store!!, recorder!!, platform.processes, platform.tempFiles,
@@ -162,27 +184,33 @@ class RunViewModel(private val platform: Platform) {
             }, metadata = checked.metadata)
         engine = orchestrator
         runJob = scope.launch {
-            val buffer = VisitLogBuffer()
+            val buffer = VisitLogBuffer(settings.logBufferLimit)
             val logGate = Mutex()
             val logCollector = launch(start = CoroutineStart.UNDISPATCHED) { orchestrator.logs.collect { logGate.withLock { buffer.add(it) } } }
             val publisher = launch { while (isActive) { delay(100); logGate.withLock { logs.value = buffer.snapshot(); truncated.value = buffer.truncated.toSet() } } }
+            fun notifyState(current: RunState) {
+                if (notificationEnabled(current.status, settings)) scope.launch {
+                    try { platform.notifier.notify("aiflow", notificationLabel(current.status), current.workflow.name) }
+                    catch (e: CancellationException) { throw e }
+                    catch (e: Exception) { platform.diagnostics(e) }
+                }
+            }
             val observer = launch(start = CoroutineStart.UNDISPATCHED) {
                 var previous: RunStatus? = null
                 orchestrator.state.filterNotNull().collect { current ->
                     state.value = current
-                    if (current.status != previous && current.status in setOf(RunStatus.COMPLETED, RunStatus.FAILED, RunStatus.AWAITING_USER) && settings.notificationsEnabled) {
-                        launch { try { platform.notifier.notify("aiflow · ${current.status}", current.workflow.name) } catch (_: Exception) { } }
-                    }
+                    if (current.status != previous && !current.status.terminal) notifyState(current)
                     previous = current.status
                 }
             }
             try { orchestrator.start(version, checked.settings) }
             catch (e: CancellationException) { throw e }
-            catch (e: Exception) { error.value = e.message }
+            catch (e: Exception) { platform.diagnostics(e); error.value = e.message }
             finally {
                 logCollector.cancelAndJoin(); publisher.cancelAndJoin(); observer.cancelAndJoin()
                 logs.value = buffer.snapshot(); truncated.value = buffer.truncated.toSet()
                 state.value = orchestrator.state.value
+                state.value?.takeIf { it.status.terminal }?.let(::notifyState)
                 history.value = RunHistory(recorder!!).list()
             }
         }
@@ -193,11 +221,30 @@ class RunViewModel(private val platform: Platform) {
     fun answer(decision: UserDecision) { scope.launch { engine?.decide(decision) } }
     fun showHistory(run: RunState) = action {
         check(!active); state.value = run; engine = null; logs.value = emptyList()
-        val buffer = VisitLogBuffer()
+        val buffer = VisitLogBuffer(settings.logBufferLimit)
         recorder!!.readLogs(run.runId, buffer::add)
         logs.value = buffer.snapshot(); truncated.value = buffer.truncated.toSet()
         selected.value = versions.value.firstOrNull { it.workflowId == run.workflowId && it.versionId == run.versionId }
         report.value = null
+    }
+    fun refreshHistory() = action {
+        check(!active); history.value = recorder?.list().orEmpty(); historyController.value?.refreshWorktrees()
+    }
+    fun selectHistory(run: RunState) = action { check(!active); historyController.value!!.select(run) }
+    fun readHistoryFile(relative: String) = action { check(!active); historyController.value!!.read(relative) }
+    fun deleteHistory() = action { check(!active); historyController.value!!.delete(true); history.value = recorder!!.list() }
+    fun removeHistoryWorktree(entry: WorktreeEntry) = action { check(!active); historyController.value!!.removeWorktree(entry, true) }
+    fun openHistoryVersion(restore: Boolean, import: Boolean = false) = action {
+        check(!active)
+        val run = historyController.value!!.selected.value ?: error("런 선택 필요")
+        val target = editor.value ?: error("편집기 없음")
+        target.preserveDraftOnShutdown()
+        if (import) target.importSnapshot(run.workflow)
+        else {
+            val version = versions.value.firstOrNull { it.workflowId == run.workflowId && it.versionId == run.versionId } ?: error("원본 버전 파일 없음")
+            target.open(version.workflowId)
+            if (restore) target.restore(version, true) else target.showVersion(version)
+        }
     }
     suspend fun refreshVersions() = gate.withLock {
         versions.value = store?.listWorkflows()?.flatMap { store!!.listVersions(it) }.orEmpty()
@@ -205,6 +252,7 @@ class RunViewModel(private val platform: Platform) {
     }
     suspend fun close() {
         gate.withLock {
+            settingsModel.close(); historyController.value?.close()
             engine?.interruptForShutdown(); runJob?.join()
             // Native Quit may bypass Compose confirmation; preserve unfinished work as a draft.
             editor.value?.let { editor ->
@@ -227,3 +275,12 @@ class VisitLogBuffer(private val limit: Int = 20_000) {
     }
     fun snapshot(): List<LogLine> = lines.values.flatMap { it.toList() }
 }
+
+fun notificationEnabled(status: RunStatus, settings: AppSettings): Boolean = settings.notificationsEnabled &&
+    NotificationEvent.entries.firstOrNull { it.name == status.name } in settings.notificationEvents
+fun notificationLabel(status: RunStatus): String = when (status) {
+    RunStatus.COMPLETED -> "실행 완료"; RunStatus.FAILED -> "실행 실패"; RunStatus.AWAITING_USER -> "사용자 확인 필요"; RunStatus.PAUSED -> "일시정지됨"; else -> status.name
+}
+
+fun sameExecutionSettings(a: AppSettings, b: AppSettings): Boolean =
+    a.codexPath == b.codexPath && a.agyPath == b.agyPath && a.codexModels == b.codexModels && a.agyModelsCache == b.agyModelsCache

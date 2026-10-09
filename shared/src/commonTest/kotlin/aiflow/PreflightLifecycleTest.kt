@@ -3,6 +3,7 @@ package aiflow
 import aiflow.engine.*
 import aiflow.model.*
 import aiflow.platform.*
+import aiflow.provider.*
 import aiflow.storage.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
@@ -92,6 +93,32 @@ class PreflightLifecycleTest {
         assertTrue(h.recorder.json.decodeFromString<PreflightReport>(h.text(state, "preflight/report.json")).passed)
         assertEquals("true\n", h.text(state, "preflight/probes/1/stdout.log"))
         assertEquals(4, fake.requests.size)
+    }
+    @Test fun unmeasuredVersionsAndModelsExecuteNewAndResumeForBothProviders() = runTest {
+        for (provider in Provider.entries) {
+            val isCodex = provider == Provider.CODEX
+            val binary = if (isCodex) "codex" else "agy"
+            val version = if (isCodex) "0.161.0" else "1.3.2"
+            val success = if (isCodex) codex() else FakeResult(listOf("""{"conversation_id":"thread-1","status":"SUCCESS","response":"done"}"""))
+            val auth = if (isCodex) FakeResult() else FakeResult(listOf("catalog-model\tCatalog model"))
+            val catalog = if (isCodex) emptyArray() else arrayOf(auth)
+            val fake = FakeProcessExecutor(FakeResult(listOf("$binary $version")), auth, *catalog, *git(), success, success)
+            val h = harness(fake)
+            h.fs.write("/$binary".toPath()) { writeUtf8("") }
+            val w = agents(agent("new", SessionMode.NEW, aiflow.model.Target.StepId("resume")), agent("resume", SessionMode.RESUME))
+                .let { it.copy(sessions = mapOf("s" to SessionDef(provider, Workspace.Local)),
+                    steps = it.steps.map { step -> step.copy(model = "new-model", effort = Effort.MAX) }) }
+            val state = h.run(w)
+            assertEquals(RunStatus.COMPLETED, state.status, state.failure)
+            assertEquals(listOf("new", "resume"), state.visits.map { it.stepId })
+            val commands = fake.requests.takeLast(2).map { it.command }
+            assertTrue(commands.all { "new-model" in it && ("max" in it || "model_reasoning_effort=max" in it) })
+            assertTrue("thread-1" in commands.last())
+            assertTrue((if (isCodex) "resume" else "--conversation") in commands.last())
+            val report = h.recorder.json.decodeFromString<PreflightReport>(h.text(state, "preflight/report.json"))
+            assertTrue(report.passed)
+            assertEquals(version to null, report.metadata[provider])
+        }
     }
     @Test fun previewAlsoStopsAfterCleanupFailure() = runTest {
         val fake = FakeProcessExecutor(version(), FakeResult(delayMs = 60_000, cleanupFailure = ProcessCleanupException("refused")))

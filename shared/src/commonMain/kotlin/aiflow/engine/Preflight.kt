@@ -69,22 +69,20 @@ class CliPreflight(private val platform: Platform, private val registry: Provide
                     resolved = if (provider == Provider.CODEX) resolved.copy(codexPath = path) else resolved.copy(agyPath = path)
                     val output = processes.capture(ProcessSpec(listOf(path, "--version"), workflow.repoPath))
                     require(output.exitCode == 0) { "버전 확인 실패: ${output.stderr}" }
-                    val actual = Regex("\\b\\d+\\.\\d+\\.\\d+\\b").find(output.stdout.joinToString("\n"))?.value ?: error("버전 형식 확인 불가")
+                    val actual = Regex("\\b\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?\\b").find(output.stdout.joinToString("\n"))?.value ?: error("버전 형식 확인 불가")
                     val contract = VerifiedCliContract.forVersion(provider, actual)
-                    if (contract == null) {
-                        item(binary, PreflightStatus.ERROR, "$path · $actual — 검증 계약 없음. 경로 지정 또는 계약 재검증 필요")
-                        return@probe
-                    }
-                    item(binary, PreflightStatus.INFO, "$path · $actual · ${contract.id}")
-                    metadata[provider] = actual to contract.id
+                    item(binary, if (contract == null) PreflightStatus.WARN else PreflightStatus.INFO,
+                        "$path · $actual · ${contract?.id ?: "실측 기록 없음 — 실행 가능"}")
+                    metadata[provider] = actual to contract?.id
                     steps.forEach { step ->
                         val modes = buildSet { add(step.session!!.mode); if (workflow.steps.any { s -> s.transitions.any { it.resetSession && (it.next as? aiflow.model.Target.StepId)?.id == step.id } }) add(SessionMode.NEW) }
-                        modes.forEach { mode -> contract.validateRequest(actual, ExecRequest(workflow.repoPath, "", step.model, step.effort, if (mode == SessionMode.RESUME) "preflight" else null, path)).forEach {
-                            item(step.id, PreflightStatus.ERROR, "${it.detail} — 경로 지정 또는 계약 재검증 필요")
+                        modes.forEach { mode -> contract?.validateRequest(actual, ExecRequest(workflow.repoPath, "", step.model, step.effort, if (mode == SessionMode.RESUME) "preflight" else null, path))?.forEach {
+                            item(step.id, PreflightStatus.ERROR, it.detail)
                         } }
+                        if (contract != null && step.effort?.let { contract.modelEfforts[ModelEffort(step.model.orEmpty(), it)]?.status } != Verification.VERIFIED) {
+                            item(step.id, PreflightStatus.WARN, "${step.model} / ${step.effort} 실측 기록 없음 — 실행 가능")
+                        }
                     }
-                    // Unknown versions must not be probed using an unverified CLI contract.
-                    if (actual != contract.version) return@probe
                     val adapter = registry.adapterFor(steps.first(), workflow)
                     val cfg = ProviderConfig(path, workflow.repoPath, actual)
                     when (val auth = adapter.probeAuth(processes, cfg)) {
@@ -95,7 +93,7 @@ class CliPreflight(private val platform: Platform, private val registry: Provide
                     }
                     val models = if (provider == Provider.CODEX) settings.codexModels else adapter.listModels(processes, cfg)
                     steps.mapNotNull { it.model }.distinct().forEach { model ->
-                        if (models == null || model !in models) item("모델", if (provider == Provider.CODEX) PreflightStatus.WARN else PreflightStatus.ERROR, "$model 목록에서 확인되지 않음")
+                        if (models == null || model !in models) item("모델", PreflightStatus.WARN, "$model 목록에서 확인되지 않음 — 요청한 모델로 실행")
                     }
                 }
             }

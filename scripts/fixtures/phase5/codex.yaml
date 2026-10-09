@@ -1,0 +1,27 @@
+name: Phase 5 installed Codex new resume
+repoPath: /path/to/acceptance/repo
+baseBranch: main
+start: codex-new
+sessions:
+  codex: { provider: codex, workspace: local }
+steps:
+  - id: codex-new
+    session: { ref: codex, mode: new }
+    model: gpt-6-luna
+    effort: medium
+    timeoutSec: 180
+    script: "Create INSTALLED_CODEX.txt containing exactly CODEX_NEW on its first line. Do not change other files. Reply READY."
+    completion: { fileExists: INSTALLED_CODEX.txt }
+    transitions:
+      - { when: success, next: codex-resume }
+      - { when: failure, next: ask }
+  - id: codex-resume
+    session: { ref: codex, mode: resume }
+    model: gpt-6-luna
+    effort: medium
+    timeoutSec: 180
+    script: "Append CODEX_RESUMED on a new line to INSTALLED_CODEX.txt from your previous turn. Do not change other files. Reply READY."
+    completion: { command: "grep -qx CODEX_RESUMED INSTALLED_CODEX.txt" }
+    transitions:
+      - { when: success, next: end }
+      - { when: failure, next: ask }

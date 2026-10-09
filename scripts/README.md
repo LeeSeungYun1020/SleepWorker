@@ -73,3 +73,18 @@ Phase 04는 이 보존 자료를 테스트 리소스로 사용한다. 과거 cwd
 
 공식 Codex 호출 참고: https://learn.chatgpt.com/docs/developer-commands#codex-exec
 실제 지원 플래그의 기준은 각 실행에 보존한 설치 바이너리의 도움말이다.
+
+## Phase 5 desktop release
+
+See [phase5-result.md](phase5-result.md) and
+[fixtures/phase5](fixtures/phase5/README.md) for installed DMG acceptance and remaining limits.
+Rebuild with `./gradlew build :desktopApp:packageDmg` from the repository root.
+The checked-in icon can be regenerated on macOS:
+
+```sh
+swift scripts/create-icon.swift /tmp/aiflow.iconset
+iconutil -c icns /tmp/aiflow.iconset -o desktopApp/src/main/resources/aiflow.icns
+```
+
+The phase fixtures are narrow isolated workflows; replacing their repoPath and running the
+Codex fixture is an explicit live model invocation. Ordinary builds/tests make no model calls.
