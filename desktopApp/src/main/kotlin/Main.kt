@@ -1,8 +1,8 @@
-import aiflow.platform.*
-import aiflow.storage.*
-import aiflow.engine.RunStatus
-import aiflow.ui.App
-import aiflow.ui.run.RunViewModel
+import sleepworker.platform.*
+import sleepworker.storage.*
+import sleepworker.engine.RunStatus
+import sleepworker.ui.App
+import sleepworker.ui.run.RunViewModel
 import androidx.compose.runtime.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.Row
@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
     val viewModel = RunViewModel(platform)
     Thread.setDefaultUncaughtExceptionHandler { _, error -> JvmAppLog.write(error); viewModel.fatalError.value = error.message ?: error.toString() }
     option("--repository")?.let(viewModel::openRepository)
-    val shutdown = Thread({ runBlocking { try { viewModel.close() } catch (e: Exception) { JvmAppLog.write(e) } } }, "aiflow-shutdown")
+    val shutdown = Thread({ runBlocking { try { viewModel.close() } catch (e: Exception) { JvmAppLog.write(e) } } }, "sleepworker-shutdown")
     Runtime.getRuntime().addShutdownHook(shutdown)
     application {
         val scope = rememberCoroutineScope()
@@ -66,7 +66,7 @@ fun main(args: Array<String>) {
                 }
             }
         }
-        Window(onCloseRequest = { requestClose() }, title = "aiflow", state = state) {
+        Window(onCloseRequest = { requestClose() }, title = APP_NAME, state = state) {
             MenuBar {
                 Menu("File") {
                     Item("새 워크플로", onClick = { viewModel.menu("new") }, enabled = editor != null && !busy, shortcut = KeyShortcut(Key.N, meta = true))
@@ -87,7 +87,7 @@ fun main(args: Array<String>) {
                     Item("계획서 열기", onClick = {
                         try {
                             val text = object {}.javaClass.getResourceAsStream("/plan.md")?.bufferedReader()?.use { it.readText() } ?: error("계획서 리소스 없음")
-                            val file = java.nio.file.Files.createTempFile("aiflow-plan-", ".md").toFile().apply { deleteOnExit(); writeText(text) }
+                            val file = java.nio.file.Files.createTempFile("sleepworker-plan-", ".md").toFile().apply { deleteOnExit(); writeText(text) }
                             Desktop.getDesktop().open(file)
                         } catch (e: Exception) { JvmAppLog.write(e); viewModel.fatalError.value = e.message }
                     })

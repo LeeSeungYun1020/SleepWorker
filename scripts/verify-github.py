@@ -57,8 +57,8 @@ def main():
     if not args.publish:
         if checked("initial-status", ["git", "status", "--porcelain"]):
             raise RuntimeError("worktree is dirty")
-        marker = wt / ".aiflow-phase0-smoke.md"
-        marker.write_text("# aiflow Phase 0 GitHub transport test\n\n"
+        marker = wt / ".sleepworker-phase0-smoke.md"
+        marker.write_text("# SleepWorker Phase 0 GitHub transport test\n\n"
                           "Temporary test fixture for a dedicated draft PR. Do not merge.\n"
                           "Validates exact reviewed SHA publication and open-PR reuse.\n"
                           "No Manicule application behavior is changed.\n")
@@ -70,9 +70,9 @@ def main():
         target = [head, base]
         save(root / "target.json", target)
         codex = args.codex
-        prompt = ("Read-only review for an aiflow CLI transport test; not a Manicule feature task. "
+        prompt = ("Read-only review for a SleepWorker CLI transport test; not a Manicule feature task. "
                   "Do not edit, delegate, publish or run network commands. Review git diff " + base + ".." + head +
-                  ". Only .aiflow-phase0-smoke.md should be added, describing a temporary draft PR that must not merge. "
+                  ". Only .sleepworker-phase0-smoke.md should be added, describing a temporary draft PR that must not merge. "
                   "If that is true, reply with first line exactly APPROVED; otherwise CHANGES_REQUESTED. "
                   "Second line must be " + head + "; third line " + base + ". Then a short rationale.")
         checked("review", command("codex", codex, wt, args.codex_model, effort=args.codex_effort), stdin=prompt, timeout=120,
@@ -90,10 +90,10 @@ def main():
         if not parsed["success"] or not publication_guard(review, target,
                 checked("reviewed-head", ["git", "rev-parse", "HEAD"]), base, dirty):
             raise RuntimeError("exact-SHA review guard failed")
-        body = ("## 🛠 작업 내역\n\n1. aiflow Phase 0의 GitHub push·draft PR 생성·재사용 계약을 검증하는 임시 문서 1개입니다.\n"
+        body = ("## 🛠 작업 내역\n\n1. SleepWorker Phase 0의 GitHub push·draft PR 생성·재사용 계약을 검증하는 임시 문서 1개입니다.\n"
                 "2. 기능 변경이 없으며 병합 대상이 아닙니다. 검증 후 이 테스트 PR을 닫습니다.\n\n"
                 "## 📝 특이 사항\n\n- 검증: 독립 복제본/워크트리, CLI 최종 성공, 깨끗한 작업 트리, 리뷰 head/base SHA 일치.\n"
-                "- 관련 Manicule 전체 계획 문서: 해당 없음(aiflow 외부 도구 통합 테스트).\n"
+                "- 관련 Manicule 전체 계획 문서: 해당 없음(SleepWorker 외부 도구 통합 테스트).\n"
                 "- 기존 이슈 해결·리뷰 요청·main 변경은 포함하지 않습니다.\n"
                 f"- 검토 head: `{head}`\n- 검토 base: `{base}`\n")
         (root / "pr-body.md").write_text(body)
@@ -121,7 +121,7 @@ def main():
     existing = json.loads(checked("existing-pr", query))
     if not existing:
         checked("create-pr", ["gh", "pr", "create", "--repo", state["githubRepo"], "--head", branch,
-            "--base", "main", "--draft", "--title", "[TEST][DO NOT MERGE] aiflow Phase 0 GitHub contract",
+            "--base", "main", "--draft", "--title", "[TEST][DO NOT MERGE] SleepWorker Phase 0 GitHub contract",
             "--body-file", str(prepared / "pr-body.md")])
     # Second pass must find/reuse the same open PR; never blindly create twice.
     prs = json.loads(checked("reuse-pr", query))

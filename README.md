@@ -1,4 +1,4 @@
-# aiflow
+# SleepWorker
 
 Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity and shell steps.
 Phases 1–5 implement workflow storage, provider adapters, execution, CLI preflight, graph editing,
@@ -15,9 +15,20 @@ Requires JDK 21; macOS is required for the DMG target.
 ./gradlew :desktopApp:packageDmg
 ```
 
-DMG output: `desktopApp/build/compose/binaries/main/dmg/aiflow-1.0.0.dmg`.
+DMG output: `desktopApp/build/compose/binaries/main/dmg/SleepWorker-1.0.0.dmg` (packaged application: `SleepWorker.app`).
 The package uses a major version of 1 because Apple's DMG packaging rejects `0.1.0`.
 This unsigned development package is not a notarized release.
+
+## Compatibility and persistence paths
+
+In this transition to SleepWorker, existing workflows, run histories, and user settings remain fully compatible without requiring data conversion:
+- Repository metadata, workflows, and execution records remain under `.aiflow/` (`.aiflow/workflows/`, `.aiflow/runs/`, `.aiflow/app.lock`).
+- User configuration remains at `~/Library/Application Support/aiflow/settings.json`.
+- Diagnostics log remains at `~/Library/Logs/aiflow/app.log`.
+- macOS bundle ID remains `dev.local.aiflow`.
+- Historical polymorphic event/decision serialization type identifiers (`aiflow.provider.AgentEvent.*`, `aiflow.engine.*`) are pinned and preserved for durable storage compatibility.
+
+Migrating persistence paths and bundle ID is treated as a separate, subsequent migration step.
 
 ## Modules
 
@@ -189,7 +200,7 @@ placeholder instruction and run it in a terminal. The command explicitly keeps t
 model/effort, binary and workspace; it uses the existing provider adapter's permission options.
 It is also available for unmeasured versions and models. Check the binary is still
 installed at the recorded path. Antigravity sessions remain tied to their original workspace.
-A manual terminal continuation is external to the saved aiflow run and creates no new visit.
+A manual terminal continuation is external to the saved SleepWorker run and creates no new visit.
 
 View Used Version opens the source version. Restore saves current edits as a draft, restores
 the historical graph to its draft, and requires saving a new version for a new run. It does not
@@ -218,7 +229,7 @@ crash-time process reattachment and interrupted-run continuation are outside thi
 macOS system notification permissions/Focus settings can prevent a delivered osascript command
 from producing a visible banner. User credentials remain the responsibility of each CLI.
 
-Differences from `airflow.md`: unknown authentication blocks execution. Measured contracts are
+Differences from `sleepworker.md`: unknown authentication blocks execution. Measured contracts are
 reference evidence rather than an execution allowlist. Manual resume copy uses the noninteractive
 command with an editable prompt, rather than assuming interactive flags. Large historical files
 use a 512 KB preview with an original-file path. Window geometry and CLI checks are additive
