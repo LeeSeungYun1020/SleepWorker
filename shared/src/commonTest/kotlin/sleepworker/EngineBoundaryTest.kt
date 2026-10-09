@@ -227,10 +227,10 @@ class EngineBoundaryTest {
         val fs = FakeFileSystem().apply { allowSymlinks = true }
         val h = EngineHarness(FakeProcessExecutor(), fs)
         fs.createDirectories("/elsewhere".toPath())
-        fs.createDirectories("/repo/.aiflow".toPath())
-        fs.createSymlink("/repo/.aiflow/runs".toPath(), "/elsewhere".toPath())
+        fs.createDirectories("/repo/.sleepworker".toPath())
+        fs.createSymlink("/repo/.sleepworker/runs".toPath(), "/elsewhere".toPath())
         assertFails { h.recorder.list() }
-        fs.delete("/repo/.aiflow/runs".toPath())
+        fs.delete("/repo/.sleepworker/runs".toPath())
         h.lease.release()
         assertFails { RunRecovery(h.recorder).recover() }
     }

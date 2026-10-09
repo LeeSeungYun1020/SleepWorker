@@ -154,7 +154,7 @@ fun RunScreen(vm: RunViewModel) {
                     a.result?.failure?.let { Text("${it.kind}: ${it.detail}", color = MaterialTheme.colorScheme.error) }
                     a.retrySkippedReason?.let { Text("자동 재시도 불가: $it") }
                 }
-                if (visit?.visitNo in truncated) Text("앞부분 로그 생략 — 파일에서 전체 보기: $repository/.aiflow/runs/${state?.runId}/logs.jsonl")
+                if (visit?.visitNo in truncated) Text("앞부분 로그 생략 — 파일에서 전체 보기: $repository/.sleepworker/runs/${state?.runId}/logs.jsonl")
                 val visible by produceState<List<LogLine>>(emptyList(), logs, visit?.visitNo, attempt?.attemptNo, phase, stderr) {
                     value = withContext(Dispatchers.Default) {
                         logs.filter { line -> line.visitNo == visit?.visitNo && (line.attemptNo == null || line.attemptNo == attempt?.attemptNo) && line.stream == (if (stderr) Stream.STDERR else Stream.STDOUT) && when (phase) {

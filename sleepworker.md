@@ -133,7 +133,7 @@ Workflow
 ### 초안·그래프 버전 저장
 
 - `WorkflowDraft(workflowId, restoredFrom?, workflow)`와 `WorkflowVersion(workflowId, versionId, createdAt, restoredFrom?, workflow)`를 YAML 최상위 구조로 저장한다. workflowId/versionId는 UUID이며 표시 이름과 독립적이다. 버전에는 그래프·스크립트·노드 배치를 함께 담는다.
-- 저장 경로는 `.aiflow/workflows/<workflowId>/draft.yaml`, `versions/<versionId>.yaml`. §4의 단독 Workflow YAML은 가져오기/내보내기 형식이다. 가져오기는 새 workflowId의 초안 생성 후 검증·버전 저장을 거친다.
+- 저장 경로는 `.sleepworker/workflows/<workflowId>/draft.yaml`, `versions/<versionId>.yaml`. §4의 단독 Workflow YAML은 가져오기/내보내기 형식이다. 가져오기는 새 workflowId의 초안 생성 후 검증·버전 저장을 거친다.
 - [저장]은 먼저 초안을 저장한다. 빈 start(`""`)·미연결 단계·빈 스크립트 등 검증 ERROR가 있어도 저장하고 다시 열 수 있다. ERROR가 없고 WARNING 확인을 마치면 실행 가능한 버전을 생성한다. WARNING 확인을 취소하면 초안만 유지한다. 파일시스템·로그인 등 현재 환경은 실행 전 프리플라이트에서 다시 확인한다.
 - 버전 파일은 불변이다. 최신 버전과 내용이 같고 복원 작업이 아니면 중복 생성하지 않는다. 초안과 버전 쓰기는 임시 파일 완성 후 확정하며, 실패 시 기존 파일을 보존한다. 초안만 저장되고 버전 생성이 실패하면 해당 상태를 표시하고 실행하지 않는다.
 - 이전 버전은 읽기 전용으로 열람하고 초안으로 복원할 수 있다. 복원 출처를 초안의 restoredFrom에 남기고, 이후 [저장] 시 새 versionId와 restoredFrom을 가진 버전을 만든다. 성공하면 초안의 복원 표시는 비운다. 원본·이후 버전·기존 런 참조를 덮어쓰지 않는다.
@@ -378,7 +378,7 @@ flowchart LR
 
 `(!)` 표시가 shell 단계. 나머지는 agent 단계. 화살표 번호는 출발 단계의 전이 평가 우선순위다. prepare-review는 깨끗한 워크트리의 검토 head/base SHA를 고정하고 이전 REVIEW.md를 비운다. review는 완료 확인에서 SHA·워크트리 상태를 검사하고 실패를 먼저 처리한다. 승인 분기는 첫 줄 정확 일치로만 결정한다. 상한 초과·조건 미매칭은 런타임 안전 정지로 표시하며 별도 저장 연결을 생성하지 않는다.
 
-예시 실행 전 준비: 샘플 저장소에 origin·main·Git 작성자 정보·사용 가능한 테스트 명령을 준비한다. `PLAN.md`, `GITLOG.md`, `VERIFY.md`, `REVIEW.md`, `REVIEW_TARGET.txt`, `.aiflow/`는 샘플의 로컬 exclude에 등록하고 추적하지 않아 작업 코드의 clean 검사와 분리한다. 앱은 이를 임의로 변경하지 않으며 Phase 0/06의 fixture 준비에서 수행한다. 생성된 보고서 경로는 예시 전용으로 예약한다.
+예시 실행 전 준비: 샘플 저장소에 origin·main·Git 작성자 정보·사용 가능한 테스트 명령을 준비한다. `PLAN.md`, `GITLOG.md`, `VERIFY.md`, `REVIEW.md`, `REVIEW_TARGET.txt`, `.sleepworker/`는 샘플의 로컬 exclude에 등록하고 추적하지 않아 작업 코드의 clean 검사와 분리한다. 앱은 이를 임의로 변경하지 않으며 Phase 0/06의 fixture 준비에서 수행한다. 생성된 보고서 경로는 예시 전용으로 예약한다.
 
 implement/fix에서 커밋하고 verify/review는 읽기·검증만 수행한다. publish는 승인된 커밋을 변경하지 않고 푸시·PR 생성/재사용만 한다. 검토 후 외부에서 브랜치를 수정하면 완료 확인 또는 publish 직전 재확인에서 실패해야 한다. 이는 예시 스크립트의 업무 규칙이며 엔진의 프롬프트 가공 기능이 아니다.
 
@@ -480,7 +480,7 @@ Visit: Preparing → Executing → Finalizing → Checking → 최종 결과
 
 ### 기록·재시작
 
-- `.aiflow/runs/<runId>/run.json`에 버전 참조와 스냅샷, 방문/시도·세션·카운터·중단 정보를 기록한다. 프로세스 시작 전 및 상태 변경/세션 ID 수신/종료 시 원자적으로 갱신한다. 로그/상태 쓰기 실패는 새 명령 시작을 막고 런 FAILED로 처리한다.
+- `.sleepworker/runs/<runId>/run.json`에 버전 참조와 스냅샷, 방문/시도·세션·카운터·중단 정보를 기록한다. 프로세스 시작 전 및 상태 변경/세션 ID 수신/종료 시 원자적으로 갱신한다. 로그/상태 쓰기 실패는 새 명령 시작을 막고 런 FAILED로 처리한다.
 - `visits/<visitNo>-<stepId>/visit.json`은 유효 모드·manualRetryOf·선택 전이·사용자 제어 기록을, `attempts/<attemptNo>/`는 실제 command/script·stdout/stderr·events·result를 보존한다. 자동 retry도 별도 디렉토리여서 최초 실패 원문이 사라지지 않는다.
 - 시도에 binary 경로/버전·적용 계약 ID·요청 모델/effort 및 CLI가 제공한 usage를 보존한다. 검증 기록에는 모델 선택 이유와 호출 수도 남긴다. 미관측 실제 모델·종료코드·비용은 추정하지 않는다.
 - completion 검사 자료는 시도 아래 `checks/completion/`, 전이 검사는 방문 아래 `checks/transitions/<index>/`, 준비/프리플라이트 명령은 각각 preparing/preflight 디렉토리에 보존한다. 저장 인덱스는 0 기반, UI 우선순위는 1 기반이다. 확정된 결과는 덮어쓰지 않고 활성 시도만 중단 상태로 마무리한다.
@@ -493,7 +493,7 @@ Visit: Preparing → Executing → Finalizing → Checking → 최종 결과
 ## 7. 아키텍처 & 디렉토리 (UI 공통 모듈)
 
 ```
-aiflow/
+SleepWorker/
 ├─ build.gradle.kts, settings.gradle.kts
 ├─ shared/                              # KMP 모듈 (compose 플러그인 적용)
 │  ├─ commonMain/

@@ -21,7 +21,7 @@ class WorkflowStore(
     private val now: () -> Instant = { Clock.System.now() },
 ) {
     private val mutex = lease.writeMutex
-    private val root = lease.repoPath / ".aiflow" / "workflows"
+    private val root = lease.repoPath / ".sleepworker" / "workflows"
     private fun id(value: String): String {
         require(Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}").matches(value)) { "Invalid application UUID" }
         return value
@@ -31,7 +31,7 @@ class WorkflowStore(
         val path = root / id(workflowId)
         // Reject symlink redirection at every existing boundary, including the repository metadata directory.
         var cursor = lease.repoPath
-        listOf(".aiflow", "workflows", workflowId, "versions").forEach {
+        listOf(".sleepworker", "workflows", workflowId, "versions").forEach {
             cursor /= it
             require(fs.metadataOrNull(cursor)?.symlinkTarget == null) { "Symlink storage path: $cursor" }
         }

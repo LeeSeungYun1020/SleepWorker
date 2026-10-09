@@ -18,7 +18,7 @@ compose.desktop {
             packageName = "SleepWorker"
             packageVersion = "1.0.0"
             modules("java.instrument", "java.management", "jdk.unsupported")
-            macOS { bundleID = "dev.local.aiflow"; iconFile.set(project.file("src/main/resources/sleepworker.icns")) }
+            macOS { bundleID = "dev.local.sleepworker"; iconFile.set(project.file("src/main/resources/sleepworker.icns")) }
         }
     }
 }

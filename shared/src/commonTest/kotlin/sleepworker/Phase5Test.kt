@@ -94,7 +94,7 @@ class Phase5Test {
     }
     @Test fun lazyArtifactPreviewIsBoundedAndDeletionRetainsVersions() = runTest {
         val run = run(); recorder.save(run); recorder.write(run.runId, "stdout.log", "a".repeat(1000))
-        fs.createDirectories("/repo/.aiflow/workflows/w/versions".toPath()); fs.write("/repo/.aiflow/workflows/w/versions/v.json".toPath()) { writeUtf8("immutable") }
+        fs.createDirectories("/repo/.sleepworker/workflows/w/versions".toPath()); fs.write("/repo/.sleepworker/workflows/w/versions/v.json".toPath()) { writeUtf8("immutable") }
         val history = HistoryViewModel(recorder, FakeProcessExecutor())
         history.select(run); assertEquals("", history.text.value)
         assertTrue(recorder.read(run.runId, "stdout.log", 100).contains("상한"))
@@ -102,13 +102,13 @@ class Phase5Test {
         assertFails { recorder.read(run.runId, "../escape") }
         assertFails { recorder.delete(run.runId, false) }
         history.delete(true); assertTrue(recorder.list().isEmpty())
-        assertTrue(fs.exists("/repo/.aiflow/workflows/w/versions/v.json".toPath()))
+        assertTrue(fs.exists("/repo/.sleepworker/workflows/w/versions/v.json".toPath()))
     }
     @Test fun activeAndSymlinkedRecordsCannotBeDeletedOrRead() = runTest {
         val active = run(RunStatus.RUNNING); recorder.save(active)
         assertFails { recorder.delete(active.runId, true) }
         fs.write("/outside".toPath()) { writeUtf8("private") }
-        fs.createSymlink("/repo/.aiflow/runs/${active.runId}/stdout.log".toPath(), "/outside".toPath())
+        fs.createSymlink("/repo/.sleepworker/runs/${active.runId}/stdout.log".toPath(), "/outside".toPath())
         assertFails { recorder.files(active.runId) }; assertFails { recorder.read(active.runId, "stdout.log") }
         assertEquals("private", fs.read("/outside".toPath()) { readUtf8() })
     }

@@ -24,7 +24,7 @@ class JvmTempFiles : TempFiles {
 class JvmRepositoryLock : RepositoryLock {
     override fun acquire(repoPath: Path): RepositoryLease {
         val canonical = java.nio.file.Path.of(repoPath.toString()).toRealPath()
-        val metadata = canonical.resolve(".aiflow")
+        val metadata = canonical.resolve(".sleepworker")
         require(!Files.isSymbolicLink(metadata)) { "Repository metadata cannot be a symlink" }
         Files.createDirectories(metadata)
         val lockPath = metadata.resolve("app.lock")
@@ -91,7 +91,7 @@ class MacNotifier(private val executor: ProcessExecutor) : Notifier {
 fun desktopPlatform(): Platform {
     val executor = JvmProcessExecutor()
     return Platform(executor, FileSystem.SYSTEM, JvmTempFiles(), MacNotifier(executor), ZshPathDetector(executor), JvmRepositoryLock(),
-        System.getProperty("user.home").toPath() / "Library" / "Application Support" / "aiflow" / "settings.json", JvmFileDialogs(), JvmAppLog::write)
+        System.getProperty("user.home").toPath() / "Library" / "Application Support" / "SleepWorker" / "settings.json", JvmFileDialogs(), JvmAppLog::write)
 }
 
 class JvmFileDialogs : FileDialogs {

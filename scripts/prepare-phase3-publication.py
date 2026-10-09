@@ -27,7 +27,7 @@ subprocess.run(['git', '-C', str(repo), 'remote', 'set-url', 'origin', remote], 
 subprocess.run(['git', '-C', str(repo), 'switch', '-c', branch], check=True)
 for key, value in [('user.name', 'Phase3 acceptance'), ('user.email', 'phase3@example.invalid')]:
     subprocess.run(['git', '-C', str(repo), 'config', key, value], check=True)
-meta = repo / '.aiflow'; meta.mkdir(exist_ok=True)
+meta = repo / '.sleepworker'; meta.mkdir(exist_ok=True)
 manifest = meta / 'publication-manifest.json'
 save(manifest, dict(repo='LeeSeungYun1020/SleepWorker', remote=remote, worktree=str(repo),
                     branch=branch, baseBranch=base, account='LeeSeungYun1020'))
@@ -44,11 +44,11 @@ manifestarg = q(str(manifest))
 def shell(id, script, next):
     return dict(id=id, kind='shell', workspace='local', script=script, timeoutSec=120,
                 transitions=[dict(when='success', next=next), dict(when='otherwise', next='ask')])
-review = ('Read only .aiflow/review-target.json and git diff of its second SHA (base) to first SHA (head). '
+review = ('Read only .sleepworker/review-target.json and git diff of its second SHA (base) to first SHA (head). '
           'This is a disposable publication test, not a product implementation task. Verify that only '
           'PHASE3_PUBLICATION_TEST.md was added and says this is temporary and must not merge. '
           'Do not edit source, run tests, delegate, publish, or call other models. '
-          'Write .aiflow/REVIEW.md with first line exactly APPROVED if that condition holds, otherwise CHANGES_REQUESTED; '
+          'Write .sleepworker/REVIEW.md with first line exactly APPROVED if that condition holds, otherwise CHANGES_REQUESTED; '
           'second line the exact head SHA; third line the exact base SHA; then a short rationale. Reply briefly.')
 steps = [
     shell('sync', 'git fetch origin ' + q(base) + ' && test "$(git rev-parse HEAD)" = ' + q(sha), 'fixture'),
@@ -59,7 +59,7 @@ steps = [
          script=review, timeoutSec=180, completion='exitCode', transitions=[dict(when='success', next='publish'), dict(when='otherwise', next='ask')]),
     shell('publish', cmd + ' publish ' + manifestarg, 'reuse'),
     shell('reuse', cmd + ' publish ' + manifestarg, 'log'),
-    shell('log', 'cat .aiflow/publication.json', 'end'),
+    shell('log', 'cat .sleepworker/publication.json', 'end'),
 ]
 w = dict(name='Phase 3 · actual publication tail (Luna review)', repoPath=str(repo), baseBranch=base,
          start='sync', maxSteps=10, sessions=dict(reviewer=dict(provider='codex', workspace='local')), steps=steps)

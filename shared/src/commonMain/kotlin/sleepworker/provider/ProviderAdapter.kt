@@ -29,13 +29,13 @@ data class ProviderConfig(val binaryPath: String, val cwd: String, val version: 
 @Serializable data class FailureInfo(val kind: FailureKind, val phase: FailurePhase, val detail: String)
 @Serializable data class ProviderReport(val outcome: ProviderOutcome, val sessionId: String?, val finalOutput: String?, val failure: FailureInfo?, val finalEvents: List<AgentEvent>, val usage: JsonElement? = null)
 @Serializable sealed interface AgentEvent {
-    @Serializable @SerialName("aiflow.provider.AgentEvent.SessionStarted") data class SessionStarted(val id: String) : AgentEvent
-    @Serializable @SerialName("aiflow.provider.AgentEvent.Message") data class Message(val text: String) : AgentEvent
-    @Serializable @SerialName("aiflow.provider.AgentEvent.ToolCall") data class ToolCall(val raw: String) : AgentEvent
-    @Serializable @SerialName("aiflow.provider.AgentEvent.Diagnostic") data class Diagnostic(val text: String) : AgentEvent
-    @Serializable @SerialName("aiflow.provider.AgentEvent.Raw") data class Raw(val text: String, val stream: Stream) : AgentEvent
-    @Serializable @SerialName("aiflow.provider.AgentEvent.Completed") data object Completed : AgentEvent
-    @Serializable @SerialName("aiflow.provider.AgentEvent.Failed") data class Failed(val failure: FailureInfo) : AgentEvent
+    @Serializable @SerialName("sleepworker.provider.AgentEvent.SessionStarted") data class SessionStarted(val id: String) : AgentEvent
+    @Serializable @SerialName("sleepworker.provider.AgentEvent.Message") data class Message(val text: String) : AgentEvent
+    @Serializable @SerialName("sleepworker.provider.AgentEvent.ToolCall") data class ToolCall(val raw: String) : AgentEvent
+    @Serializable @SerialName("sleepworker.provider.AgentEvent.Diagnostic") data class Diagnostic(val text: String) : AgentEvent
+    @Serializable @SerialName("sleepworker.provider.AgentEvent.Raw") data class Raw(val text: String, val stream: Stream) : AgentEvent
+    @Serializable @SerialName("sleepworker.provider.AgentEvent.Completed") data object Completed : AgentEvent
+    @Serializable @SerialName("sleepworker.provider.AgentEvent.Failed") data class Failed(val failure: FailureInfo) : AgentEvent
 }
 sealed interface AuthStatus {
     data object LoggedIn : AuthStatus

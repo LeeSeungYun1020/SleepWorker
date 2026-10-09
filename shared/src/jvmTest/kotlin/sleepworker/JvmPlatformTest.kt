@@ -81,7 +81,7 @@ class JvmPlatformTest {
             try { assertFails { JvmRepositoryLock().acquire(dir.resolve(".").toString().toPath()) } } finally { lease.release() }
             assertFails { lease.requireHeld() }
             locks.acquire(dir.toString().toPath()).release()
-            assertTrue(Files.exists(dir.resolve(".aiflow/app.lock")))
+            assertTrue(Files.exists(dir.resolve(".sleepworker/app.lock")))
         } finally { dir.toFile().deleteRecursively() }
     }
     @Test fun tempScriptPreservesContentAndCleansUp() {

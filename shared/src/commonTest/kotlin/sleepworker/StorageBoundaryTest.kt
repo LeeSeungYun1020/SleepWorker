@@ -59,7 +59,7 @@ class StorageBoundaryTest {
     @Test fun symlinkStorageEscapeRejected() = runTest {
         val store = WorkflowStore(fs, lease)
         fs.createDirectories("/elsewhere".toPath())
-        fs.createSymlink("/repo/.aiflow".toPath(), "/elsewhere".toPath())
+        fs.createSymlink("/repo/.sleepworker".toPath(), "/elsewhere".toPath())
         assertFails { store.importYaml(WorkflowCodec().encode(workflow(shell()))) }
         assertTrue(fs.list("/elsewhere".toPath()).isEmpty())
     }

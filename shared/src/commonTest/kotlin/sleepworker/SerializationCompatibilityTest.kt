@@ -11,15 +11,15 @@ class SerializationCompatibilityTest {
     private val json = Json { ignoreUnknownKeys = true }
 
     @Test
-    fun agentEventSubclassesPreserveHistoricalTypeNames() {
+    fun agentEventSubclassesPreserveTypeNames() {
         val cases: List<Pair<AgentEvent, String>> = listOf(
-            AgentEvent.Raw("hello", Stream.STDOUT) to "aiflow.provider.AgentEvent.Raw",
-            AgentEvent.SessionStarted("s-1") to "aiflow.provider.AgentEvent.SessionStarted",
-            AgentEvent.Message("msg") to "aiflow.provider.AgentEvent.Message",
-            AgentEvent.ToolCall("tool") to "aiflow.provider.AgentEvent.ToolCall",
-            AgentEvent.Diagnostic("diag") to "aiflow.provider.AgentEvent.Diagnostic",
-            AgentEvent.Completed to "aiflow.provider.AgentEvent.Completed",
-            AgentEvent.Failed(FailureInfo(FailureKind.EXIT_CODE, FailurePhase.EXECUTING, "bad")) to "aiflow.provider.AgentEvent.Failed"
+            AgentEvent.Raw("hello", Stream.STDOUT) to "sleepworker.provider.AgentEvent.Raw",
+            AgentEvent.SessionStarted("s-1") to "sleepworker.provider.AgentEvent.SessionStarted",
+            AgentEvent.Message("msg") to "sleepworker.provider.AgentEvent.Message",
+            AgentEvent.ToolCall("tool") to "sleepworker.provider.AgentEvent.ToolCall",
+            AgentEvent.Diagnostic("diag") to "sleepworker.provider.AgentEvent.Diagnostic",
+            AgentEvent.Completed to "sleepworker.provider.AgentEvent.Completed",
+            AgentEvent.Failed(FailureInfo(FailureKind.EXIT_CODE, FailurePhase.EXECUTING, "bad")) to "sleepworker.provider.AgentEvent.Failed"
         )
         for ((event, expectedType) in cases) {
             val encoded = json.encodeToString<AgentEvent>(event)
@@ -30,11 +30,11 @@ class SerializationCompatibilityTest {
     }
 
     @Test
-    fun checkResultSubclassesPreserveHistoricalTypeNames() {
+    fun checkResultSubclassesPreserveTypeNames() {
         val cases: List<Pair<CheckResult, String>> = listOf(
-            CheckResult.Met to "aiflow.engine.CheckResult.Met",
-            CheckResult.NotMet to "aiflow.engine.CheckResult.NotMet",
-            CheckResult.Error("boom") to "aiflow.engine.CheckResult.Error"
+            CheckResult.Met to "sleepworker.engine.CheckResult.Met",
+            CheckResult.NotMet to "sleepworker.engine.CheckResult.NotMet",
+            CheckResult.Error("boom") to "sleepworker.engine.CheckResult.Error"
         )
         for ((check, expectedType) in cases) {
             val encoded = json.encodeToString<CheckResult>(check)
@@ -45,11 +45,11 @@ class SerializationCompatibilityTest {
     }
 
     @Test
-    fun decisionSubclassesPreserveHistoricalTypeNames() {
+    fun decisionSubclassesPreserveTypeNames() {
         val cases: List<Pair<Decision, String>> = listOf(
-            Decision.NextStep("step-2", false, 0) to "aiflow.engine.Decision.NextStep",
-            Decision.End to "aiflow.engine.Decision.End",
-            Decision.Ask("user confirmation") to "aiflow.engine.Decision.Ask"
+            Decision.NextStep("step-2", false, 0) to "sleepworker.engine.Decision.NextStep",
+            Decision.End to "sleepworker.engine.Decision.End",
+            Decision.Ask("user confirmation") to "sleepworker.engine.Decision.Ask"
         )
         for ((decision, expectedType) in cases) {
             val encoded = json.encodeToString<Decision>(decision)
@@ -60,8 +60,8 @@ class SerializationCompatibilityTest {
     }
 
     @Test
-    fun deserializesHistoricalEventsJsonlLine() {
-        val rawLine = """{"type":"aiflow.provider.AgentEvent.Raw","text":"sync ready","stream":"STDOUT"}"""
+    fun deserializesEventsJsonlLine() {
+        val rawLine = """{"type":"sleepworker.provider.AgentEvent.Raw","text":"sync ready","stream":"STDOUT"}"""
         val decoded = json.decodeFromString<AgentEvent>(rawLine)
         assertEquals(AgentEvent.Raw("sync ready", Stream.STDOUT), decoded)
     }

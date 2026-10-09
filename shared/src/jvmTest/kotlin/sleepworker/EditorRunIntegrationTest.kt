@@ -67,7 +67,7 @@ class EditorRunIntegrationTest {
             withTimeout(10_000) { vm.error.first { it != null } }
             assertNull(vm.state.value); assertEquals(1, vm.history.value.size)
             assertTrue(vm.error.value!!.contains("편집 내용과 저장 버전"))
-            println("PHASE4_LOCAL_EVIDENCE=$repo/.aiflow")
+            println("PHASE4_LOCAL_EVIDENCE=$repo/.sleepworker")
         } finally { vm.close() }
         val reopened = RunViewModel(platform)
         try {

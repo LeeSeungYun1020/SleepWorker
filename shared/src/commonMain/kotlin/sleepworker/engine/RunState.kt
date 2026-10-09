@@ -12,9 +12,9 @@ import kotlinx.serialization.Serializable
 }
 @Serializable enum class StepStatus { PENDING, PREPARING, EXECUTING, FINALIZING, CHECKING, SUCCEEDED, RETRYING, AWAITING_USER, SKIPPED, FAILED, INTERRUPTED }
 @Serializable sealed interface CheckResult {
-    @Serializable @SerialName("aiflow.engine.CheckResult.Met") data object Met : CheckResult
-    @Serializable @SerialName("aiflow.engine.CheckResult.NotMet") data object NotMet : CheckResult
-    @Serializable @SerialName("aiflow.engine.CheckResult.Error") data class Error(val reason: String) : CheckResult
+    @Serializable @SerialName("sleepworker.engine.CheckResult.Met") data object Met : CheckResult
+    @Serializable @SerialName("sleepworker.engine.CheckResult.NotMet") data object NotMet : CheckResult
+    @Serializable @SerialName("sleepworker.engine.CheckResult.Error") data class Error(val reason: String) : CheckResult
 }
 @Serializable data class CommandResult(val exitCode: Int? = null, val termination: Termination = Termination.NORMAL, val stdout: List<String> = emptyList(), val stderr: List<String> = emptyList(), val elapsedMs: Long = 0, val error: String? = null, val cleanupError: String? = null, val bodyStarted: Boolean = false)
 @Serializable data class CheckRecord(val result: CheckResult, val command: CommandResult? = null)
@@ -24,9 +24,9 @@ import kotlinx.serialization.Serializable
 @Serializable data class SessionBinding(val id: String, val provider: Provider, val workspace: String)
 @Serializable data class TransitionTaken(val stepId: String, val index: Int, val condition: Condition, val target: Target)
 @Serializable sealed interface Decision {
-    @Serializable @SerialName("aiflow.engine.Decision.NextStep") data class NextStep(val id: String, val resetSession: Boolean, val transitionIndex: Int) : Decision
-    @Serializable @SerialName("aiflow.engine.Decision.End") data object End : Decision
-    @Serializable @SerialName("aiflow.engine.Decision.Ask") data class Ask(val reason: String) : Decision
+    @Serializable @SerialName("sleepworker.engine.Decision.NextStep") data class NextStep(val id: String, val resetSession: Boolean, val transitionIndex: Int) : Decision
+    @Serializable @SerialName("sleepworker.engine.Decision.End") data object End : Decision
+    @Serializable @SerialName("sleepworker.engine.Decision.Ask") data class Ask(val reason: String) : Decision
 }
 @Serializable data class UserControl(val action: String, val timestamp: Instant)
 @Serializable data class StepVisit(val visitNo: Int, val stepId: String, val status: StepStatus, val startedAt: Instant, val endedAt: Instant? = null, val effectiveMode: SessionMode? = null, val manualRetryOf: Int? = null, val boundSessionId: String? = null, val attempts: List<AttemptRecord> = emptyList(), val result: StepResult? = null, val transitionTaken: TransitionTaken? = null, val conditionEvaluations: Map<Int, CheckRecord> = emptyMap(), val decision: Decision? = null, val controls: List<UserControl> = emptyList())

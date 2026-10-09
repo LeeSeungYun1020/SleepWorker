@@ -1,4 +1,4 @@
-# aiflow 단계별 실행 계획 — 개요
+# SleepWorker 단계별 실행 계획 — 개요
 
 기준 문서: `sleepworker.md` (확정 계획서)
 

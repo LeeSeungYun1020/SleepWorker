@@ -46,7 +46,7 @@ fun HistoryScreen(vm: RunViewModel, onEditor: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row { Text("실행 히스토리", Modifier.weight(1f), style = MaterialTheme.typography.headlineMedium); OutlinedButton({ vm.refreshHistory() }, enabled = !busy && !active) { Text("새로고침") } }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (ignored == false) Text(".aiflow/runs/가 Git ignore 규칙에 없습니다. 필요하면 직접 .gitignore에 추가하세요.")
+        if (ignored == false) Text(".sleepworker/runs/가 Git ignore 규칙에 없습니다. 필요하면 직접 .gitignore에 추가하세요.")
         if (active) Text("실행 종료 후 기록과 워크트리를 관리할 수 있습니다.")
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -97,7 +97,7 @@ fun HistoryScreen(vm: RunViewModel, onEditor: () -> Unit) {
                             TextButton({ vm.readHistoryFile(relative) }, enabled = !busy && !active) { Text(relative) }
                         }
                     }
-                    file?.let { Text("$repository/.aiflow/runs/${selected.runId}/$it"); SelectionContainer { Text(text, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) } }
+                    file?.let { Text("$repository/.sleepworker/runs/${selected.runId}/$it"); SelectionContainer { Text(text, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) } }
                 }
                 Text("워크트리", style = MaterialTheme.typography.titleMedium)
                 worktrees.forEach { entry -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

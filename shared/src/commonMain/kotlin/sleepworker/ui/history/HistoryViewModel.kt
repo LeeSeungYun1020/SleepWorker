@@ -42,7 +42,7 @@ class HistoryViewModel(private val recorder: RunRecorder, processes: ProcessExec
         val result = git(listOf("worktree", "list", "--porcelain"))
         check(result.exitCode == 0) { result.stderr.joinToString("\n") }
         worktrees.value = parseWorktrees(result.stdout.joinToString("\n"))
-        val ignore = git(listOf("check-ignore", "--no-index", ".aiflow/runs/sleepworker-ignore-probe"))
+        val ignore = git(listOf("check-ignore", "--no-index", ".sleepworker/runs/sleepworker-ignore-probe"))
         check(ignore.exitCode in listOf(0, 1)) { ignore.stderr.joinToString("\n") }
         ignored.value = ignore.exitCode == 0
     }

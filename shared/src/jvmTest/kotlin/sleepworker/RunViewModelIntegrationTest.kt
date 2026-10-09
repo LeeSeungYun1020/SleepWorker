@@ -52,8 +52,8 @@ class RunViewModelIntegrationTest {
             withTimeout(10_000) { while (notified.none { "실행 완료" in it }) delay(20) }
             assertEquals(1, notified.count { "실행 완료" in it })
             assertTrue(vm.logs.value.any { it.text == "complete" })
-            assertTrue(FileSystem.SYSTEM.exists("$repo/.aiflow/runs/${done.runId}/run.json".toPath()))
-            val evidence = directory.resolve(".aiflow/runs/${done.runId}/preflight")
+            assertTrue(FileSystem.SYSTEM.exists("$repo/.sleepworker/runs/${done.runId}/run.json".toPath()))
+            val evidence = directory.resolve(".sleepworker/runs/${done.runId}/preflight")
             assertTrue(evidence.resolve("expected.json").isFile)
             val recorded = kotlinx.serialization.json.Json.decodeFromString<PreflightReport>(evidence.resolve("report.json").readText())
             assertTrue(recorded.passed)
@@ -65,7 +65,7 @@ class RunViewModelIntegrationTest {
             assertTrue(probes.all { it.resolve("stdout.log").isFile && it.resolve("stderr.log").isFile && it.resolve("process.json").isFile })
             vm.showHistory(done)
             withTimeout(10_000) { vm.logs.first { it.any { line -> line.text == "complete" } } }
-            println("PHASE3_LOCAL_EVIDENCE=$repo/.aiflow/runs/${done.runId}")
+            println("PHASE3_LOCAL_EVIDENCE=$repo/.sleepworker/runs/${done.runId}")
         } finally { vm.close() }
         // Reopening reacquires ownership and discovers history without starting a process.
         val reopened = RunViewModel(platform)

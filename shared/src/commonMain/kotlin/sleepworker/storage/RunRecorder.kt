@@ -17,11 +17,11 @@ class RecordingException(cause: Throwable) : Exception("Run recording failed: ${
 @OptIn(ExperimentalUuidApi::class)
 class RunRecorder(val fs: FileSystem, val lease: RepositoryLease) {
     val json = Json { prettyPrint = true; encodeDefaults = true }
-    private val root = lease.repoPath / ".aiflow" / "runs"
+    private val root = lease.repoPath / ".sleepworker" / "runs"
     private fun path(runId: String, relative: String): Path {
         lease.requireHeld()
         require(Regex("[0-9]{8}-[0-9]{6}-[0-9a-f]{8,32}").matches(runId)) { "Invalid run ID" }
-        val parts = listOf(".aiflow", "runs", runId) + relative.split('/').filter { it.isNotEmpty() }
+        val parts = listOf(".sleepworker", "runs", runId) + relative.split('/').filter { it.isNotEmpty() }
         var result = lease.repoPath
         parts.forEach {
             require(it != "." && it != ".." && '\\' !in it)

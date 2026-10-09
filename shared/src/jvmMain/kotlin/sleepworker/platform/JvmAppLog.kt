@@ -6,7 +6,7 @@ import java.nio.file.StandardOpenOption
 import java.time.Instant
 
 object JvmAppLog {
-    private val path = Path.of(System.getProperty("user.home"), "Library", "Logs", "aiflow", "app.log")
+    private val path = Path.of(System.getProperty("user.home"), "Library", "Logs", "SleepWorker", "app.log")
     @Synchronized fun write(error: Throwable) {
         try {
             Files.createDirectories(path.parent)

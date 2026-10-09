@@ -58,7 +58,7 @@ class Publication:
         self.m = read(self.path)
         validate_manifest(self.m)
         self.cwd = Path(self.m['worktree']).resolve()
-        self.meta = self.cwd / '.aiflow'
+        self.meta = self.cwd / '.sleepworker'
         self.env = None
         self.account = account or self.m['account']
         if self.git('remote', 'get-url', 'origin') != self.m['remote']:
