@@ -12,4 +12,4 @@ __pycache__/
 *.iml
 
 # Local workflow runtime and agent handoff artifacts
-.aiflow/
+.sleepworker/
