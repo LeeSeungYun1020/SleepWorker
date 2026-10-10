@@ -15,6 +15,8 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
 
 @Composable
 fun SelectField(label: String, value: String, options: List<String>, enabled: Boolean = true, onSelect: (String) -> Unit) =
@@ -42,7 +44,13 @@ fun ComboField(label: String, value: String, suggestions: List<String>, enabled:
 }
 @Composable
 fun <T> SegmentedChoice(options: List<T>, selected: T, label: (T) -> String, enabled: Boolean = true, onSelect: (T) -> Unit) {
-    SingleChoiceSegmentedButtonRow { options.forEachIndexed { i, option -> SegmentedButton(selected = option == selected, onClick = { onSelect(option) }, enabled = enabled, shape = SegmentedButtonDefaults.itemShape(i, options.size)) { Text(label(option)) } } }
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val style = MaterialTheme.typography.labelLarge
+    val labels = options.map(label)
+    // Reserve the selected icon, its gap and horizontal padding in every segment.
+    val segmentWidth = with(density) { (labels.maxOfOrNull { measurer.measure(it, style, softWrap = false).size.width } ?: 0).toDp() } + 56.dp
+    SingleChoiceSegmentedButtonRow(Modifier.width(segmentWidth * options.size - 1.dp * (options.size - 1).coerceAtLeast(0))) { options.forEachIndexed { i, option -> SegmentedButton(selected = option == selected, onClick = { onSelect(option) }, enabled = enabled, shape = SegmentedButtonDefaults.itemShape(i, options.size)) { Text(label(option), maxLines = 1, softWrap = false) } } }
 }
 /** Failed commits retain input and stay editable; Escape restores the accepted value. */
 @Composable

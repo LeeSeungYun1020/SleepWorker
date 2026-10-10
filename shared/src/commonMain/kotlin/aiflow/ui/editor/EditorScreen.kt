@@ -243,8 +243,8 @@ private fun StepPanel(vm: EditorViewModel, w: Workflow, s: Step, onDelete: () ->
         }
     }
     Text("단계 속성", style = MaterialTheme.typography.titleMedium)
-    Box(Modifier.bringIntoViewRequester(idRequest)) { CommitTextField("단계 ID", s.id, enabled, validate = { name -> if (!WorkflowValidator.SAFE_NAME.matches(name) || name in GraphLayout.special || w.steps.any { it.id == name && it.id != s.id }) "중복·예약어 또는 잘못된 ID" else null }) { vm.renameNode(s.id, it) } }
     SectionCard("기본 정보") {
+    Box(Modifier.bringIntoViewRequester(idRequest)) { CommitTextField("단계 ID", s.id, enabled, validate = { name -> if (!WorkflowValidator.SAFE_NAME.matches(name) || name in GraphLayout.special || w.steps.any { it.id == name && it.id != s.id }) "중복·예약어 또는 잘못된 ID" else null }) { vm.renameNode(s.id, it) } }
     EditorField("제목", s.title.orEmpty(), { value -> vm.updateStep(s.id, "title") { it.copy(title = value) } })
     Row { TextButton({ vm.setStart(s.id) }, enabled = enabled) { Text("시작 단계로 지정") }; TextButton({ vm.duplicateNode(s.id) }, enabled = enabled) { Text("복제") }; TextButton(onDelete, enabled = enabled, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("삭제") } }
     SegmentedChoice(StepKind.entries, s.effectiveKind, { if (it == StepKind.AGENT) "에이전트" else "셸" }, enabled) { vm.setKind(s.id, it) }
@@ -360,7 +360,6 @@ private class ShellHighlight(val comment: Color, val string: Color, val keyword:
 private fun ScriptEditor(script: String, change: (String) -> Unit, shell: Boolean, enabled: Boolean) {
     var value by remember { mutableStateOf(TextFieldValue(script)) }
     LaunchedEffect(script) { if (script != value.text) value = value.copy(text = script, selection = TextRange(value.selection.start.coerceAtMost(script.length), value.selection.end.coerceAtMost(script.length))) }
-    Text("스크립트 · 첫 비공백 ! 입력/삭제로 모드 전환", style = MaterialTheme.typography.labelSmall)
     Row(Modifier.fillMaxWidth().heightIn(min = 230.dp).border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.small).padding(8.dp)) {
         Text((1..maxOf(12, script.count { it == '\n' } + 1)).joinToString("\n"), fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(end = 8.dp))
         BasicTextField(value, { value = it; change(it.text) }, enabled = enabled, textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurface), visualTransformation = if (shell) ShellHighlight(LocalStatusColors.current.comment, LocalStatusColors.current.string, MaterialTheme.colorScheme.primary) else VisualTransformation.None,
