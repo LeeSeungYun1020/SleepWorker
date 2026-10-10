@@ -14,7 +14,9 @@ import kotlin.uuid.Uuid
 @Serializable enum class NotificationEvent { COMPLETED, FAILED, AWAITING_USER, PAUSED }
 @Serializable data class WindowGeometry(val width: Int = 1280, val height: Int = 850, val x: Int? = null, val y: Int? = null)
 @Serializable data class CliCheck(val path: String, val version: String?, val contractId: String?, val checkedAt: Instant, val diagnostic: String)
+@Serializable enum class ThemeMode { SYSTEM, LIGHT, DARK }
 @Serializable data class AppSettings(
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val codexPath: String? = null,
     val agyPath: String? = null,
     val codexModels: List<String> = emptyList(),

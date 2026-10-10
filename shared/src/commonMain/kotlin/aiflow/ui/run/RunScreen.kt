@@ -1,6 +1,10 @@
 package aiflow.ui.run
 
 import aiflow.engine.*
+import aiflow.ui.components.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+import kotlinx.coroutines.launch
 import aiflow.model.*
 import aiflow.provider.*
 import androidx.compose.foundation.*
@@ -33,15 +37,15 @@ fun RunScreen(vm: RunViewModel) {
     val busy by vm.busy.collectAsState()
     val error by vm.error.collectAsState()
     val repository by vm.repository.collectAsState()
-    var repo by remember { mutableStateOf("") }
-    LaunchedEffect(repository) { if (repository != null) repo = repository!! }
+    val scope = rememberCoroutineScope()
     var showTimeline by remember { mutableStateOf(true) }
     var yaml by remember { mutableStateOf("") }
-    var versionMenu by remember { mutableStateOf(false) }
+
     var historyMenu by remember { mutableStateOf(false) }
     var abortConfirm by remember { mutableStateOf(false) }
     var selectedVisit by remember(state?.runId) { mutableStateOf<Int?>(null) }
     var selectedAttempt by remember(selectedVisit, state?.runId) { mutableStateOf<Int?>(null) }
+    var showTarget by remember(state?.runId) { mutableStateOf(state == null) }
     var showPreflight by remember(state?.runId) { mutableStateOf(false) }
     var phase by remember(selectedVisit) { mutableStateOf("전체") }
     var stderr by remember { mutableStateOf(false) }
@@ -62,29 +66,27 @@ fun RunScreen(vm: RunViewModel) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
     val compact = maxWidth < 840.dp
     Column(Modifier.fillMaxSize().padding(if (compact) 12.dp else 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(repo, { repo = it }, label = { Text("저장소 절대 경로") }, modifier = Modifier.weight(1f), singleLine = true)
-            OutlinedButton({ vm.openRepository(repo) }, enabled = !active && !busy && repo.isNotBlank()) { Text("열기") }
-            OutlinedTextField(yaml, { yaml = it }, label = { Text("가져올 YAML 경로") }, modifier = Modifier.weight(1f), singleLine = true)
-            OutlinedButton({ vm.importYaml(yaml) }, enabled = repository != null && !active && !busy && yaml.isNotBlank()) { Text("버전 가져오기") }
+        if (repository == null) { EmptyState("실행할 저장소를 여세요", "상단에서 Git 저장소를 선택하면 저장 버전을 실행할 수 있습니다."); return@Column }
+        if (state != null) TextButton({ showTarget = !showTarget }) { Text(if (showTarget) "실행 대상 접기" else "실행 대상 변경 · ${selected?.workflow?.name.orEmpty()}") }
+        if (showTarget || state == null) SectionCard("실행 대상") {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(yaml, { yaml = it }, label = { Text("가져올 YAML 경로") }, modifier = Modifier.trackTextInputFocus().weight(1f), singleLine = true,
+                    trailingIcon = { ToolIcon("YAML 파일 선택", Icons.Outlined.FolderOpen, !active && !busy) { scope.launch { vm.chooseYaml()?.let { yaml = it } } } })
+                OutlinedButton({ vm.importYaml(yaml) }, enabled = !active && !busy && yaml.isNotBlank()) { Text("버전 가져오기") }
+            }
+            SelectField("저장 버전", selected, versions, { "${it.workflow.name} · ${it.versionId.take(8)} · ${it.createdAt}" }, !active && !busy, vm::select)
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Box {
-                OutlinedButton({ versionMenu = true }, enabled = !active && !busy) { Text(selected?.workflow?.name ?: "저장 버전 선택") }
-                DropdownMenu(versionMenu, { versionMenu = false }) { versions.forEach { v ->
-                    DropdownMenuItem(text = { Text("${v.workflow.name} · ${v.versionId.take(8)} · ${v.createdAt}") }, onClick = { vm.select(v); versionMenu = false })
-                } }
-            }
             FilledTonalButton({ vm.runPreflight() }, enabled = selected != null && !active && !busy) { Text("프리플라이트") }
             Button({ vm.start() }, enabled = report?.passed == true && report?.version == selected && !active && !busy) { Text("새 실행") }
             OutlinedButton({ vm.pause() }, enabled = state?.status == RunStatus.RUNNING) { Text("일시정지") }
             OutlinedButton({ vm.resume() }, enabled = state?.status == RunStatus.PAUSED) { Text("재개") }
-            OutlinedButton({ abortConfirm = true }, enabled = active) { Text("강제 중지") }
+            OutlinedButton({ abortConfirm = true }, enabled = active, colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("강제 중지") }
             Box {
                 TextButton({ historyMenu = true }, enabled = !active && !busy) { Text("기록") }
                 DropdownMenu(historyMenu, { historyMenu = false }) { history.forEach { run ->
-                    DropdownMenuItem(text = { Text("${run.runId} · ${run.status}") }, onClick = { vm.showHistory(run); historyMenu = false })
+                    DropdownMenuItem(text = { Text("${run.runId} · ${run.status.label()}") }, onClick = { vm.showHistory(run); historyMenu = false })
                 } }
             }
         }
@@ -97,7 +99,7 @@ fun RunScreen(vm: RunViewModel) {
                 Text(if (showPreflight) "프리플라이트 상세 접기" else "프리플라이트 통과 · 상세 보기")
             }
             if (!collapse || showPreflight) LazyColumn(Modifier.fillMaxWidth().heightIn(max = 150.dp)) { items(r.items) { item ->
-                Text("${item.status} · ${item.name}: ${item.detail}", color = if (item.status == PreflightStatus.ERROR) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodySmall)
+                Text("${item.status.label()} · ${item.name}: ${item.detail}", color = if (item.status == PreflightStatus.ERROR) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodySmall)
             } }
         }
         state?.let { run ->
@@ -115,8 +117,7 @@ fun RunScreen(vm: RunViewModel) {
             run.failure?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
         if (compact) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(showTimeline, { showTimeline = true }, label = { Text("방문 목록") })
-            FilterChip(!showTimeline, { showTimeline = false }, label = { Text("선택 방문 로그") })
+            SegmentedChoice(listOf(true, false), showTimeline, { if (it) "방문 목록" else "선택 방문 로그" }) { showTimeline = it }
         }
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             val timelineState = rememberLazyListState()
@@ -126,10 +127,10 @@ fun RunScreen(vm: RunViewModel) {
             if (!compact || showTimeline) LazyColumn((if (compact) Modifier.weight(1f) else Modifier.width(300.dp)).fillMaxHeight(), state = timelineState, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(state?.visits.orEmpty(), key = { it.visitNo }) { v ->
                     val definition = state!!.workflow.steps.first { it.id == v.stepId }
-                    Card(onClick = { selectedVisit = v.visitNo; selectedAttempt = null; if (compact) showTimeline = false }, colors = CardDefaults.cardColors(containerColor = if (v.visitNo == visit?.visitNo) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
+                    Card(onClick = { selectedVisit = v.visitNo; selectedAttempt = null; if (compact) showTimeline = false }, colors = CardDefaults.cardColors(containerColor = if (v.visitNo == visit?.visitNo) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh)) {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {
                             Text("#${v.visitNo} ${if (definition.effectiveKind == StepKind.SHELL) "!" else "Agent"} ${v.stepId} · ${definition.title.orEmpty()}")
-                            Text("${v.status} · ${visitElapsedTime(state!!.status, v.startedAt, v.endedAt, now).displayText()} · ${visitAttemptLabel(v)}", color = if (v.status == StepStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
+                            Text("${v.status.label()} · ${visitElapsedTime(state!!.status, v.startedAt, v.endedAt, now).displayText()} · ${visitAttemptLabel(v)}", color = if (v.status == StepStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                             v.manualRetryOf?.let { Text("방문 #$it 수동 재시도") }
                             v.attempts.lastOrNull()?.sessionId?.let { id -> TextButton({ clipboard.setText(AnnotatedString(id)) }) { Text(id) } }
                             v.transitionTaken?.let { Text("${it.index + 1}: ${conditionLabel(it.condition)} → ${targetLabel(it.target)}") }
@@ -140,18 +141,17 @@ fun RunScreen(vm: RunViewModel) {
             if (!compact) VerticalDivider()
             if (!compact || !showTimeline) Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(!stderr, { stderr = false }, label = { Text("stdout") })
-                    FilterChip(stderr, { stderr = true }, label = { Text("stderr") })
+                    SegmentedChoice(listOf(false, true), stderr, { if (it) "stderr" else "stdout" }) { stderr = it }
                     if (step?.effectiveKind == StepKind.AGENT) FilterChip(summary, { summary = !summary }, label = { Text(if (summary) "이벤트 요약" else "원문") })
                     FilterChip(follow, { follow = !follow }, label = { Text("하단 고정") })
                 }
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     visit?.attempts?.forEach { a -> FilterChip(a.attemptNo == attempt?.attemptNo, { selectedAttempt = a.attemptNo }, label = { Text("시도 ${a.attemptNo}") }) }
-                    listOf("전체", "본문", "완료 확인", "전이 조건").forEach { p -> FilterChip(phase == p, { phase = p }, label = { Text(p) }) }
+                    SegmentedChoice(listOf("전체", "본문", "완료 확인", "전이 조건"), phase, { it }) { phase = it }
                 }
                 attempt?.let { a ->
-                    Text("Provider: ${a.result?.providerReport?.outcome ?: if (step?.effectiveKind == StepKind.SHELL) "해당 없음" else if (active) "수신 중" else "미확인"} · 종료코드: ${a.result?.exitCode ?: if (active) "대기" else "미확인"} · ${a.result?.termination ?: if (active) "진행 중" else "기록 없음"}", style = MaterialTheme.typography.bodySmall)
-                    a.result?.failure?.let { Text("${it.kind}: ${it.detail}", color = MaterialTheme.colorScheme.error) }
+                    Text("Provider: ${a.result?.providerReport?.outcome?.label() ?: if (step?.effectiveKind == StepKind.SHELL) "해당 없음" else if (active) "수신 중" else "미확인"} · 종료코드: ${a.result?.exitCode ?: if (active) "대기" else "미확인"} · ${a.result?.termination?.label() ?: if (active) "진행 중" else "기록 없음"}", style = MaterialTheme.typography.bodySmall)
+                    a.result?.failure?.let { Text("${it.kind.label()}: ${it.detail}", color = MaterialTheme.colorScheme.error) }
                     a.retrySkippedReason?.let { Text("자동 재시도 불가: $it") }
                 }
                 if (visit?.visitNo in truncated) Text("앞부분 로그 생략 — 파일에서 전체 보기: $repository/.aiflow/runs/${state?.runId}/logs.jsonl")
@@ -170,7 +170,7 @@ fun RunScreen(vm: RunViewModel) {
                 val listState = rememberLazyListState()
                 LaunchedEffect(rendered.size, follow, selectedVisit, selectedAttempt) { if (follow && rendered.isNotEmpty()) listState.scrollToItem(rendered.lastIndex) }
                 SelectionContainerCompat {
-                    LazyColumn(Modifier.fillMaxSize(), state = listState) { items(rendered.size) { index -> Text(rendered[index], fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) } }
+                    LazyColumn(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.shapes.small).padding(12.dp), state = listState) { items(rendered.size) { index -> Text(rendered[index], fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) } }
                 }
             }
         }
@@ -180,13 +180,13 @@ fun RunScreen(vm: RunViewModel) {
         text = { Column(Modifier.heightIn(max = 300.dp).verticalScroll(rememberScrollState())) { importWarnings.forEach { Text(it.message + " · " + it.stepId.orEmpty()) } } },
         confirmButton = { Button({ vm.confirmImport() }, enabled = !busy) { Text("경고 확인 · 버전 저장") } },
         dismissButton = { TextButton({ vm.cancelImport() }) { Text("초안만 유지") } })
-    if (abortConfirm) AlertDialog(onDismissRequest = { abortConfirm = false }, title = { Text("실행을 강제 중지할까요?") }, text = { Text("본문과 완료·전이 검사 프로세스를 종료합니다. 실행 기록은 보존됩니다.") }, confirmButton = { Button({ vm.abort(); abortConfirm = false }) { Text("강제 중지") } }, dismissButton = { TextButton({ abortConfirm = false }) { Text("취소") } })
+    if (abortConfirm) AlertDialog(onDismissRequest = { abortConfirm = false }, title = { Text("실행을 강제 중지할까요?") }, text = { Text("본문과 완료·전이 검사 프로세스를 종료합니다. 실행 기록은 보존됩니다.") }, confirmButton = { Button({ vm.abort(); abortConfirm = false }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) { Text("강제 중지") } }, dismissButton = { TextButton({ abortConfirm = false }) { Text("취소") } })
     if (state?.status == RunStatus.AWAITING_USER && !abortConfirm) {
         val current = state!!.visits.last()
         AlertDialog(onDismissRequest = {}, title = { Text("사용자 확인 필요") }, text = {
             Column(Modifier.heightIn(max = 350.dp).verticalScroll(rememberScrollState())) {
                 Text((current.decision as? Decision.Ask)?.reason.orEmpty())
-                current.result?.failure?.let { Text("${it.kind}: ${it.detail}") }
+                current.result?.failure?.let { Text("${it.kind.label()}: ${it.detail}") }
                 current.attempts.lastOrNull()?.retrySkippedReason?.let { Text("자동 재시도 불가: $it") }
                 Text("다시 시도는 원래 스크립트 전체를 새 방문으로 실행합니다. 건너뛰기는 실패 기록을 보존하고 성공으로 간주해 분기합니다. 이미 검사한 외부 조건은 재실행하지 않으며 ask·오류·상한이 남으면 계속 대기합니다.")
                 logs.filter { it.visitNo == current.visitNo }.takeLast(8).forEach { Text(it.text, style = MaterialTheme.typography.bodySmall) }
@@ -225,8 +225,8 @@ fun RunStatusBadge(status: RunStatus) {
         RunStatus.PAUSE_REQUESTED -> "일시정지 예약"
         RunStatus.PAUSED -> "일시정지"
         RunStatus.AWAITING_USER -> "확인 필요"
-        RunStatus.COMPLETED -> "✓ 완료"
-        RunStatus.FAILED -> "! 실패"
+        RunStatus.COMPLETED -> "완료"
+        RunStatus.FAILED -> "실패"
         RunStatus.ABORTED -> "중지됨"
         RunStatus.INTERRUPTED -> "중단된 기록"
     }
@@ -234,17 +234,20 @@ fun RunStatusBadge(status: RunStatus) {
     val background = when (status) {
         RunStatus.FAILED -> colors.errorContainer
         RunStatus.AWAITING_USER, RunStatus.INTERRUPTED -> colors.tertiaryContainer
-        RunStatus.COMPLETED -> colors.secondaryContainer
+        RunStatus.COMPLETED -> aiflow.ui.theme.LocalStatusColors.current.success.copy(alpha = .14f)
         else -> colors.primaryContainer
     }
     val foreground = when (status) {
         RunStatus.FAILED -> colors.onErrorContainer
         RunStatus.AWAITING_USER, RunStatus.INTERRUPTED -> colors.onTertiaryContainer
-        RunStatus.COMPLETED -> colors.onSecondaryContainer
+        RunStatus.COMPLETED -> aiflow.ui.theme.LocalStatusColors.current.success
         else -> colors.onPrimaryContainer
     }
     Surface(color = background, contentColor = foreground, shape = MaterialTheme.shapes.small) {
-        Text(label, Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelLarge)
+        Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(when(status) { RunStatus.COMPLETED -> Icons.Outlined.CheckCircle; RunStatus.FAILED -> Icons.Outlined.ErrorOutline; RunStatus.AWAITING_USER, RunStatus.INTERRUPTED -> Icons.Outlined.WarningAmber; RunStatus.PAUSED, RunStatus.PAUSE_REQUESTED -> Icons.Outlined.Pause; else -> Icons.Outlined.PlayArrow }, null, Modifier.size(18.dp))
+            Text(label, style = MaterialTheme.typography.labelLarge)
+        }
     }
 }
 

@@ -26,3 +26,12 @@ This is a scoped desktop run-screen assessment, not a claim of full accessibilit
 
 Broader visual editor, complete settings/history navigation and mobile layouts are outside
 Phase 3. Compact desktop validation is based on actual measured windows, not every device.
+
+## 2026-10-10 design follow-up
+
+The editor, history and settings now share theme, selection, section and icon controls.
+The application uses a navigation rail and one repository picker. History switches between
+list/detail/file at compact widths and shows three panes at wide widths. See
+[Phase 6 results](phase6-result.md) for the revised acceptance criteria and actual checks.
+The earlier Phase 3 observations remain historical evidence rather than certification of
+all later screens or keyboard/screen-reader interactions.

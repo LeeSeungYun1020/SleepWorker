@@ -223,3 +223,20 @@ reference evidence rather than an execution allowlist. Manual resume copy uses t
 command with an editable prompt, rather than assuming interactive flags. Large historical files
 use a 512 KB preview with an original-file path. Window geometry and CLI checks are additive
 settings fields; historical records missing the new run-start timestamp keep it unknown.
+
+## Appearance and editing
+
+Settings → 화면 selects System, Light or Dark; the choice is saved immediately.
+The left rail opens Editor, Run, History and Settings. The shared repository picker protects
+unsaved drafts and disables repository changes during execution.
+
+Step IDs, session names and worktree names update references on Enter or focus exit; Escape
+restores the accepted name. Duplicate names stay uncommitted with a field error. Ordinary
+values and transition fields update the draft immediately; invalid drafts remain saveable
+but cannot publish an executable version. Same-field typing within 300 ms shares one undo
+entry. Cmd+Z and Shift+Cmd+Z undo/redo the workflow only in Editor with no text input
+focused; focused fields keep their text undo. Edit offers Cmd+F; Run offers Cmd+R and Shift+Cmd+P.
+Selecting another node or edge first commits valid pending names; invalid names block selection.
+
+History shows list/detail/file panes side by side in wide windows and switches between them
+in compact windows. See [design review and results](scripts/phase6-result.md).
