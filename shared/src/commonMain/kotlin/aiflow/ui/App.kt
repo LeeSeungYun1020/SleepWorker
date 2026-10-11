@@ -53,7 +53,7 @@ fun App(viewModel: RunViewModel) {
                             trailingIcon = { ToolIcon("저장소 폴더 선택", Icons.Outlined.FolderOpen, !busy && run?.status?.terminal != false) { scope.launch { viewModel.chooseRepository()?.let { path = it; viewModel.openRepository(it) } } } })
                         FilledTonalButton({ focusManager.clearFocus(); viewModel.openRepository(path) }, enabled = path.isNotBlank() && !busy && run?.status?.terminal != false) { Text("열기") }
                     }
-                    if (tab != AppDestination.RUN && tab != AppDestination.HISTORY) error?.let { Text(it, Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.error) }
+                    if (repository == null || (tab != AppDestination.RUN && tab != AppDestination.HISTORY)) error?.let { Text(it, Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.error) }
                     HorizontalDivider()
                     Box(Modifier.weight(1f)) {
                         when(tab) {
