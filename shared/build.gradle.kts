@@ -31,6 +31,6 @@ kotlin {
     }
 }
 tasks.withType<Test>().configureEach {
-    systemProperty("aiflow.fixtures", rootProject.file("scripts/fixtures/phase0").absolutePath)
-    doFirst { systemProperty("aiflow.testClasspath", classpath.asPath) }
+    systemProperty("sleepworker.fixtures", rootProject.file("scripts/fixtures/phase0").absolutePath)
+    doFirst { systemProperty("sleepworker.testClasspath", classpath.asPath) }
 }

@@ -1,6 +1,6 @@
-# aiflow 단계별 실행 계획 — 개요
+# SleepWorker 단계별 실행 계획 — 개요
 
-기준 문서: `airflow.md` (확정 계획서)
+기준 문서: `sleepworker.md` (확정 계획서)
 
 ## Phase 5 구현 상태 (2026-10-09)
 

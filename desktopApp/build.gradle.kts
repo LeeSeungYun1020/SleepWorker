@@ -15,10 +15,10 @@ compose.desktop {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg)
-            packageName = "aiflow"
+            packageName = "SleepWorker"
             packageVersion = "1.0.0"
             modules("java.instrument", "java.management", "jdk.unsupported")
-            macOS { bundleID = "dev.local.aiflow"; iconFile.set(project.file("src/main/resources/aiflow.icns")) }
+            macOS { bundleID = "dev.local.sleepworker"; iconFile.set(project.file("src/main/resources/sleepworker.icns")) }
         }
     }
 }
@@ -31,5 +31,5 @@ tasks.register<JavaExec>("acceptance") {
 }
 
 tasks.processResources {
-    from(rootProject.file("airflow.md")) { rename { "plan.md" } }
+    from(rootProject.file("sleepworker.md")) { rename { "plan.md" } }
 }

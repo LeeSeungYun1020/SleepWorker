@@ -64,7 +64,7 @@ def main():
     checked("fetch", ["git", "fetch", "origin", "main"], repo)
     previous_setup = root / "setup-worktree/result.json"
     branch = (json.loads(previous_setup.read_text())["argv"][4] if args.resume and previous_setup.exists()
-              else "ai/aiflow-phase0-" + uuid.uuid4().hex[:8])
+              else "ai/sleepworker-phase0-" + uuid.uuid4().hex[:8])
     checked("setup-worktree", ["git", "worktree", "add", "-b", branch, str(wt), "origin/main"], repo)
     checked("github-account", ["gh", "api", "user", "--jq", ".login"], wt)
     checked("github-repo", ["/bin/zsh", "-lc", "gh repo view --json nameWithOwner,defaultBranchRef,viewerPermission"], wt)
@@ -76,7 +76,7 @@ def main():
     checked("github-pr-list", ["gh", "pr", "list", "--state", "all", "--limit", "3", "--json", "number,state,url,headRefName,baseRefName"], wt)
     checked("agy-models-authenticated", [agy, "models"], version=versions["agy"])
     run("agy-invalid-model-no-effort", [agy, "--output-format", "json", "--model",
-        "aiflow-invalid-model-000000", "-p", "Reply OK only."], wt, version=versions["agy"])
+        "sleepworker-invalid-model-000000", "-p", "Reply OK only."], wt, version=versions["agy"])
 
     # This new conversation only observes the authorized Manicule clone.
     token_file = root / "context-token.txt"
@@ -121,10 +121,10 @@ def main():
     # ZDOTDIR isolates startup files without changing HOME or any user file.
     zdot = root / "zdot"
     zdot.mkdir(exist_ok=args.resume)
-    (zdot / ".zshrc").write_text("alias aiflow_phase0_alias='printf alias-present'\n")
+    (zdot / ".zshrc").write_text("alias sleepworker_phase0_alias='printf alias-present'\n")
     zenv = dict(os.environ, ZDOTDIR=str(zdot))
-    checked("zsh-interactive-alias", ["/bin/zsh", "-ic", "alias aiflow_phase0_alias"], env=zenv)
-    run("zsh-login-alias", ["/bin/zsh", "-lc", "alias aiflow_phase0_alias"], env=zenv)
+    checked("zsh-interactive-alias", ["/bin/zsh", "-ic", "alias sleepworker_phase0_alias"], env=zenv)
+    run("zsh-login-alias", ["/bin/zsh", "-lc", "alias sleepworker_phase0_alias"], env=zenv)
     checked("source-status-after", ["git", "status", "--porcelain"], source)
     checked("source-head-after", ["git", "rev-parse", "HEAD"], source)
     checked("worktree-clean", ["git", "status", "--porcelain"], wt)
