@@ -1,4 +1,4 @@
-# aiflow
+# SleepWorker
 
 Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity and shell steps.
 Phases 1–5 implement workflow storage, provider adapters, execution, CLI preflight, graph editing,
@@ -15,9 +15,18 @@ Requires JDK 21; macOS is required for the DMG target.
 ./gradlew :desktopApp:packageDmg
 ```
 
-DMG output: `desktopApp/build/compose/binaries/main/dmg/aiflow-1.0.0.dmg`.
+DMG output: `desktopApp/build/compose/binaries/main/dmg/SleepWorker-1.0.0.dmg` (packaged application: `SleepWorker.app`).
 The package uses a major version of 1 because Apple's DMG packaging rejects `0.1.0`.
 This unsigned development package is not a notarized release.
+
+## Persistence paths and identifiers
+
+SleepWorker manages persistent files and metadata under dedicated paths:
+- Repository metadata, workflows, and execution records: `.sleepworker/` (`.sleepworker/workflows/`, `.sleepworker/runs/`, `.sleepworker/app.lock`).
+- User configuration: `~/Library/Application Support/SleepWorker/settings.json`.
+- Diagnostics log: `~/Library/Logs/SleepWorker/app.log`.
+- macOS bundle ID: `dev.local.sleepworker`.
+- Polymorphic event/decision serialization type identifiers: `sleepworker.provider.AgentEvent.*`, `sleepworker.engine.*`.
 
 ## Modules
 
@@ -93,13 +102,13 @@ original attempt results. External conditions are cached per visit. `abort()` an
 `interruptForShutdown()` cancel owned body/check/preparation processes and wait for bounded cleanup.
 The caller should await shutdown before releasing the repository lease.
 
-Records are stored under `.aiflow/runs/<runId>/`: the authoritative atomic `run.json`, visit snapshots,
+Records are stored under `.sleepworker/runs/<runId>/`: the authoritative atomic `run.json`, visit snapshots,
 separate attempt scripts/output/events/results, completion/transition checks and auxiliary command
 records. Attempt outcomes live in `AttemptRecord.result`; missing observed exit codes remain null.
 Transition counter keys are `stepId:zeroBasedIndex`; next-step edges count only when entering the
 actual target visit. Live log subscribers may lag; disk logs remain the full recorded source.
 If storage becomes unwritable, the engine stops and exposes `FAILED`, emits an application diagnostic,
-and leaves the last durable snapshot for recovery. Add `.aiflow/runs/` to your repository's ignore
+and leaves the last durable snapshot for recovery. Add `.sleepworker/runs/` to your repository's ignore
 rules if desired; the engine does not modify `.gitignore`.
 
 ## Run screen
@@ -110,7 +119,7 @@ require acknowledgement before publishing the imported draft. Run preflight, the
 Agent runs accept CLI versions and model/effort pairs without prior execution measurements.
 Preflight reports missing measurements and catalog entries as warnings; authentication and workflow
 errors still block execution. Use Settings to detect CLI candidates, inspect their versions, and choose an absolute path.
-Settings are saved immediately in `~/Library/Application Support/aiflow/settings.json`.
+Settings are saved immediately in `~/Library/Application Support/SleepWorker/settings.json`.
 Use the timeline to select visits and the log controls to select attempts, streams and phases.
 History records never resume automatically; interrupted runs require a new preflight and run.
 
@@ -137,7 +146,7 @@ effort combinations can run with the exact requested settings.
 
 ## Install and configure
 
-Open `desktopApp/build/compose/binaries/main/dmg/aiflow-1.0.0.dmg`, copy `aiflow.app` to
+Open `desktopApp/build/compose/binaries/main/dmg/SleepWorker-1.0.0.dmg`, copy `SleepWorker.app` to
 Applications, and launch it from Finder. This personal-use package has no Developer ID signature
 or notarization. If macOS blocks it, follow [Apple's per-app opening instructions](https://support.apple.com/en-us/102445):
 attempt opening it, then use System Settings → Privacy & Security → Open Anyway for this app.
@@ -181,7 +190,7 @@ Skip preserves the original failed result and separately records the user's bran
 History lists runs newest first. Select a run to view its snapshot, transition priorities,
 visits, attempts, metadata and check outcomes. Expand a visit, search its artifact names and
 select stdout/stderr, script, command or result files; contents load only on selection and large
-files have a bounded preview. Full files remain under `.aiflow/runs/<runId>/`. Missing exit codes,
+files have a bounded preview. Full files remain under `.sleepworker/runs/<runId>/`. Missing exit codes,
 actual models and prices are displayed as unknown; provider-reported usage is preserved.
 
 Copy a session ID or the noninteractive resume command from an attempt. Edit its
@@ -189,7 +198,7 @@ placeholder instruction and run it in a terminal. The command explicitly keeps t
 model/effort, binary and workspace; it uses the existing provider adapter's permission options.
 It is also available for unmeasured versions and models. Check the binary is still
 installed at the recorded path. Antigravity sessions remain tied to their original workspace.
-A manual terminal continuation is external to the saved aiflow run and creates no new visit.
+A manual terminal continuation is external to the saved SleepWorker run and creates no new visit.
 
 View Used Version opens the source version. Restore saves current edits as a draft, restores
 the historical graph to its draft, and requires saving a new version for a new run. It does not
@@ -203,14 +212,14 @@ partial. They never auto-resume: select a version and start a fresh run after pr
 History is the only UI for worktree deletion. Its confirmation explains that session resume can
 be lost. Main/locked worktrees cannot be deleted; dirty worktrees are rejected by Git. Branches
 remain. Run deletion requires confirmation and removes only that terminal run directory, retaining
-workflow versions. The ignore banner suggests ignoring `.aiflow/runs/` without editing Git rules.
+workflow versions. The ignore banner suggests ignoring `.sleepworker/runs/` without editing Git rules.
 
 ## Desktop behavior and limits
 
 File/Run/Help menus offer workflow commands, execution controls and the bundled plan. Window
 size/position are remembered. Closing or Cmd+Q offers save/discard/cancel for dirty drafts and
 confirms unfinished execution; shutdown waits for owned processes and durable interruption
-records. Unexpected errors appear in a dialog and `~/Library/Logs/aiflow/app.log`. Operational
+records. Unexpected errors appear in a dialog and `~/Library/Logs/SleepWorker/app.log`. Operational
 errors appear on the relevant screen and are also logged.
 
 Execution is sequential; parallel steps, in-app authentication, notification-click activation,
@@ -218,7 +227,7 @@ crash-time process reattachment and interrupted-run continuation are outside thi
 macOS system notification permissions/Focus settings can prevent a delivered osascript command
 from producing a visible banner. User credentials remain the responsibility of each CLI.
 
-Differences from `airflow.md`: unknown authentication blocks execution. Measured contracts are
+Differences from `sleepworker.md`: unknown authentication blocks execution. Measured contracts are
 reference evidence rather than an execution allowlist. Manual resume copy uses the noninteractive
 command with an editable prompt, rather than assuming interactive flags. Large historical files
 use a 512 KB preview with an original-file path. Window geometry and CLI checks are additive

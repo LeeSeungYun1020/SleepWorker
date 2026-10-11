@@ -1,9 +1,9 @@
-import aiflow.platform.*
-import aiflow.storage.*
-import aiflow.engine.RunStatus
-import aiflow.ui.App
-import aiflow.ui.theme.AiflowTheme
-import aiflow.ui.run.RunViewModel
+import sleepworker.platform.*
+import sleepworker.storage.*
+import sleepworker.engine.RunStatus
+import sleepworker.ui.App
+import sleepworker.ui.theme.SleepWorkerTheme
+import sleepworker.ui.run.RunViewModel
 import androidx.compose.runtime.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.Row
@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
     val viewModel = RunViewModel(platform)
     Thread.setDefaultUncaughtExceptionHandler { _, error -> JvmAppLog.write(error); viewModel.fatalError.value = error.message ?: error.toString() }
     option("--repository")?.let(viewModel::openRepository)
-    val shutdown = Thread({ runBlocking { try { viewModel.close() } catch (e: Exception) { JvmAppLog.write(e) } } }, "aiflow-shutdown")
+    val shutdown = Thread({ runBlocking { try { viewModel.close() } catch (e: Exception) { JvmAppLog.write(e) } } }, "sleepworker-shutdown")
     Runtime.getRuntime().addShutdownHook(shutdown)
     application {
         val settings by viewModel.settingsModel.settings.collectAsState()
@@ -37,8 +37,8 @@ fun main(args: Array<String>) {
         val busy by viewModel.busy.collectAsState()
         val canUndo by (editor?.canUndo ?: clean).collectAsState()
         val canRedo by (editor?.canRedo ?: clean).collectAsState()
-        val emptyPreview = remember { MutableStateFlow<aiflow.model.WorkflowVersion?>(null) }
-        val emptyDraft = remember { MutableStateFlow<aiflow.model.WorkflowDraft?>(null) }
+        val emptyPreview = remember { MutableStateFlow<sleepworker.model.WorkflowVersion?>(null) }
+        val emptyDraft = remember { MutableStateFlow<sleepworker.model.WorkflowDraft?>(null) }
         val preview by (editor?.preview ?: emptyPreview).collectAsState()
         val draft by (editor?.draft ?: emptyDraft).collectAsState()
         val editorVisible by viewModel.editorVisible.collectAsState()
@@ -76,7 +76,7 @@ fun main(args: Array<String>) {
                 }
             }
         }
-        Window(onCloseRequest = { requestClose() }, title = "aiflow", state = state, onPreviewKeyEvent = { event ->
+        Window(onCloseRequest = { requestClose() }, title = APP_NAME, state = state, onPreviewKeyEvent = { event ->
             if (event.type == KeyEventType.KeyDown && event.key == Key.Z && event.isMetaPressed && !event.isAltPressed && !event.isCtrlPressed && viewModel.editorVisible.value && !viewModel.textInputFocus.active.value && !viewModel.busy.value && editor?.readOnly == false) {
                 viewModel.undoWorkflow(event.isShiftPressed); true
             } else false
@@ -106,14 +106,14 @@ fun main(args: Array<String>) {
                     Item("계획서 열기", onClick = {
                         try {
                             val text = object {}.javaClass.getResourceAsStream("/plan.md")?.bufferedReader()?.use { it.readText() } ?: error("계획서 리소스 없음")
-                            val file = java.nio.file.Files.createTempFile("aiflow-plan-", ".md").toFile().apply { deleteOnExit(); writeText(text) }
+                            val file = java.nio.file.Files.createTempFile("sleepworker-plan-", ".md").toFile().apply { deleteOnExit(); writeText(text) }
                             Desktop.getDesktop().open(file)
                         } catch (e: Exception) { JvmAppLog.write(e); viewModel.fatalError.value = e.message }
                     })
                 }
             }
             App(viewModel)
-            if (confirmClose) AiflowTheme(settings.themeMode) { AlertDialog(onDismissRequest = { confirmClose = false }, title = { Text(if (dirty) "저장하지 않은 편집 내용" else "실행 중인 앱 종료") }, text = { Text((if (dirty) "초안을 저장하거나 변경을 버린 뒤 종료하세요.\n" else "") + (if (viewModel.active) "실행 중인 프로세스를 종료하고 로그를 저장한 뒤 중단된 실행으로 기록합니다." else "")) },
+            if (confirmClose) SleepWorkerTheme(settings.themeMode) { AlertDialog(onDismissRequest = { confirmClose = false }, title = { Text(if (dirty) "저장하지 않은 편집 내용" else "실행 중인 앱 종료") }, text = { Text((if (dirty) "초안을 저장하거나 변경을 버린 뒤 종료하세요.\n" else "") + (if (viewModel.active) "실행 중인 프로세스를 종료하고 로그를 저장한 뒤 중단된 실행으로 기록합니다." else "")) },
                 confirmButton = { Button({ confirmClose = false; closeWindow() }) { Text(if (dirty) "저장 후 종료" else "실행 중단 후 종료") } },
                 dismissButton = { Row { if (dirty) TextButton({ confirmClose = false; closeWindow(false) }) { Text("버리기·종료") }; TextButton({ confirmClose = false }) { Text("취소") } } }) }
         }

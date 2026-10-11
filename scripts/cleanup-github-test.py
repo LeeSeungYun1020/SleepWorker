@@ -9,6 +9,15 @@ import subprocess
 from phase0 import capture, save
 
 
+def is_valid_test_branch(branch: str) -> bool:
+    return branch.startswith("ai/sleepworker-phase0-") or branch.startswith("ai/aiflow-phase0-")
+
+
+def is_valid_test_pr_title(title: str) -> bool:
+    return (title.startswith("[TEST][DO NOT MERGE] SleepWorker Phase 0") or
+            title.startswith("[TEST][DO NOT MERGE] aiflow Phase 0"))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("publication", type=Path)
@@ -16,7 +25,7 @@ def main():
     published = args.publication.resolve()
     state = json.loads((published / "summary.json").read_text())
     context = json.loads((published.parent / "summary.json").read_text())
-    if state["status"] != "VERIFIED" or not state["branch"].startswith("ai/aiflow-phase0-"):
+    if state["status"] != "VERIFIED" or not is_valid_test_branch(state["branch"]):
         raise RuntimeError("not a verified Phase 0 publication")
     root = published / "cleanup"
     root.mkdir(exist_ok=False)
@@ -39,7 +48,7 @@ def main():
     pr = json.loads(run("pr-before", ["gh", "pr", "view", url, "--json", fields]))
     if (pr["headRefOid"] != state["head"] or pr["headRefName"] != state["branch"] or
         not pr["isDraft"] or pr["state"] != "OPEN" or pr["baseRefName"] != "main" or
-        not pr["title"].startswith("[TEST][DO NOT MERGE] aiflow Phase 0")):
+        not is_valid_test_pr_title(pr["title"])):
         raise RuntimeError("PR changed; refusing cleanup")
     run("checks", ["gh", "pr", "checks", url, "--json", "name,state,link"], check=False)
     runs = json.loads(run("workflow-runs", ["gh", "run", "list", "--repo", context["githubRepo"],

@@ -10,11 +10,11 @@ def step(script,completion=None):
  if completion:s['completion']={'command':completion}
  return s
 cases={
- 'retry':step('if test ! -f .aiflow/retry-marker; then touch .aiflow/retry-marker; echo FIRST_FAILURE; exit 7; fi; echo RETRY_OK'),
+ 'retry':step('if test ! -f .sleepworker/retry-marker; then touch .sleepworker/retry-marker; echo FIRST_FAILURE; exit 7; fi; echo RETRY_OK'),
  'manual':step('echo MANUAL_FAILURE; exit 7'),
- 'abort-body':step('echo $$ > .aiflow/body.pid\nsleep 120 &\necho $! > .aiflow/child.pid\nwait'),
- 'abort-check':step('echo BODY_DONE', 'echo $$ > .aiflow/check.pid; sleep 120'),
- 'recovery':step('echo $$ > .aiflow/recovery.pid\necho RECOVERY_RUNNING\nsleep 120'),
+ 'abort-body':step('echo $$ > .sleepworker/body.pid\nsleep 120 &\necho $! > .sleepworker/child.pid\nwait'),
+ 'abort-check':step('echo BODY_DONE', 'echo $$ > .sleepworker/check.pid; sleep 120'),
+ 'recovery':step('echo $$ > .sleepworker/recovery.pid\necho RECOVERY_RUNNING\nsleep 120'),
  'logs':step("for i in {1..25000}; do printf 'line-%s\\n' $i; done; echo LOGS_COMPLETE; sleep 2"),
 }
 for name,s in cases.items():

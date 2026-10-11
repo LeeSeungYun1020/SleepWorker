@@ -28,19 +28,19 @@ python3 -m unittest discover -s scripts -p 'test_*.py' -v
 # 두 provider를 연결한 로컬 5단계 smoke (원격 §4 예시와 별도)
 python3 scripts/verify-pipeline.py \
   --codex /Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex \
-  --agy-model gemini-3.8-flash-low --output /tmp/aiflow-pipeline-new
+  --agy-model gemini-3.8-flash-low --output /tmp/sleepworker-pipeline-new
 
 # 실제 프로젝트는 독립 clone에서 조회·프로토콜만 추가 검증
 python3 scripts/verify-additional.py --source /Users/leeseungyun/project/Manicule \
-  --output /tmp/aiflow-additional-new
+  --output /tmp/sleepworker-additional-new
 # 수집기 중단 후에는 같은 명령에 --resume을 붙인다. 원문은 덮어쓰지 않는다.
 
 # 로컬 테스트 문서 커밋, Codex SHA 리뷰, push dry-run
-python3 scripts/verify-github.py --evidence /tmp/aiflow-additional-new
+python3 scripts/verify-github.py --evidence /tmp/sleepworker-additional-new
 # 아래는 실제 GitHub 쓰기다. 이 저장소에 게시하도록 허용받은 경우에만 실행한다.
-python3 scripts/verify-github.py --evidence /tmp/aiflow-additional-new --publish
+python3 scripts/verify-github.py --evidence /tmp/sleepworker-additional-new --publish
 # 실제 성공 결과 디렉터리를 지정: PR/branch/SHA를 재검사한 뒤 테스트 자료만 정리
-python3 scripts/cleanup-github-test.py /tmp/aiflow-additional-new/github-publish
+python3 scripts/cleanup-github-test.py /tmp/sleepworker-additional-new/github-publish
 ```
 
 `--output <새 디렉터리>`로 결과 위치를 지정한다. 기존 경로는 덮어쓰지 않는다.
@@ -82,8 +82,8 @@ Rebuild with `./gradlew build :desktopApp:packageDmg` from the repository root.
 The checked-in icon can be regenerated on macOS:
 
 ```sh
-swift scripts/create-icon.swift /tmp/aiflow.iconset
-iconutil -c icns /tmp/aiflow.iconset -o desktopApp/src/main/resources/aiflow.icns
+swift scripts/create-icon.swift /tmp/sleepworker.iconset
+iconutil -c icns /tmp/sleepworker.iconset -o desktopApp/src/main/resources/sleepworker.icns
 ```
 
 The phase fixtures are narrow isolated workflows; replacing their repoPath and running the

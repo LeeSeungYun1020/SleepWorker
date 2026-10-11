@@ -1,6 +1,6 @@
 # 09. 디자인 개선 계획 (Material Design 3)
 
-작성일: 2026-10-10 · 대상: `shared/src/commonMain/kotlin/aiflow/ui/**`, `desktopApp/Main.kt`
+작성일: 2026-10-10 · 대상: `shared/src/commonMain/kotlin/sleepworker/ui/**`, `desktopApp/Main.kt`
 기준: Compose Multiplatform 1.10.3 / `androidx.compose.material3`
 
 참고 자료

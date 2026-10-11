@@ -272,7 +272,7 @@ def main():
         resumed = turn("resume", "Append exactly RESUMED to FILES.md. Reply with the remembered token from the previous turn.", new["sessionId"])
         if new_file.exists():
             (root / "resume/FILES.md").write_text(new_file.read_text())
-    invalid = turn("invalid-model", "Reply OK only.", model="aiflow-invalid-model-000000")
+    invalid = turn("invalid-model", "Reply OK only.", model="sleepworker-invalid-model-000000")
     if args.edge_cases and args.provider == "codex":
         turn("stdin-held-open", "Reply OK only.", hold_stdin=True, timeout=5)
         turn("interrupt-before-id", "Reply OK only.", timeout=0.001)
