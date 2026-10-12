@@ -58,16 +58,20 @@ class EditorViewModel(
         canUndo.value = undo.isNotEmpty(); canRedo.value = redo.isNotEmpty()
         validation?.cancel(); validation = scope.launch { delay(300); validateNow() }
     }
-    fun edit(transform: (Workflow) -> Workflow) {
+    private var mergeKey: String? = null
+    private var mergeAt = kotlin.time.TimeSource.Monotonic.markNow()
+    fun edit(merge: String? = null, transform: (Workflow) -> Workflow) {
         check(!readOnly) { "버전 열람은 읽기 전용입니다" }
         val current = draft.value ?: return
         val changed = transform(current.workflow)
         if (changed == current.workflow) return
-        undo.addLast(current); if (undo.size > 50) undo.removeFirst(); redo.clear()
+        if (merge == null || merge != mergeKey || mergeAt.elapsedNow().inWholeMilliseconds > 300 || undo.isEmpty()) undo.addLast(current)
+        mergeKey = merge; mergeAt = kotlin.time.TimeSource.Monotonic.markNow()
+        if (undo.size > 50) undo.removeFirst(); redo.clear()
         draft.value = current.copy(workflow = changed); updated()
     }
     private fun load(value: WorkflowDraft, persisted: Boolean) {
-        validation?.cancel(); preview.value = null; draft.value = value.copy(workflow = GraphLayout.fillMissing(value.workflow))
+        mergeKey = null; validation?.cancel(); preview.value = null; draft.value = value.copy(workflow = GraphLayout.fillMissing(value.workflow))
         baseline = if (persisted) value else null
         undo.clear(); redo.clear(); selectedNode.value = null; selectedEdge.value = null; savedVersion.value = null
         updated(); validateNow()
@@ -91,12 +95,14 @@ class EditorViewModel(
     }
     suspend fun saveDraft() = gate.withLock {
         check(!readOnly)
+        mergeKey = null
         val snapshot = draft.value ?: error("워크플로 없음")
         store.saveDraft(snapshot); baseline = snapshot; updated(); message.value = "초안 저장됨"
     }
     suspend fun save(warningsAcknowledged: Boolean = false): SaveOutcome {
         val outcome = gate.withLock {
         check(!readOnly)
+        mergeKey = null
         val snapshot = draft.value ?: error("워크플로 없음")
         store.saveDraft(snapshot); baseline = snapshot; updated()
         val checked = WorkflowValidator(fs).validate(snapshot.workflow)
@@ -117,8 +123,8 @@ class EditorViewModel(
         return outcome
     }
     suspend fun versions(): List<WorkflowVersion> = draft.value?.let { store.listVersions(it.workflowId) }.orEmpty()
-    fun showVersion(version: WorkflowVersion) { editRevision.update { it + 1 }; preview.value = version; selectNode(null); validateNow() }
-    fun closePreview() { editRevision.update { it + 1 }; preview.value = null; validateNow() }
+    fun showVersion(version: WorkflowVersion) { mergeKey = null; editRevision.update { it + 1 }; preview.value = version; selectNode(null); validateNow() }
+    fun closePreview() { mergeKey = null; editRevision.update { it + 1 }; preview.value = null; validateNow() }
     suspend fun restore(version: WorkflowVersion, confirmed: Boolean) = gate.withLock {
         require(confirmed); require(version.workflowId == draft.value?.workflowId)
         load(store.restoreToDraft(version.workflowId, version.versionId), true)
@@ -131,11 +137,11 @@ class EditorViewModel(
         draft.value = null; baseline = null; undo.clear(); redo.clear(); preview.value = null; updated(); issues.value = emptyList()
     }
     fun discard() { baseline?.let { load(it, true) } ?: run { draft.value = null; undo.clear(); redo.clear(); updated() } }
-    fun undo() { if (!readOnly && undo.isNotEmpty()) { draft.value?.let(redo::addLast); draft.value = undo.removeLast(); selectNode(null); updated() } }
-    fun redo() { if (!readOnly && redo.isNotEmpty()) { draft.value?.let(undo::addLast); draft.value = redo.removeLast(); selectNode(null); updated() } }
+    fun undo() { mergeKey = null; if (!readOnly && undo.isNotEmpty()) { draft.value?.let(redo::addLast); draft.value = undo.removeLast(); selectNode(null); updated() } }
+    fun redo() { mergeKey = null; if (!readOnly && redo.isNotEmpty()) { draft.value?.let(undo::addLast); draft.value = redo.removeLast(); selectNode(null); updated() } }
     fun selectNode(id: String?) { selectedNode.value = id; selectedEdge.value = null }
     fun selectEdge(source: String, index: Int) { selectedNode.value = source; selectedEdge.value = EdgeSelection(source, index) }
-    fun updateStep(id: String, transform: (Step) -> Step) = edit { w -> w.copy(steps = w.steps.map { if (it.id == id) transform(it) else it }) }
+    fun updateStep(id: String, merge: String? = null, transform: (Step) -> Step) = edit(merge?.let { "$id:$it" }) { w -> w.copy(steps = w.steps.map { if (it.id == id) transform(it) else it }) }
     private fun unique(base: String, ids: Collection<String>): String { var candidate = base; var n = 2; while (candidate in ids || candidate in GraphLayout.special) candidate = "$base-${n++}"; return candidate }
     fun addNode(kind: StepKind = StepKind.AGENT): String {
         val id = unique("step", workflow?.steps.orEmpty().map { it.id })
@@ -172,10 +178,23 @@ class EditorViewModel(
             s.copy(transitions = s.transitions.toMutableList().apply { add(index, transition) }) }
         selectedEdge.value = null
     }
-    fun updateTransition(source: String, index: Int, transition: Transition) {
-        updateStep(source) { s -> require(transition.`when` != Condition.Otherwise || s.transitions.withIndex().none { it.index != index && it.value.`when` == Condition.Otherwise })
-            s.copy(transitions = s.transitions.toMutableList().apply { this[index] = transition }.sortedBy { it.`when` == Condition.Otherwise }) }
-        selectedEdge.value = null
+    fun updateTransition(source: String, index: Int, transition: Transition, merge: String? = null) {
+        val current = workflow?.steps?.firstOrNull { it.id == source }?.transitions?.getOrNull(index) ?: return
+        if (current == transition) return
+        var selected = index
+        val argumentKey = if (current.copy(maxVisits = transition.maxVisits) == transition) "maxVisits" else if (conditionName(current.`when`) == conditionName(transition.`when`) && current.copy(`when` = transition.`when`) == transition) when (val old = current.`when`) {
+            is Condition.Command -> "command"
+            is Condition.FileExists -> "path"
+            is Condition.FileContains -> if ((transition.`when` as Condition.FileContains).path != old.path) "path" else "text"
+            else -> null
+        } else null
+        updateStep(source, (merge ?: argumentKey)?.let { "transition:$index:$it" }) { step ->
+            require(transition.`when` != Condition.Otherwise || step.transitions.withIndex().none { it.index != index && it.value.`when` == Condition.Otherwise }) { "otherwise 조건은 하나만 사용할 수 있습니다" }
+            val indexed = step.transitions.mapIndexed { i, t -> i to if (i == index) transition else t }.sortedBy { it.second.`when` == Condition.Otherwise }
+            selected = indexed.indexOfFirst { it.first == index }
+            step.copy(transitions = indexed.map { it.second })
+        }
+        selectedEdge.value = EdgeSelection(source, selected)
     }
     fun deleteTransition(source: String, index: Int) { updateStep(source) { it.copy(transitions = it.transitions.filterIndexed { i, _ -> i != index }) }; selectedEdge.value = null }
     fun moveTransition(source: String, from: Int, to: Int) {
@@ -183,7 +202,7 @@ class EditorViewModel(
     }
     fun setScript(id: String, script: String) {
         var switched = false
-        updateStep(id) { s -> val marker = script.trimStart().startsWith('!'); val removed = s.script.trimStart().startsWith('!') && !marker
+        updateStep(id, "script") { s -> val marker = script.trimStart().startsWith('!'); val removed = s.script.trimStart().startsWith('!') && !marker
             val kind = if (marker) StepKind.SHELL else if (removed) StepKind.AGENT else s.kind
             switched = kind != s.effectiveKind
             s.copy(script = script, kind = kind, workspace = if (kind == StepKind.SHELL) s.workspace ?: workflow?.sessions?.get(s.session?.ref)?.workspace ?: Workspace.Local else null) }

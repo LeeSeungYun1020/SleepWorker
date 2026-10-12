@@ -32,6 +32,11 @@ class SettingsViewModel(private val platform: Platform, private val scope: Corou
             store.save(next); settings.value = next
         }
     }
+    private suspend fun pickFile(pick: suspend () -> String?): String? = try { pick() }
+    catch (e: CancellationException) { throw e }
+    catch (e: Exception) { platform.diagnostics(e); error.value = "파일 선택 실패: ${e.message ?: e.toString()}"; null }
+    suspend fun chooseFile(): String? = pickFile { platform.fileDialogs?.file() }
+    suspend fun chooseDirectory(): String? = pickFile { platform.fileDialogs?.directory() }
     fun update(transform: (AppSettings) -> AppSettings) = scope.launch {
         try { save(transform); error.value = null } catch (e: Exception) { platform.diagnostics(e); error.value = e.message }
     }

@@ -110,6 +110,7 @@ class JvmFileDialogs : FileDialogs {
         }
     }
     override suspend fun directory() = pick(java.awt.FileDialog.LOAD, true)
+    override suspend fun file() = pick(java.awt.FileDialog.LOAD, false)
     override suspend fun openYaml() = pick(java.awt.FileDialog.LOAD, false)
     override suspend fun saveYaml(suggestedName: String) = pick(java.awt.FileDialog.SAVE, false, suggestedName)
 }
