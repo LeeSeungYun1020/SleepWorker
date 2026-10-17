@@ -130,3 +130,56 @@ internal class AntigravityParser(req: ExecRequest) : AgentParser(req) {
         return report(exitCode, termination, events)
     }
 }
+internal class ClaudeParser(private val req: ExecRequest) : AgentParser(req) {
+    override fun accept(line: String, stream: Stream): List<AgentEvent> {
+        checkOpen()
+        if (stream == Stream.STDERR) {
+            // Claude Code prints a rejected resume ID on stderr without a terminal result object.
+            val missing = req.resumeSessionId?.let { line.trim() == "No conversation found with session ID: $it" } == true
+            return listOfNotNull(AgentEvent.Diagnostic(line), if (missing) fail(line, FailureKind.SESSION_INVALID) else null)
+        }
+        val obj = try { Json.parseToJsonElement(line) as? JsonObject } catch (_: Exception) { null }
+        if (obj == null) {
+            if (line.trimStart().startsWith('{')) malformed = true
+            return listOf(AgentEvent.Raw(line, stream))
+        }
+        return when (obj.string("type")) {
+            "system" -> if (obj.string("subtype") == "init") session(obj.string("session_id")) else listOf(AgentEvent.Raw(line, stream))
+            "assistant" -> {
+                val content = (obj["message"] as? JsonObject)?.get("content") as? JsonArray
+                if (content == null) { malformed = true; emptyList() }
+                else content.mapNotNull { block ->
+                    val item = block as? JsonObject
+                    when (item?.string("type")) {
+                        "text" -> item.string("text")?.takeIf { it.isNotBlank() }?.let { AgentEvent.Message(it) }
+                        "tool_use" -> AgentEvent.ToolCall(item.toString())
+                        else -> null
+                    }
+                }.ifEmpty { listOf(AgentEvent.Raw(line, stream)) }
+            }
+            "result" -> {
+                val events = session(obj.string("session_id")).toMutableList()
+                usage = obj["usage"]
+                complete = true
+                val text = obj.string("result")
+                val isError = (obj["is_error"] as? JsonPrimitive)?.booleanOrNull == true
+                if (obj.string("subtype") == "success" && !isError) { output = text; events.add(AgentEvent.Completed) }
+                else {
+                    val detail = text ?: obj["errors"]?.toString() ?: obj.string("subtype") ?: line
+                    val kind = when {
+                        "Please run /login" in detail -> FailureKind.AUTH
+                        "usage limit" in detail.lowercase() -> FailureKind.QUOTA
+                        else -> null
+                    }
+                    events.add(fail(detail, kind))
+                }
+                events
+            }
+            else -> listOf(AgentEvent.Raw(line, stream))
+        }
+    }
+    override fun finalizeOutput(exitCode: Int?, termination: Termination): ProviderReport {
+        checkOpen()
+        return report(exitCode, termination, emptyList())
+    }
+}

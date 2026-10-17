@@ -89,6 +89,49 @@ class ProviderTest {
         assertNull(agy.parseModels("slug\t"))
         assertNull(agy.parseModels("slug\tLabel\npartial"))
     }
+    private val claudeSuccess = listOf(
+        """{"type":"system","subtype":"init","session_id":"id","model":"claude-sonnet-5-5"}""",
+        """{"type":"assistant","message":{"content":[{"type":"text","text":"working"},{"type":"tool_use","id":"t","name":"Bash","input":{}}]},"session_id":"id"}""",
+        """{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t"}]},"session_id":"id"}""",
+        """{"type":"result","subtype":"success","is_error":false,"result":"ok","session_id":"id","usage":{"input_tokens":1}}""",
+    )
+    @Test fun claudeCommandStreamAndFailures() {
+        val adapter = ClaudeAdapter()
+        val command = listOf("/custom/bin", "-p", "--output-format", "stream-json", "--verbose", "--model", "model", "--effort", "low", "--dangerously-skip-permissions")
+        assertEquals(ProcessSpec(command, req.cwd, req.script), adapter.buildCommand(req))
+        assertEquals(command + listOf("--resume", "session"), adapter.buildCommand(req.copy(resumeSessionId = "session")).command)
+        val step = agent("x", SessionMode.NEW)
+        assertIs<ClaudeAdapter>(ProviderRegistry().adapterFor(step, workflow(step).copy(sessions = mapOf("s" to SessionDef(Provider.CLAUDE, Workspace.Local)))))
+        val parser = adapter.createParser(req)
+        val events = claudeSuccess.flatMap { parser.accept(it, Stream.STDOUT) }
+        assertEquals(listOf(AgentEvent.SessionStarted("id")), events.filterIsInstance<AgentEvent.SessionStarted>())
+        assertEquals(1, events.count { it is AgentEvent.ToolCall })
+        assertEquals(AgentEvent.Message("working"), events.first { it is AgentEvent.Message })
+        val report = parser.finalizeOutput(0, Termination.NORMAL)
+        assertEquals(ProviderOutcome.SUCCEEDED, report.outcome)
+        assertEquals("ok", report.finalOutput)
+        assertEquals("id", report.sessionId)
+        assertEquals(ProviderOutcome.PROTOCOL_ERROR, parse(adapter, claudeSuccess.dropLast(1)).outcome)
+        assertEquals(ProviderOutcome.PROTOCOL_ERROR, parse(adapter, claudeSuccess + "{\"type\":").outcome)
+        assertEquals(ProviderOutcome.PROTOCOL_ERROR, parse(adapter, claudeSuccess.dropLast(1) + """{"type":"result","subtype":"success","is_error":false,"result":"ok","session_id":"other"}""").outcome)
+        assertEquals(ProviderOutcome.FAILED, parse(adapter, claudeSuccess, 1).outcome)
+        val auth = parse(adapter, listOf(claudeSuccess.first(), """{"type":"result","subtype":"success","is_error":true,"result":"Invalid API key · Please run /login","session_id":"id"}"""), 1)
+        assertEquals(FailureKind.AUTH, auth.failure?.kind)
+        assertEquals(ProviderOutcome.FAILED, parse(adapter, listOf(claudeSuccess.first(), """{"type":"result","subtype":"error_max_turns","is_error":true,"session_id":"id"}"""), 1).outcome)
+        val resume = adapter.createParser(req.copy(resumeSessionId = "requested-id"))
+        resume.accept("No conversation found with session ID: requested-id", Stream.STDERR)
+        val missing = resume.finalizeOutput(1, Termination.NORMAL)
+        assertEquals(FailureKind.SESSION_INVALID, missing.failure?.kind)
+        assertEquals("requested-id", missing.sessionId)
+    }
+    @Test fun claudeAuthenticationStatus() = runTest {
+        val cfg = ProviderConfig("/bin/claude", "/repo")
+        val adapter = ClaudeAdapter()
+        assertEquals(AuthStatus.LoggedIn, adapter.probeAuth(FakeProcessExecutor(FakeResult(stdout = listOf("{", "\"loggedIn\": true,", "\"authMethod\": \"claude.ai\"", "}"))), cfg))
+        assertEquals(AuthStatus.LoggedOut, adapter.probeAuth(FakeProcessExecutor(FakeResult(stdout = listOf("""{"loggedIn": false}"""), exitCode = 1)), cfg))
+        assertIs<AuthStatus.Unknown>(adapter.probeAuth(FakeProcessExecutor(FakeResult(stderr = listOf("unknown command"), exitCode = 1)), cfg))
+        assertNull(adapter.listModels(FakeProcessExecutor(), cfg))
+    }
     @Test fun measurementsDoNotRestrictVersionsModelsOrUnmeasuredFeatures() {
         val c = VerifiedCliContract.antigravity
         val measured = req.copy(model = "gemini-3.8-flash-low")

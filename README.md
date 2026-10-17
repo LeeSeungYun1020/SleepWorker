@@ -1,6 +1,6 @@
 # SleepWorker
 
-Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity and shell steps.
+Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity, Claude Code and shell steps.
 Phases 1–5 implement workflow storage, provider adapters, execution, CLI preflight, graph editing,
 read-only run history, settings, notifications and a macOS DMG. Verification evidence and
 remaining limits are recorded in the phase result documents.

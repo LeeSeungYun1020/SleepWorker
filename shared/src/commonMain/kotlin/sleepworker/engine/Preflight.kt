@@ -62,11 +62,11 @@ class CliPreflight(private val platform: Platform, private val registry: Provide
             agents.groupBy { workflow.sessions[it.session?.ref]?.provider }.forEach { (provider, steps) ->
                 if (provider == null) return@forEach
                 probe(provider.name) {
-                    val binary = if (provider == Provider.CODEX) "codex" else "agy"
-                    val path = (if (provider == Provider.CODEX) settings.codexPath else settings.agyPath)
+                    val binary = provider.binary
+                    val path = settings.pathFor(provider)
                         ?.takeIf { it.isNotBlank() } ?: platform.pathDetector.detect(binary, processes)
                     require(path != null && path.toPath().isAbsolute && platform.files.exists(path.toPath())) { "$binary 경로를 찾을 수 없음 — 설정 파일에서 절대 경로 지정" }
-                    resolved = if (provider == Provider.CODEX) resolved.copy(codexPath = path) else resolved.copy(agyPath = path)
+                    resolved = resolved.withPath(provider, path)
                     val output = processes.capture(ProcessSpec(listOf(path, "--version"), workflow.repoPath))
                     require(output.exitCode == 0) { "버전 확인 실패: ${output.stderr}" }
                     val actual = Regex("\\b\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?\\b").find(output.stdout.joinToString("\n"))?.value ?: error("버전 형식 확인 불가")
@@ -91,7 +91,7 @@ class CliPreflight(private val platform: Platform, private val registry: Provide
                         is AuthStatus.Unknown -> item("$binary 인증", PreflightStatus.ERROR, "인증 상태 확인 불가: ${auth.detail}")
                         AuthStatus.NotApplicable -> item("$binary 인증", PreflightStatus.ERROR, "인증 계약 확인 불가")
                     }
-                    val models = if (provider == Provider.CODEX) settings.codexModels else adapter.listModels(processes, cfg)
+                    val models = if (provider == Provider.ANTIGRAVITY) adapter.listModels(processes, cfg) else settings.modelCandidates(provider)
                     steps.mapNotNull { it.model }.distinct().forEach { model ->
                         if (models == null || model !in models) item("모델", PreflightStatus.WARN, "$model 목록에서 확인되지 않음 — 요청한 모델로 실행")
                     }

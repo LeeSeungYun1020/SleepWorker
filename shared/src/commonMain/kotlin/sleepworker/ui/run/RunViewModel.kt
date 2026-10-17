@@ -57,7 +57,7 @@ class RunViewModel(private val platform: Platform) {
         var previous: AppSettings? = null
         settingsModel.settings.collect { value ->
             editor.value?.settings = value
-            if (!active && previous?.let { it.codexPath != value.codexPath || it.agyPath != value.agyPath || it.codexModels != value.codexModels || it.agyModelsCache != value.agyModelsCache } == true) report.value = null
+            if (!active && previous?.let { !sameExecutionSettings(it, value) } == true) report.value = null
             previous = value
         }
     } }
@@ -294,4 +294,4 @@ fun notificationLabel(status: RunStatus): String = when (status) {
 }
 
 fun sameExecutionSettings(a: AppSettings, b: AppSettings): Boolean =
-    a.codexPath == b.codexPath && a.agyPath == b.agyPath && a.codexModels == b.codexModels && a.agyModelsCache == b.agyModelsCache
+    a.codexPath == b.codexPath && a.agyPath == b.agyPath && a.claudePath == b.claudePath && a.codexModels == b.codexModels && a.claudeModels == b.claudeModels && a.agyModelsCache == b.agyModelsCache

@@ -37,7 +37,7 @@ internal class EngineHarness(val executor: ProcessExecutor, val fs: FileSystem =
         val draft = store.importYaml(WorkflowCodec().encode(workflow))
         return store.saveVersion(draft, warningsAcknowledged = true)
     }
-    suspend fun run(workflow: Workflow) = engine.start(version(workflow), AppSettings(codexPath = "/codex", agyPath = "/agy"))
+    suspend fun run(workflow: Workflow) = engine.start(version(workflow), AppSettings(codexPath = "/codex", agyPath = "/agy", claudePath = "/claude"))
     fun text(state: RunState, relative: String) = fs.read(lease.repoPath / ".sleepworker/runs" / state.runId / relative) { readUtf8() }
 }
 internal fun codex(id: String = "thread-1", exitCode: Int = 0, delayMs: Long = 0) = FakeResult(listOf(

@@ -23,7 +23,7 @@ data class Workflow(
 @Serializable data class NodePosition(val x: Float, val y: Float)
 @Serializable data class WorktreeDef(val name: String, val branch: String)
 @Serializable data class SessionDef(val provider: Provider, val workspace: Workspace)
-@Serializable enum class Provider { @SerialName("codex") CODEX, @SerialName("antigravity") ANTIGRAVITY }
+@Serializable enum class Provider { @SerialName("codex") CODEX, @SerialName("antigravity") ANTIGRAVITY, @SerialName("claude") CLAUDE }
 @Serializable(with = WorkspaceSerializer::class)
 sealed interface Workspace {
     data object Local : Workspace

@@ -4,6 +4,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Instant
 import kotlinx.serialization.Serializable
+import sleepworker.model.Provider
 import kotlinx.serialization.json.Json
 import okio.FileSystem
 import okio.Path
@@ -19,7 +20,9 @@ import kotlin.uuid.Uuid
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val codexPath: String? = null,
     val agyPath: String? = null,
+    val claudePath: String? = null,
     val codexModels: List<String> = emptyList(),
+    val claudeModels: List<String> = listOf("opus", "sonnet", "haiku"),
     val agyModelsCache: ModelsCache? = null,
     val defaultWorktreeRoot: String? = null,
     val notificationsEnabled: Boolean = true,
@@ -28,6 +31,17 @@ import kotlin.uuid.Uuid
     val window: WindowGeometry = WindowGeometry(),
     val cliChecks: Map<String, CliCheck> = emptyMap(),
 )
+/** CLI binary name; also the key of [AppSettings.cliChecks]. */
+val Provider.binary: String get() = when (this) { Provider.CODEX -> "codex"; Provider.ANTIGRAVITY -> "agy"; Provider.CLAUDE -> "claude" }
+fun providerForBinary(binary: String): Provider = Provider.entries.first { it.binary == binary }
+fun AppSettings.pathFor(provider: Provider): String? = when (provider) { Provider.CODEX -> codexPath; Provider.ANTIGRAVITY -> agyPath; Provider.CLAUDE -> claudePath }
+fun AppSettings.withPath(provider: Provider, path: String?): AppSettings = when (provider) {
+    Provider.CODEX -> copy(codexPath = path); Provider.ANTIGRAVITY -> copy(agyPath = path); Provider.CLAUDE -> copy(claudePath = path)
+}
+/** Settings-managed candidates; Antigravity candidates come from its queried model cache. */
+fun AppSettings.modelCandidates(provider: Provider): List<String> = when (provider) {
+    Provider.CODEX -> codexModels; Provider.ANTIGRAVITY -> agyModelsCache?.models.orEmpty(); Provider.CLAUDE -> claudeModels
+}
 @OptIn(ExperimentalUuidApi::class)
 class SettingsStore(private val fs: FileSystem, private val path: Path) {
     private val mutex = Mutex()
