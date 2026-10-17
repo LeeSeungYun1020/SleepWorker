@@ -112,6 +112,20 @@ class JvmPlatformTest {
             dir.toFile().deleteRecursively()
         }
     }
+    @Test fun claudeCandidatesUseClaudeLocationsOnly() = runBlocking {
+        val home = Files.createTempDirectory("home")
+        try {
+            val bin = Files.createDirectories(home.resolve(".local/bin"))
+            listOf("claude", "agy").forEach { name ->
+                Files.writeString(bin.resolve(name), "#!/bin/sh\n").toFile().setExecutable(true)
+            }
+            val noPath = ProcessProbe { CapturedProcess(1, emptyList(), emptyList()) }
+            val detector = ZshPathDetector(JvmProcessExecutor(), home.toString())
+            assertEquals(listOf(bin.resolve("claude").toString()), detector.candidates("claude", noPath).filter { it.startsWith(home.toString()) })
+            assertEquals(listOf(bin.resolve("agy").toString()), detector.candidates("agy", noPath).filter { it.startsWith(home.toString()) })
+            assertTrue(detector.candidates("other", noPath).none { it.startsWith(home.toString()) })
+        } finally { home.toFile().deleteRecursively() }
+    }
 }
 
 /** Standalone child used to verify that kernel locks release even without application cleanup. */

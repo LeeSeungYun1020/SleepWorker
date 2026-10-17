@@ -79,7 +79,7 @@ fun resumeCommand(run: RunState, visit: StepVisit, attempt: AttemptRecord): Stri
         }
     }
     val request = ExecRequest(cwd, "여기에 재개 지시를 입력하세요", metadata.requestedModel, metadata.requestedEffort, id, metadata.binaryPath)
-    val adapter = if (session.provider == Provider.CODEX) CodexAdapter() else AntigravityAdapter()
+    val adapter = when (session.provider) { Provider.CODEX -> CodexAdapter(); Provider.ANTIGRAVITY -> AntigravityAdapter(); Provider.CLAUDE -> ClaudeAdapter() }
     val spec = try { adapter.buildCommand(request) } catch (_: ProviderConfigException) { return null }
     fun quote(value: String) = "'" + value.replace("'", "'\\''") + "'"
     val command = spec.command.joinToString(" ", transform = ::quote)

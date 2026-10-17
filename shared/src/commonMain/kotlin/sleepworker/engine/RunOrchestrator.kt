@@ -212,7 +212,7 @@ class RunOrchestrator(
             var attemptNo = 1
             while (true) {
                 currentCoroutineContext().ensureActive()
-                val binary = when (definition?.provider) { Provider.CODEX -> settings.codexPath.orEmpty(); Provider.ANTIGRAVITY -> settings.agyPath.orEmpty(); null -> "/bin/zsh" }
+                val binary = definition?.provider?.let { settings.pathFor(it).orEmpty() } ?: "/bin/zsh"
                 val meta = ExecutionMetadata(binary, metadata[definition?.provider]?.first, metadata[definition?.provider]?.second, step.model, step.effort)
                 visitUpdate { it.copy(attempts = it.attempts + AttemptRecord(attemptNo, StepStatus.PREPARING, now(), sessionId = it.boundSessionId, metadata = meta)) }
                 val script = if (attemptNo == 1) { if (agent) step.script else step.shellScript } else RetryPolicy.script(step, visit().attempts.first().result!!)

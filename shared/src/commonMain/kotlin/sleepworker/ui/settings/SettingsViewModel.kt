@@ -59,7 +59,7 @@ class SettingsViewModel(private val platform: Platform, private val scope: Corou
         catch (e: sleepworker.engine.UnsafeCleanup) { throw e }
         catch (e: Exception) { return CliCheck(path, null, null, Clock.System.now(), e.message ?: e.toString()) }
         val version = if (output.exitCode == 0) Regex("\\b\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?\\b").find(output.stdout.joinToString("\n"))?.value else null
-        val provider = if (binary == "codex") Provider.CODEX else Provider.ANTIGRAVITY
+        val provider = providerForBinary(binary)
         val contract = version?.let { VerifiedCliContract.forVersion(provider, it) }
         return CliCheck(path, version, contract?.id, Clock.System.now(),
             "exit=${output.exitCode}\n${(output.stdout + output.stderr).joinToString("\n")}\n${contract?.id ?: "실측 기록 없음 — 버전·모델 실측 여부는 실행을 제한하지 않습니다"}")
@@ -69,7 +69,7 @@ class SettingsViewModel(private val platform: Platform, private val scope: Corou
         check(candidates.value[binary].orEmpty().isNotEmpty()) { "$binary 후보를 찾지 못했습니다. 절대 경로를 입력하세요." }
     }
     fun verify(binary: String) = action {
-        val path = (if (binary == "codex") settings.value.codexPath else settings.value.agyPath)?.takeIf { it.startsWith('/') } ?: error("CLI 절대 경로가 필요합니다")
+        val path = settings.value.pathFor(providerForBinary(binary))?.takeIf { it.startsWith('/') } ?: error("CLI 절대 경로가 필요합니다")
         val check = checkPath(binary, path)
         val next = settings.value.copy(cliChecks = settings.value.cliChecks + (binary to check))
         store.save(next); settings.value = next

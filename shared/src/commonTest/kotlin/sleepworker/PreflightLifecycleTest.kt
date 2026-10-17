@@ -94,14 +94,21 @@ class PreflightLifecycleTest {
         assertEquals("true\n", h.text(state, "preflight/probes/1/stdout.log"))
         assertEquals(4, fake.requests.size)
     }
-    @Test fun unmeasuredVersionsAndModelsExecuteNewAndResumeForBothProviders() = runTest {
+    @Test fun unmeasuredVersionsAndModelsExecuteNewAndResumeForAllProviders() = runTest {
         for (provider in Provider.entries) {
-            val isCodex = provider == Provider.CODEX
-            val binary = if (isCodex) "codex" else "agy"
-            val version = if (isCodex) "0.161.0" else "1.3.2"
-            val success = if (isCodex) codex() else FakeResult(listOf("""{"conversation_id":"thread-1","status":"SUCCESS","response":"done"}"""))
-            val auth = if (isCodex) FakeResult() else FakeResult(listOf("catalog-model\tCatalog model"))
-            val catalog = if (isCodex) emptyArray() else arrayOf(auth)
+            val binary = provider.binary
+            val version = when (provider) { Provider.CODEX -> "0.161.0"; Provider.ANTIGRAVITY -> "1.3.2"; Provider.CLAUDE -> "2.1.302" }
+            val success = when (provider) {
+                Provider.CODEX -> codex()
+                Provider.ANTIGRAVITY -> FakeResult(listOf("""{"conversation_id":"thread-1","status":"SUCCESS","response":"done"}"""))
+                Provider.CLAUDE -> FakeResult(listOf("""{"type":"system","subtype":"init","session_id":"thread-1"}""", """{"type":"result","subtype":"success","is_error":false,"result":"done","session_id":"thread-1"}"""))
+            }
+            val auth = when (provider) {
+                Provider.CODEX -> FakeResult()
+                Provider.ANTIGRAVITY -> FakeResult(listOf("catalog-model\tCatalog model"))
+                Provider.CLAUDE -> FakeResult(listOf("""{"loggedIn": true}"""))
+            }
+            val catalog = if (provider == Provider.ANTIGRAVITY) arrayOf(auth) else emptyArray()
             val fake = FakeProcessExecutor(FakeResult(listOf("$binary $version")), auth, *catalog, *git(), success, success)
             val h = harness(fake)
             h.fs.write("/$binary".toPath()) { writeUtf8("") }
@@ -114,7 +121,7 @@ class PreflightLifecycleTest {
             val commands = fake.requests.takeLast(2).map { it.command }
             assertTrue(commands.all { "new-model" in it && ("max" in it || "model_reasoning_effort=max" in it) })
             assertTrue("thread-1" in commands.last())
-            assertTrue((if (isCodex) "resume" else "--conversation") in commands.last())
+            assertTrue(when (provider) { Provider.CODEX -> "resume"; Provider.ANTIGRAVITY -> "--conversation"; Provider.CLAUDE -> "--resume" } in commands.last())
             val report = h.recorder.json.decodeFromString<PreflightReport>(h.text(state, "preflight/report.json"))
             assertTrue(report.passed)
             assertEquals(version to null, report.metadata[provider])

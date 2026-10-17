@@ -269,7 +269,7 @@ private fun StepPanel(vm: EditorViewModel, w: Workflow, s: Step, onDelete: () ->
             val cache = if (definition.provider == Provider.ANTIGRAVITY) vm.settings.agyModelsCache else null
             cache?.let { Text("${it.binaryPath} · ${it.binaryVersion}\n${it.queriedAt}", style = MaterialTheme.typography.labelSmall) }
             EditorChoice("effort", s.effort?.name.orEmpty(), listOf("") + Effort.entries.map { "${it.name} · ${vm.effortStatus(definition.provider, s.model, it, cliVersions[definition.provider] ?: cache?.binaryVersion)}" }) { value -> vm.updateStep(s.id) { it.copy(effort = value.substringBefore(' ').takeIf { it.isNotBlank() }?.let(Effort::valueOf)) } }
-            Text("Codex CLI 버전은 프리플라이트에서 확인합니다. 실측 기록이 없는 버전·모델·effort도 실행할 수 있습니다.", style = MaterialTheme.typography.bodySmall)
+            Text("CLI 버전은 프리플라이트에서 확인합니다. 실측 기록이 없는 버전·모델·effort도 실행할 수 있습니다.", style = MaterialTheme.typography.bodySmall)
         }
         ExpandableSection("재시도 스크립트") { OutlinedTextField(s.retryScript.orEmpty(), { value -> vm.updateStep(s.id, "retryScript") { it.copy(retryScript = value.ifBlank { null }) } }, label = { Text("retryScript") }, placeholder = { Text("Retry the current task. Previous attempt failed: …; exit code: …; completion: … (기본 문구)") }, minLines = 3, enabled = enabled, modifier = Modifier.trackTextInputFocus()) }
     }

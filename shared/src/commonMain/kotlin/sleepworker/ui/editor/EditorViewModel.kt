@@ -225,7 +225,7 @@ class EditorViewModel(
     fun worktreeReferences(name: String): List<String> = workflow?.let { w -> w.steps.filter { it.workspace == Workspace.Worktree(name) || w.sessions[it.session?.ref]?.workspace == Workspace.Worktree(name) }.map { it.id } }.orEmpty()
     fun deleteSession(name: String) = edit { it.copy(sessions = it.sessions - name) }
     fun deleteWorktree(name: String) = edit { it.copy(worktrees = it.worktrees.filterNot { wt -> wt.name == name }) }
-    fun modelCandidates(provider: Provider): List<String> = if (provider == Provider.CODEX) settings.codexModels else settings.agyModelsCache?.models.orEmpty()
+    fun modelCandidates(provider: Provider): List<String> = settings.modelCandidates(provider)
     fun effortStatus(provider: Provider, model: String?, effort: Effort, version: String?): Verification = version?.let { VerifiedCliContract.forVersion(provider, it)?.modelEfforts?.get(ModelEffort(model.orEmpty(), effort))?.status } ?: Verification.NOT_VERIFIED
     suspend fun preserveDraftOnShutdown() = gate.withLock {
         if (dirty.value) draft.value?.let { store.saveDraft(it); baseline = it; updated() }

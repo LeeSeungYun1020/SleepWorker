@@ -1,6 +1,6 @@
 # SleepWorker
 
-Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity and shell steps.
+Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity, Claude Code and shell steps.
 Build and run sequential workflows with agent and shell steps, explicit branching and bounded loops.
 The app includes a graph editor, live run monitoring, read-only history, CLI settings, notifications
 and macOS DMG packaging. System, light and dark themes and responsive desktop panes are supported.
@@ -155,7 +155,7 @@ or notarization. If macOS blocks it, follow [Apple's per-app opening instruction
 attempt opening it, then use System Settings → Privacy & Security → Open Anyway for this app.
 Older macOS versions may also offer Finder right-click → Open.
 
-Install Codex and/or Antigravity and log in using their CLI before running agent steps. The app
+Install Codex, Antigravity and/or Claude Code and log in using their CLI before running agent steps. The app
 has no login UI and does not store tokens or credentials. Git is required; `gh` is optional unless
 your shell steps use it. A JVM is bundled; JDK 21 is needed only to build from source.
 
@@ -167,7 +167,7 @@ path, version, contract and timestamp; a mismatched current path is labeled as a
 Unknown versions and unmeasured model/effort combinations can run; preflight records the actual
 version and leaves the measured contract ID empty when there is no matching evidence.
 
-Codex's editable catalog is a candidate list, not proof of model support. Antigravity Refresh
+Codex and Claude editable catalogs are candidate lists, not proof of model support. Antigravity Refresh
 uses `agy models` TSV, and preserves the old cache with a diagnostic if refreshing fails. The
 cache always shows its source binary/version and query time. Default worktree root affects new
 workflows. Notification toggles select completion, failure, user attention and pause events.

@@ -39,16 +39,29 @@ class JvmRepositoryLock : RepositoryLock {
         }
     }
 }
-class ZshPathDetector(private val executor: ProcessExecutor) : PathDetector {
+class ZshPathDetector(private val executor: ProcessExecutor, private val home: String = System.getProperty("user.home")) : PathDetector {
     override suspend fun candidates(binary: String): List<String> = candidates(binary, ProcessProbe { captureProcess(executor, it) })
     override suspend fun candidates(binary: String, probe: ProcessProbe): List<String> = buildList {
         detect(binary, probe)?.let(::add)
-        val home = System.getProperty("user.home")
-        val paths = if (binary == "codex") listOf(
-            "/Applications/Codex.app/Contents/Resources/codex", "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
-            "$home/.local/bin/codex", "/opt/homebrew/bin/codex", "/usr/local/bin/codex")
-        else listOf("$home/.local/bin/agy", "/opt/homebrew/bin/agy", "/usr/local/bin/agy")
+        val paths = when (binary) {
+            "codex" -> listOf(
+                "/Applications/Codex.app/Contents/Resources/codex", "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
+                "$home/.local/bin/codex", "/opt/homebrew/bin/codex", "/usr/local/bin/codex")
+            "agy" -> listOf("$home/.local/bin/agy", "/opt/homebrew/bin/agy", "/usr/local/bin/agy")
+            // Native installer, legacy local install, Homebrew and global npm locations.
+            "claude" -> listOf("$home/.local/bin/claude", "$home/.claude/local/claude", "/opt/homebrew/bin/claude", "/usr/local/bin/claude")
+            else -> emptyList()
+        }
         addAll(paths.filter { Files.isExecutable(java.nio.file.Path.of(it)) })
+        if (binary == "claude") {
+            val nvm = java.nio.file.Path.of(home, ".nvm", "versions", "node")
+            if (Files.isDirectory(nvm)) Files.list(nvm).use { versions ->
+                versions.sorted().limit(32).forEach { version ->
+                    val launcher = version.resolve("bin/claude")
+                    if (Files.isExecutable(launcher)) add(launcher.toString())
+                }
+            }
+        }
         if (binary == "codex") {
             // Finder does not load NVM's interactive shell profile. Discover its installed
             // launchers and native binaries as explicit candidates, never as defaults.
@@ -76,7 +89,7 @@ class ZshPathDetector(private val executor: ProcessExecutor) : PathDetector {
     override suspend fun detect(binary: String): String? = detect(binary, ProcessProbe { captureProcess(executor, it) })
     override suspend fun detect(binary: String, probe: ProcessProbe): String? {
         require(Regex("[A-Za-z0-9_.-]+").matches(binary))
-        val result = probe.capture(ProcessSpec(listOf("/bin/zsh", "-lc", "command -v -- '$binary'"), System.getProperty("user.home")))
+        val result = probe.capture(ProcessSpec(listOf("/bin/zsh", "-lc", "command -v -- '$binary'"), home))
         return result.stdout.lastOrNull()?.takeIf { result.exitCode == 0 && it.startsWith('/') }
     }
 }
