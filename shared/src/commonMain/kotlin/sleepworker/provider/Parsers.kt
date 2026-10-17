@@ -131,6 +131,8 @@ internal class AntigravityParser(req: ExecRequest) : AgentParser(req) {
     }
 }
 internal class ClaudeParser(private val req: ExecRequest) : AgentParser(req) {
+    /** Structured API error category from an assistant message, e.g. "rate_limit". */
+    private var apiError: String? = null
     override fun accept(line: String, stream: Stream): List<AgentEvent> {
         checkOpen()
         if (stream == Stream.STDERR) {
@@ -146,6 +148,7 @@ internal class ClaudeParser(private val req: ExecRequest) : AgentParser(req) {
         return when (obj.string("type")) {
             "system" -> if (obj.string("subtype") == "init") session(obj.string("session_id")) else listOf(AgentEvent.Raw(line, stream))
             "assistant" -> {
+                obj.string("error")?.let { apiError = it }
                 val content = (obj["message"] as? JsonObject)?.get("content") as? JsonArray
                 if (content == null) { malformed = true; emptyList() }
                 else content.mapNotNull { block ->
@@ -167,8 +170,8 @@ internal class ClaudeParser(private val req: ExecRequest) : AgentParser(req) {
                 else {
                     val detail = text ?: obj["errors"]?.toString() ?: obj.string("subtype") ?: line
                     val kind = when {
-                        "Please run /login" in detail -> FailureKind.AUTH
-                        "usage limit" in detail.lowercase() -> FailureKind.QUOTA
+                        apiError == "authentication_failed" || "Please run /login" in detail -> FailureKind.AUTH
+                        apiError in setOf("rate_limit", "billing_error") || "usage limit" in detail.lowercase() || "hit your limit" in detail.lowercase() -> FailureKind.QUOTA
                         else -> null
                     }
                     events.add(fail(detail, kind))

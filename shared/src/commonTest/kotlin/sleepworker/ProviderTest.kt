@@ -124,6 +124,21 @@ class ProviderTest {
         assertEquals(FailureKind.SESSION_INVALID, missing.failure?.kind)
         assertEquals("requested-id", missing.sessionId)
     }
+    @Test fun claudeRateLimitIsQuotaAndIsNotRetried() = runTest {
+        val limited = FakeResult(listOf(
+            """{"type":"system","subtype":"init","session_id":"id"}""",
+            """{"type":"assistant","message":{"content":[{"type":"text","text":"API Error: Request rejected (429) · You've hit your limit · resets 3pm"}]},"session_id":"id","error":"rate_limit"}""",
+            """{"type":"result","subtype":"success","is_error":true,"result":"API Error: Request rejected (429) · You've hit your limit · resets 3pm","session_id":"id"}""",
+        ), exitCode = 1)
+        val parser = ClaudeAdapter().createParser(req)
+        limited.stdout.forEach { parser.accept(it, Stream.STDOUT) }
+        assertEquals(FailureKind.QUOTA, parser.finalizeOutput(1, Termination.NORMAL).failure?.kind)
+        val fake = FakeProcessExecutor(limited)
+        val state = EngineHarness(fake).run(agents(agent("a", SessionMode.NEW)).copy(sessions = mapOf("s" to SessionDef(Provider.CLAUDE, Workspace.Local))))
+        assertEquals(1, fake.requests.size)
+        assertEquals(1, state.visits.single().attempts.size)
+        assertEquals(FailureKind.QUOTA, state.visits.single().attempts.single().result?.failure?.kind)
+    }
     @Test fun claudeAuthenticationStatus() = runTest {
         val cfg = ProviderConfig("/bin/claude", "/repo")
         val adapter = ClaudeAdapter()
