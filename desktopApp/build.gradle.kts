@@ -31,5 +31,5 @@ tasks.register<JavaExec>("acceptance") {
 }
 
 tasks.processResources {
-    from(rootProject.file("sleepworker.md")) { rename { "plan.md" } }
+    from(rootProject.file("README.md"))
 }

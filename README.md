@@ -1,9 +1,9 @@
 # SleepWorker
 
 Kotlin Multiplatform + Compose Desktop workflow runner for Codex, Antigravity, Claude Code and shell steps.
-Phases 1–5 implement workflow storage, provider adapters, execution, CLI preflight, graph editing,
-read-only run history, settings, notifications and a macOS DMG. Verification evidence and
-remaining limits are recorded in the phase result documents.
+Build and run sequential workflows with agent and shell steps, explicit branching and bounded loops.
+The app includes a graph editor, live run monitoring, read-only history, CLI settings, notifications
+and macOS DMG packaging. System, light and dark themes and responsive desktop panes are supported.
 
 ## Build and run
 
@@ -35,7 +35,7 @@ SleepWorker manages persistent files and metadata under dedicated paths:
   provider commands/parsers/contracts and platform interfaces.
 - `shared/jvmMain`: process execution, temporary scripts, macOS notifications, login-shell path
   detection and operating-system repository locks.
-- `desktopApp`: app entry point and macOS packaging.
+- `desktopApp`: app entry point, native menus, bundled README help and macOS packaging.
 
 ## Model and storage
 
@@ -80,8 +80,10 @@ calls, authentication changes or GitHub writes occur. The tests replay original 
 from `scripts/fixtures/phase0` (measured and synthetic sources remain distinct), avoiding copied
 fixtures that could drift. Reports: `shared/build/reports/tests/jvmTest/index.html`.
 
-See [Phase 1 results](scripts/phase1-result.md), [Phase 2 results](scripts/phase2-result.md),
-[Phase 3 results](scripts/phase3-result.md), [Phase 4 results](scripts/phase4-result.md), [Phase 5 results](scripts/phase5-result.md), and the [phase plan](00-overview.md).
+CLI collectors and fixture maintenance are documented in [scripts/README.md](scripts/README.md).
+Original CLI output, capture metadata and isolated acceptance records remain under
+`scripts/fixtures/`. These records describe the versions and environments originally measured;
+they do not establish compatibility with every later CLI release.
 
 ## Execution engine
 
@@ -121,6 +123,7 @@ Preflight reports missing measurements and catalog entries as warnings; authenti
 errors still block execution. Use Settings to detect CLI candidates, inspect their versions, and choose an absolute path.
 Settings are saved immediately in `~/Library/Application Support/SleepWorker/settings.json`.
 Use the timeline to select visits and the log controls to select attempts, streams and phases.
+Attempt labels show the current attempt out of a maximum of two; manual Retry starts a separate visit.
 History records never resume automatically; interrupted runs require a new preflight and run.
 
 ## Graph editor
@@ -152,7 +155,7 @@ or notarization. If macOS blocks it, follow [Apple's per-app opening instruction
 attempt opening it, then use System Settings → Privacy & Security → Open Anyway for this app.
 Older macOS versions may also offer Finder right-click → Open.
 
-Install Codex and/or Antigravity and log in using their CLI before running agent steps. The app
+Install Codex, Antigravity and/or Claude Code and log in using their CLI before running agent steps. The app
 has no login UI and does not store tokens or credentials. Git is required; `gh` is optional unless
 your shell steps use it. A JVM is bundled; JDK 21 is needed only to build from source.
 
@@ -164,7 +167,7 @@ path, version, contract and timestamp; a mismatched current path is labeled as a
 Unknown versions and unmeasured model/effort combinations can run; preflight records the actual
 version and leaves the measured contract ID empty when there is no matching evidence.
 
-Codex's editable catalog is a candidate list, not proof of model support. Antigravity Refresh
+Codex and Claude editable catalogs are candidate lists, not proof of model support. Antigravity Refresh
 uses `agy models` TSV, and preserves the old cache with a diagnostic if refreshing fails. The
 cache always shows its source binary/version and query time. Default worktree root affects new
 workflows. Notification toggles select completion, failure, user attention and pause events.
@@ -216,7 +219,8 @@ workflow versions. The ignore banner suggests ignoring `.sleepworker/runs/` with
 
 ## Desktop behavior and limits
 
-File/Run/Help menus offer workflow commands, execution controls and the bundled plan. Window
+File/Edit/Run/Help menus offer workflow commands, undo/redo, execution controls and the bundled
+README (Help → 사용 안내 열기). Window
 size/position are remembered. Closing or Cmd+Q offers save/discard/cancel for dirty drafts and
 confirms unfinished execution; shutdown waits for owned processes and durable interruption
 records. Unexpected errors appear in a dialog and `~/Library/Logs/SleepWorker/app.log`. Operational
@@ -227,11 +231,10 @@ crash-time process reattachment and interrupted-run continuation are outside thi
 macOS system notification permissions/Focus settings can prevent a delivered osascript command
 from producing a visible banner. User credentials remain the responsibility of each CLI.
 
-Differences from `sleepworker.md`: unknown authentication blocks execution. Measured contracts are
-reference evidence rather than an execution allowlist. Manual resume copy uses the noninteractive
-command with an editable prompt, rather than assuming interactive flags. Large historical files
-use a 512 KB preview with an original-file path. Window geometry and CLI checks are additive
-settings fields; historical records missing the new run-start timestamp keep it unknown.
+Unknown authentication blocks execution. Measured contracts are reference evidence rather than
+an execution allowlist. Historical records missing the run-start timestamp keep it unknown.
+Interrupted runs never use their recovery discovery time as the execution end; visits without a
+recorded end show an unknown duration after termination.
 
 ## Appearance and editing
 
@@ -248,4 +251,4 @@ focused; focused fields keep their text undo. Edit offers Cmd+F; Run offers Cmd+
 Selecting another node or edge first commits valid pending names; invalid names block selection.
 
 History shows list/detail/file panes side by side in wide windows and switches between them
-in compact windows. See [design review and results](scripts/phase6-result.md).
+in compact windows.
