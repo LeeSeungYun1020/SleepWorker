@@ -1,10 +1,11 @@
-# Phase 0 CLI verification
+# Verification scripts and fixtures
 
-이후 검증에는 `../00-overview.md`의 비용 원칙을 적용한다. 모델 없는 검사/fixture 재생을
-우선하고, 실제 모델이 필요하면 지원 확인한 GPT-6 Luna 등 저비용 모델과 low effort를 명시한다.
-**현재 과거 재현용 도우미 일부는 Astra 고정 또는 Codex 기본 모델 상속을 사용한다.**
-추가 실모델 실행 전 01 계획의 모델/effort 인자화 작업을 먼저 완료한다. 아래 명령들은 기존
-재현 방법이며 저비용 정책을 충족한 기본값으로 변경됐다는 의미가 아니다.
+일반 검증은 빌드·로컬 셸·저장 fixture 재생을 우선하며 모델을 호출하지 않는다.
+실제 모델 검증이 필요한 경우 설치 CLI에서 지원을 확인한 저비용 모델과 effort를 명시한다.
+요청한 조합이 지원되지 않으면 다른 모델이나 effort로 암묵 변경하지 않는다.
+**과거 재현용 도우미 일부는 Astra 고정 또는 Codex 기본 모델 상속을 사용한다.**
+아래 명령은 기존 재현 예시다. 실모델 실행 전 해당 도우미의 모델/effort 선택 방식을
+확인하고, 선택 인자가 없으면 명시적으로 지정할 수 있도록 수정한 뒤 실행한다.
 
 Python 3 표준 라이브러리, Bash, Git을 사용한다. 사용자 저장소 대신 실행마다 별도
 샘플 저장소와 `ai/test` 워크트리를 생성한다. 사용자 인증을 삭제하거나 로그아웃하지 않는다.
@@ -57,7 +58,7 @@ python3 scripts/cleanup-github-test.py /tmp/sleepworker-additional-new/github-pu
 새 세션은 FILES.md 작성 후 임의 토큰을 대화에서만 기억하게 하고, resume에는 토큰을
 재전달하지 않는다. 동일 ID, 이전 토큰 응답, 파일 수정, 최종 성공 신호와 실제 종료코드를
 함께 검사한다. `summary.json`의 VERIFIED는 이 좁은 new/resume 계약에만 해당한다.
-전체 Phase 0 완료 여부와 수동 실험 항목은 `phase0-result.md`를 따른다.
+실측 범위와 미검증 항목은 `fixtures/phase0/README.md` 및 각 case의 메타데이터를 확인한다.
 
 GitHub 추가 검증은 Manicule 및 게시 계정 `LeeSeungYun1020`을 대상으로 한 전용 스크립트다.
 저장된 해당 계정 인증을 자식 프로세스 메모리에서만 사용하며 공유 gh 활성 계정을 바꾸지 않는다.
@@ -76,8 +77,7 @@ Phase 04는 이 보존 자료를 테스트 리소스로 사용한다. 과거 cwd
 
 ## Phase 5 desktop release
 
-See [phase5-result.md](phase5-result.md) and
-[fixtures/phase5](fixtures/phase5/README.md) for installed DMG acceptance and remaining limits.
+See [fixtures/phase5](fixtures/phase5/README.md) for installed DMG acceptance and remaining limits.
 Rebuild with `./gradlew build :desktopApp:packageDmg` from the repository root.
 The checked-in icon can be regenerated on macOS:
 
@@ -88,3 +88,12 @@ iconutil -c icns /tmp/sleepworker.iconset -o desktopApp/src/main/resources/sleep
 
 The phase fixtures are narrow isolated workflows; replacing their repoPath and running the
 Codex fixture is an explicit live model invocation. Ordinary builds/tests make no model calls.
+
+## Documentation
+
+Current setup and application behavior: [README](../README.md).
+Implementation plans and completed phase result/audit reports have been removed.
+`fixtures/` retains original CLI output, capture metadata and isolated acceptance records,
+with README files explaining their scope. Captured implementation plans and review notes
+have also been removed. Historical paths and prompts in the original records may refer to
+files or temporary repositories that no longer exist.

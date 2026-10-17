@@ -40,7 +40,7 @@ data class VerifiedCliContract(
             "modelsTsv" to measured("agy/live/models", "slug and label TSV"),
             "resumeOriginalWorkspace" to measured("additional/manicule-v2/agy-resume-other-cwd", "Session stays bound to original workspace"),
             "modelsJson" to ContractEvidence(Verification.UNSUPPORTED, "scripts/fixtures/phase0/agy", "models --output-format json rejected"),
-            "unauthenticated" to ContractEvidence(Verification.NOT_VERIFIED, "scripts/phase0-result.md", "Deferred until Phase 3 authentication handling"),
+            "unauthenticated" to ContractEvidence(Verification.NOT_VERIFIED, "scripts/fixtures/phase0/README.md", "No logged-out failure measured on 1.2.16; later CLI versions retain separate evidence"),
             "effortHelp" to measured("agy", "Help lists low/medium/high/xhigh/max; this does not verify execution"),
         ), mapOf(ModelEffort("gemini-3.8-flash-low", Effort.LOW) to measured("agy/live/new", "Explicit model + low succeeded")))
 
