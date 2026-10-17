@@ -103,10 +103,10 @@ fun main(args: Array<String>) {
                     Item("중지", onClick = { viewModel.menu("abort") }, enabled = viewModel.active)
                 }
                 Menu("Help") {
-                    Item("계획서 열기", onClick = {
+                    Item("사용 안내 열기", onClick = {
                         try {
-                            val text = object {}.javaClass.getResourceAsStream("/plan.md")?.bufferedReader()?.use { it.readText() } ?: error("계획서 리소스 없음")
-                            val file = java.nio.file.Files.createTempFile("sleepworker-plan-", ".md").toFile().apply { deleteOnExit(); writeText(text) }
+                            val text = object {}.javaClass.getResourceAsStream("/README.md")?.bufferedReader()?.use { it.readText() } ?: error("사용 안내 리소스 없음")
+                            val file = java.nio.file.Files.createTempFile("sleepworker-readme-", ".md").toFile().apply { deleteOnExit(); writeText(text) }
                             Desktop.getDesktop().open(file)
                         } catch (e: Exception) { JvmAppLog.write(e); viewModel.fatalError.value = e.message }
                     })

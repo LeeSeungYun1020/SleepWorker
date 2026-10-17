@@ -667,11 +667,6 @@
       "bytes": 628
     },
     {
-      "path": "additional/manicule-v2/github-prepare/REVIEW.md",
-      "sha256": "43281573df0e62bd4d3c12893881373a7e8a99912a6ba32ad5f7d8642f8d50b0",
-      "bytes": 235
-    },
-    {
       "path": "additional/manicule-v2/github-prepare/target.json",
       "sha256": "88f54d200e6bee8e9fbdd47be25ff0b44480d57e96b692aada8efd1f7c43cdc5",
       "bytes": 95
