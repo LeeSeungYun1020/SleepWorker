@@ -44,8 +44,8 @@ fun AppSettings.modelsCache(provider: Provider): ModelsCache? = when (provider) 
 fun AppSettings.withModelsCache(provider: Provider, cache: ModelsCache): AppSettings = when (provider) {
     Provider.CODEX -> copy(codexModelsCache = cache); Provider.ANTIGRAVITY -> copy(agyModelsCache = cache); Provider.CLAUDE -> copy(claudeModelsCache = cache)
 }
-/** Queried model cache first, then manually entered candidates as a fallback (Antigravity has no manual list). */
-fun AppSettings.modelCandidates(provider: Provider): List<String> = (modelsCache(provider)?.models.orEmpty() + when (provider) {
+/** Queried model cache first, then manually entered candidates as a fallback (Antigravity has no manual list). With [binaryPath], a cache queried from another binary is ignored. */
+fun AppSettings.modelCandidates(provider: Provider, binaryPath: String? = null): List<String> = (modelsCache(provider)?.takeIf { binaryPath == null || it.binaryPath == binaryPath }?.models.orEmpty() + when (provider) {
     Provider.CODEX -> codexModels; Provider.ANTIGRAVITY -> emptyList(); Provider.CLAUDE -> claudeModels
 }).distinct()
 @OptIn(ExperimentalUuidApi::class)

@@ -27,12 +27,12 @@ class CodexAdapter : ProviderAdapter {
             else -> AuthStatus.Unknown("exit=${result.exitCode}\n${(result.stdout + result.stderr).joinToString("\n")}")
         }
     } catch (e: TimeoutCancellationException) { AuthStatus.Unknown("Authentication probe timed out: ${e.message}") } catch (e: CancellationException) { throw e } catch (e: Exception) { AuthStatus.Unknown(e.toString()) }
-    /** `codex debug models` catalog; entries hidden from the picker (`visibility != "list"`) are skipped. */
+    /** `codex debug models` catalog; malformed entries and those hidden from the picker (`visibility != "list"`) are skipped. */
     fun parseModels(text: String): List<String>? {
         val models = try { (Json.parseToJsonElement(text) as? JsonObject)?.get("models") as? JsonArray } catch (_: Exception) { null } ?: return null
         val slugs = models.mapNotNull { entry ->
-            val model = entry as? JsonObject ?: return null
-            val slug = (model["slug"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() } ?: return null
+            val model = entry as? JsonObject ?: return@mapNotNull null
+            val slug = (model["slug"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
             slug.takeIf { (model["visibility"] as? JsonPrimitive)?.contentOrNull == "list" }
         }
         return slugs.distinct().ifEmpty { null }

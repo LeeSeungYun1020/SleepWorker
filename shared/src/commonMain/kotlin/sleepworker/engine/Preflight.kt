@@ -91,7 +91,7 @@ class CliPreflight(private val platform: Platform, private val registry: Provide
                         is AuthStatus.Unknown -> item("$binary 인증", PreflightStatus.ERROR, "인증 상태 확인 불가: ${auth.detail}")
                         AuthStatus.NotApplicable -> item("$binary 인증", PreflightStatus.ERROR, "인증 계약 확인 불가")
                     }
-                    val models = if (provider == Provider.ANTIGRAVITY) adapter.listModels(processes, cfg) else settings.modelCandidates(provider)
+                    val models = if (provider == Provider.ANTIGRAVITY) adapter.listModels(processes, cfg) else settings.modelCandidates(provider, path)
                     steps.mapNotNull { it.model }.distinct().forEach { model ->
                         if (models == null || model !in models) item("모델", PreflightStatus.WARN, "$model 목록에서 확인되지 않음 — 요청한 모델로 실행")
                     }

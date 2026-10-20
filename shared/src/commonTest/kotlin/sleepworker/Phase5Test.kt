@@ -118,6 +118,20 @@ class Phase5Test {
         assertEquals(listOf("gpt-a"), vm.settings.value.codexModelsCache?.models)
         assertNull(vm.settings.value.agyModelsCache)
         assertEquals(listOf("gpt-a", "manual"), vm.settings.value.modelCandidates(Provider.CODEX))
+        assertEquals(listOf("gpt-a", "manual"), vm.settings.value.modelCandidates(Provider.CODEX, "/bin/codex"))
+        assertEquals(listOf("manual", "gpt-a"), vm.settings.value.modelCandidates(Provider.CODEX, "/other/codex"))
+    }
+    @Test fun claudeModelRefreshSendsInitializeOverStdin() = runTest {
+        val init = """{"type":"control_response","response":{"subtype":"success","request_id":"sleepworker-models","response":{"models":[{"value":"opus","resolvedModel":"claude-opus-5-5"}]}}}"""
+        val executor = FakeProcessExecutor(FakeResult(listOf("2.1.302 (Claude Code)")), FakeResult(listOf(init)))
+        val vm = SettingsViewModel(platform(executor), backgroundScope)
+        vm.save { it.copy(claudePath = "/bin/claude") }
+        vm.refreshModels(Provider.CLAUDE).join()
+        assertNull(vm.error.value)
+        assertTrue(executor.requests[1].stdin!!.contains("\"subtype\":\"initialize\""))
+        assertEquals("/", executor.requests[1].cwd)
+        assertEquals(listOf("opus", "claude-opus-5-5"), vm.settings.value.claudeModelsCache?.models)
+        assertNull(vm.settings.value.agyModelsCache); assertNull(vm.settings.value.codexModelsCache)
     }
     @Test fun pathAndCustomVersionAreRecordedIndependently() = runTest {
         val executor = FakeProcessExecutor(FakeResult(listOf("codex 0.146.0")), FakeResult(listOf("codex 0.160.0")))
