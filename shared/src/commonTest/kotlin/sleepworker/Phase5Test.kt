@@ -110,6 +110,15 @@ class Phase5Test {
         assertEquals(listOf("/bin/agy", "models"), executor.requests[1].command)
         assertTrue(executor.requests.none { "--output-format" in it.command })
     }
+    @Test fun codexModelRefreshCachesSeparatelyAndKeepsManualCandidates() = runTest {
+        val executor = FakeProcessExecutor(FakeResult(listOf("codex-cli 0.160.0")), FakeResult(listOf("""{"models":[{"slug":"gpt-a","visibility":"list"}]}""")))
+        val vm = SettingsViewModel(platform(executor), backgroundScope)
+        vm.save { it.copy(codexPath = "/bin/codex", codexModels = listOf("manual", "gpt-a")) }
+        vm.refreshModels(Provider.CODEX).join()
+        assertEquals(listOf("gpt-a"), vm.settings.value.codexModelsCache?.models)
+        assertNull(vm.settings.value.agyModelsCache)
+        assertEquals(listOf("gpt-a", "manual"), vm.settings.value.modelCandidates(Provider.CODEX))
+    }
     @Test fun pathAndCustomVersionAreRecordedIndependently() = runTest {
         val executor = FakeProcessExecutor(FakeResult(listOf("codex 0.146.0")), FakeResult(listOf("codex 0.160.0")))
         val vm = SettingsViewModel(platform(executor), backgroundScope)

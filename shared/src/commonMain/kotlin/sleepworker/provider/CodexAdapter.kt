@@ -4,6 +4,7 @@ import sleepworker.model.Provider
 import sleepworker.platform.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.serialization.json.*
 
 class CodexAdapter : ProviderAdapter {
     override val id = Provider.CODEX
@@ -26,5 +27,18 @@ class CodexAdapter : ProviderAdapter {
             else -> AuthStatus.Unknown("exit=${result.exitCode}\n${(result.stdout + result.stderr).joinToString("\n")}")
         }
     } catch (e: TimeoutCancellationException) { AuthStatus.Unknown("Authentication probe timed out: ${e.message}") } catch (e: CancellationException) { throw e } catch (e: Exception) { AuthStatus.Unknown(e.toString()) }
-    override suspend fun listModels(exec: ProcessProbe, cfg: ProviderConfig): List<String>? = null
+    /** `codex debug models` catalog; entries hidden from the picker (`visibility != "list"`) are skipped. */
+    fun parseModels(text: String): List<String>? {
+        val models = try { (Json.parseToJsonElement(text) as? JsonObject)?.get("models") as? JsonArray } catch (_: Exception) { null } ?: return null
+        val slugs = models.mapNotNull { entry ->
+            val model = entry as? JsonObject ?: return null
+            val slug = (model["slug"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() } ?: return null
+            slug.takeIf { (model["visibility"] as? JsonPrimitive)?.contentOrNull == "list" }
+        }
+        return slugs.distinct().ifEmpty { null }
+    }
+    override suspend fun listModels(exec: ProcessProbe, cfg: ProviderConfig): List<String>? {
+        val result = exec.capture(ProcessSpec(listOf(cfg.binaryPath, "debug", "models"), cfg.cwd))
+        return if (result.exitCode == 0) parseModels(result.stdout.joinToString("\n")) else null
+    }
 }

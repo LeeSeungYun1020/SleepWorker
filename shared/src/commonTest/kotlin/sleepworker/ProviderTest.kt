@@ -145,7 +145,25 @@ class ProviderTest {
         assertEquals(AuthStatus.LoggedIn, adapter.probeAuth(FakeProcessExecutor(FakeResult(stdout = listOf("{", "\"loggedIn\": true,", "\"authMethod\": \"claude.ai\"", "}"))), cfg))
         assertEquals(AuthStatus.LoggedOut, adapter.probeAuth(FakeProcessExecutor(FakeResult(stdout = listOf("""{"loggedIn": false}"""), exitCode = 1)), cfg))
         assertIs<AuthStatus.Unknown>(adapter.probeAuth(FakeProcessExecutor(FakeResult(stderr = listOf("unknown command"), exitCode = 1)), cfg))
-        assertNull(adapter.listModels(FakeProcessExecutor(), cfg))
+        val init = """{"type":"control_response","response":{"subtype":"success","request_id":"sleepworker-models","response":{"models":[{"value":"default"},{"value":"opus"},{"value":"fable"}]}}}"""
+        val executor = FakeProcessExecutor(FakeResult(stdout = listOf(init)), FakeResult(stderr = listOf("offline"), exitCode = 1))
+        assertEquals(listOf("opus", "fable"), adapter.listModels(executor, cfg))
+        assertEquals(listOf("/bin/claude", "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose"), executor.requests[0].command)
+        assertTrue(executor.requests[0].stdin!!.contains("\"subtype\":\"initialize\""))
+        assertNull(adapter.listModels(executor, cfg))
+        assertNull(adapter.parseModels(listOf("""{"type":"control_response","response":{"subtype":"error","request_id":"sleepworker-models","error":"x"}}""")))
+        assertNull(adapter.parseModels(listOf("not json")))
+    }
+    @Test fun codexModelCatalog() = runTest {
+        val cfg = ProviderConfig("/bin/codex", "/repo")
+        val adapter = CodexAdapter()
+        val catalog = """{"models":[{"slug":"gpt-a","visibility":"list"},{"slug":"hidden","visibility":"hide"},{"slug":"gpt-b","visibility":"list"}]}"""
+        val executor = FakeProcessExecutor(FakeResult(stdout = listOf(catalog)))
+        assertEquals(listOf("gpt-a", "gpt-b"), adapter.listModels(executor, cfg))
+        assertEquals(listOf("/bin/codex", "debug", "models"), executor.requests.single().command)
+        assertNull(adapter.parseModels("""{"models":[{"visibility":"list"}]}"""))
+        assertNull(adapter.parseModels("""{"models":[]}"""))
+        assertNull(adapter.parseModels("error"))
     }
     @Test fun measurementsDoNotRestrictVersionsModelsOrUnmeasuredFeatures() {
         val c = VerifiedCliContract.antigravity

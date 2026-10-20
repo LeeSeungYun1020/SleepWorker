@@ -24,6 +24,8 @@ import kotlin.uuid.Uuid
     val codexModels: List<String> = emptyList(),
     val claudeModels: List<String> = listOf("opus", "sonnet", "haiku"),
     val agyModelsCache: ModelsCache? = null,
+    val codexModelsCache: ModelsCache? = null,
+    val claudeModelsCache: ModelsCache? = null,
     val defaultWorktreeRoot: String? = null,
     val notificationsEnabled: Boolean = true,
     val notificationEvents: Set<NotificationEvent> = NotificationEvent.entries.toSet(),
@@ -38,10 +40,14 @@ fun AppSettings.pathFor(provider: Provider): String? = when (provider) { Provide
 fun AppSettings.withPath(provider: Provider, path: String?): AppSettings = when (provider) {
     Provider.CODEX -> copy(codexPath = path); Provider.ANTIGRAVITY -> copy(agyPath = path); Provider.CLAUDE -> copy(claudePath = path)
 }
-/** Settings-managed candidates; Antigravity candidates come from its queried model cache. */
-fun AppSettings.modelCandidates(provider: Provider): List<String> = when (provider) {
-    Provider.CODEX -> codexModels; Provider.ANTIGRAVITY -> agyModelsCache?.models.orEmpty(); Provider.CLAUDE -> claudeModels
+fun AppSettings.modelsCache(provider: Provider): ModelsCache? = when (provider) { Provider.CODEX -> codexModelsCache; Provider.ANTIGRAVITY -> agyModelsCache; Provider.CLAUDE -> claudeModelsCache }
+fun AppSettings.withModelsCache(provider: Provider, cache: ModelsCache): AppSettings = when (provider) {
+    Provider.CODEX -> copy(codexModelsCache = cache); Provider.ANTIGRAVITY -> copy(agyModelsCache = cache); Provider.CLAUDE -> copy(claudeModelsCache = cache)
 }
+/** Queried model cache first, then manually entered candidates as a fallback (Antigravity has no manual list). */
+fun AppSettings.modelCandidates(provider: Provider): List<String> = (modelsCache(provider)?.models.orEmpty() + when (provider) {
+    Provider.CODEX -> codexModels; Provider.ANTIGRAVITY -> emptyList(); Provider.CLAUDE -> claudeModels
+}).distinct()
 @OptIn(ExperimentalUuidApi::class)
 class SettingsStore(private val fs: FileSystem, private val path: Path) {
     private val mutex = Mutex()

@@ -2,6 +2,7 @@ package sleepworker.ui.editor
 
 import sleepworker.model.*
 import sleepworker.model.Target
+import sleepworker.storage.modelsCache
 import sleepworker.ui.run.RunViewModel
 import sleepworker.ui.components.*
 import sleepworker.ui.theme.LocalStatusColors
@@ -266,7 +267,7 @@ private fun StepPanel(vm: EditorViewModel, w: Workflow, s: Step, onDelete: () ->
         session?.let { definition ->
 
             val cliVersions by vm.cliVersions.collectAsState()
-            val cache = if (definition.provider == Provider.ANTIGRAVITY) vm.settings.agyModelsCache else null
+            val cache = vm.settings.modelsCache(definition.provider)
             cache?.let { Text("${it.binaryPath} · ${it.binaryVersion}\n${it.queriedAt}", style = MaterialTheme.typography.labelSmall) }
             EditorChoice("effort", s.effort?.name.orEmpty(), listOf("") + Effort.entries.map { "${it.name} · ${vm.effortStatus(definition.provider, s.model, it, cliVersions[definition.provider] ?: cache?.binaryVersion)}" }) { value -> vm.updateStep(s.id) { it.copy(effort = value.substringBefore(' ').takeIf { it.isNotBlank() }?.let(Effort::valueOf)) } }
             Text("CLI 버전은 프리플라이트에서 확인합니다. 실측 기록이 없는 버전·모델·effort도 실행할 수 있습니다.", style = MaterialTheme.typography.bodySmall)

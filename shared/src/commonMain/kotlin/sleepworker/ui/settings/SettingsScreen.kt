@@ -43,10 +43,11 @@ fun SettingsScreen(vm: SettingsViewModel) {
         }
         SectionCard("모델 후보") {
             Text("후보 목록은 실행 지원 검증을 의미하지 않습니다.", style = MaterialTheme.typography.bodySmall)
+            ModelCache("Codex", settings.codexModelsCache, settings.codexPath, !busy) { vm.refreshModels(Provider.CODEX) }
             ModelCandidateList("Codex", settings.codexModels) { transform -> vm.update { it.copy(codexModels = transform(it.codexModels)) } }
+            ModelCache("Claude", settings.claudeModelsCache, settings.claudePath, !busy) { vm.refreshModels(Provider.CLAUDE) }
             ModelCandidateList("Claude", settings.claudeModels) { transform -> vm.update { it.copy(claudeModels = transform(it.claudeModels)) } }
-            Row { Text("Antigravity 모델 캐시", Modifier.weight(1f)); OutlinedButton({ vm.refreshModels() }, enabled = !busy) { Text("갱신") } }
-            ExpandableSection("과거 조회 정보") { settings.agyModelsCache?.let { cache -> Text("${cache.binaryPath} · ${cache.binaryVersion} · ${cache.queriedAt}\n${cache.models.joinToString("\n")}${if (cache.binaryPath != settings.agyPath) "\n현재 경로와 다른 캐시입니다" else ""}") } ?: Text("조회 기록 없음") }
+            ModelCache("Antigravity", settings.agyModelsCache, settings.agyPath, !busy) { vm.refreshModels(Provider.ANTIGRAVITY) }
         }
         SectionCard("워크트리") { OutlinedTextField(settings.defaultWorktreeRoot.orEmpty(), { value -> vm.update { it.copy(defaultWorktreeRoot = value.ifBlank { null }) } }, label = { Text("새 워크플로의 기본 루트") }, modifier = Modifier.trackTextInputFocus().fillMaxWidth(), trailingIcon = { ToolIcon("워크트리 루트 폴더 선택", Icons.Outlined.FolderOpen) { scope.launch { vm.chooseDirectory()?.let { value -> vm.update { it.copy(defaultWorktreeRoot = value) } } } } }) }
         SectionCard("알림") {
@@ -62,10 +63,16 @@ fun SettingsScreen(vm: SettingsViewModel) {
 }
 
 @Composable
+private fun ModelCache(label: String, cache: ModelsCache?, currentPath: String?, enabled: Boolean, refresh: () -> Unit) {
+    Row { Text("$label 모델 캐시", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall); OutlinedButton(refresh, enabled = enabled) { Text("갱신") } }
+    ExpandableSection("과거 조회 정보") { cache?.let { Text("${it.binaryPath} · ${it.binaryVersion} · ${it.queriedAt}\n${it.models.joinToString("\n")}${if (it.binaryPath != currentPath) "\n현재 경로와 다른 캐시입니다" else ""}") } ?: Text("조회 기록 없음") }
+}
+
+@Composable
 private fun ModelCandidateList(label: String, models: List<String>, edit: ((List<String>) -> List<String>) -> Unit) {
     var model by remember { mutableStateOf("") }
     fun addModel() { val name = model.trim(); if (name.isNotEmpty()) { edit { (it + name).distinct() }; model = "" } }
-    Text(label, style = MaterialTheme.typography.titleSmall)
+    Text("$label 직접 추가 후보 · 캐시에 없는 모델용", style = MaterialTheme.typography.bodySmall)
     models.forEachIndexed { i, name -> ListItem(colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow), headlineContent = { Text(name) }, trailingContent = { Row {
         ToolIcon("위로 이동", Icons.Outlined.ArrowUpward, i > 0) { edit { it.toMutableList().apply { add(i - 1, removeAt(i)) } } }
         ToolIcon("아래로 이동", Icons.Outlined.ArrowDownward, i < models.lastIndex) { edit { it.toMutableList().apply { add(i + 1, removeAt(i)) } } }
