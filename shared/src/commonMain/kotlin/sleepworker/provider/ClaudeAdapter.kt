@@ -27,5 +27,24 @@ class ClaudeAdapter : ProviderAdapter {
             null -> AuthStatus.Unknown("claude auth status response unrecognized; version=${cfg.version}; exit=${result.exitCode}\n${(result.stdout + result.stderr).joinToString("\n")}")
         }
     } catch (e: TimeoutCancellationException) { AuthStatus.Unknown("Authentication probe timed out: ${e.message}") } catch (e: CancellationException) { throw e } catch (e: Exception) { AuthStatus.Unknown(e.toString()) }
-    override suspend fun listModels(exec: ProcessProbe, cfg: ProviderConfig): List<String>? = null
+    /** Reads aliases and their resolved IDs from the stream-json `initialize` control response; `default` is dropped because omitting the model already means it. */
+    fun parseModels(lines: List<String>): List<String>? {
+        val response = lines.firstNotNullOfOrNull { line ->
+            val message = try { Json.parseToJsonElement(line) as? JsonObject } catch (_: Exception) { null }
+            (message?.get("response") as? JsonObject)?.takeIf { message["type"] == JsonPrimitive("control_response") && it["request_id"] == JsonPrimitive(MODELS_REQUEST_ID) }
+        } ?: return null
+        if (response["subtype"] != JsonPrimitive("success")) return null
+        val models = ((response["response"] as? JsonObject)?.get("models") as? JsonArray) ?: return null
+        fun JsonObject.text(key: String) = (get(key) as? JsonPrimitive)?.contentOrNull?.takeIf(String::isNotBlank)
+        val entries = models.filterIsInstance<JsonObject>()
+        val values = entries.mapNotNull { it.text("value") } + entries.mapNotNull { it.text("resolvedModel") }
+        return values.filter { it != "default" }.distinct().ifEmpty { null }
+    }
+    override suspend fun listModels(exec: ProcessProbe, cfg: ProviderConfig): List<String>? {
+        val request = """{"type":"control_request","request_id":"$MODELS_REQUEST_ID","request":{"subtype":"initialize"}}"""
+        val result = exec.capture(ProcessSpec(listOf(cfg.binaryPath, "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose"), cfg.cwd, stdin = request + "\n"))
+        // The matching control_response is printed before exit, so it is trusted even if the CLI later exits non-zero.
+        return parseModels(result.stdout)
+    }
+    private companion object { const val MODELS_REQUEST_ID = "sleepworker-models" }
 }

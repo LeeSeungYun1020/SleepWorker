@@ -294,4 +294,4 @@ fun notificationLabel(status: RunStatus): String = when (status) {
 }
 
 fun sameExecutionSettings(a: AppSettings, b: AppSettings): Boolean =
-    a.codexPath == b.codexPath && a.agyPath == b.agyPath && a.claudePath == b.claudePath && a.codexModels == b.codexModels && a.claudeModels == b.claudeModels && a.agyModelsCache == b.agyModelsCache
+    a.codexPath == b.codexPath && a.agyPath == b.agyPath && a.claudePath == b.claudePath && a.codexModels == b.codexModels && a.claudeModels == b.claudeModels && a.agyModelsCache == b.agyModelsCache && a.codexModelsCache == b.codexModelsCache && a.claudeModelsCache == b.claudeModelsCache

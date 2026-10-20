@@ -47,8 +47,8 @@ class SettingsViewModel(private val platform: Platform, private val scope: Corou
             finally { busy.value = false }
         }
     }
-    private suspend fun capture(command: List<String>, cwd: String = "/"): CapturedProcess {
-        val result = runner.run(ProcessSpec(command, cwd), 30_000)
+    private suspend fun capture(command: List<String>, cwd: String = "/", stdin: String? = null): CapturedProcess {
+        val result = runner.run(ProcessSpec(command, cwd, stdin), 30_000)
         result.cleanupError?.let { throw sleepworker.engine.UnsafeCleanup(it) }
         check(result.termination == Termination.NORMAL) { result.error ?: "CLI 확인 실패" }
         return CapturedProcess(result.exitCode ?: error("종료코드 미관측"), result.stdout, result.stderr)
@@ -74,13 +74,14 @@ class SettingsViewModel(private val platform: Platform, private val scope: Corou
         val next = settings.value.copy(cliChecks = settings.value.cliChecks + (binary to check))
         store.save(next); settings.value = next
     }
-    fun refreshModels() = action {
-        val path = settings.value.agyPath?.takeIf { it.startsWith('/') } ?: error("agy 절대 경로가 필요합니다")
-        val checked = checkPath("agy", path)
+    fun refreshModels(provider: Provider = Provider.ANTIGRAVITY) = action {
+        val binary = provider.binary
+        val path = settings.value.pathFor(provider)?.takeIf { it.startsWith('/') } ?: error("$binary 절대 경로가 필요합니다")
+        val checked = checkPath(binary, path)
         require(checked.version != null) { checked.diagnostic }
-        val adapter = AntigravityAdapter()
-        val models = adapter.listModels(ProcessProbe { capture(it.command) }, ProviderConfig(path, "/", checked.version)) ?: error("agy models 갱신 실패 — 기존 캐시는 과거 결과입니다")
-        val next = settings.value.copy(agyModelsCache = ModelsCache(path, checked.version, Clock.System.now(), models), cliChecks = settings.value.cliChecks + ("agy" to checked))
+        val adapter = when (provider) { Provider.CODEX -> CodexAdapter(); Provider.ANTIGRAVITY -> AntigravityAdapter(); Provider.CLAUDE -> ClaudeAdapter() }
+        val models = adapter.listModels(ProcessProbe { capture(it.command, it.cwd, it.stdin) }, ProviderConfig(path, "/", checked.version)) ?: error("$binary 모델 목록 갱신 실패 — 기존 캐시는 과거 결과입니다")
+        val next = settings.value.withModelsCache(provider, ModelsCache(path, checked.version, Clock.System.now(), models)).copy(cliChecks = settings.value.cliChecks + (binary to checked))
         store.save(next); settings.value = next
     }
     suspend fun close() { owner.cancelAll() }
